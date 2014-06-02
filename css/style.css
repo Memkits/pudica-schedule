@@ -1,0 +1,38 @@
+
+body {
+    margin: 0;
+}
+
+#app {}
+
+body * {}
+
+#paper {
+    width: 1000px;
+    margin: auto;
+}
+
+#add {
+    background: blue;
+    color: white;
+    border: none;
+    cursor: pointer;
+    outline: none;
+}
+
+.list-item {
+    width: 200px;
+    line-height: 30px;
+    background: rgb(170, 180, 255);
+    margin: 2px 0;
+    height: 30px;
+    padding: 0 10px;
+    color: white;
+    border-radius: 9px;
+    outline: none;
+    text-align: center;
+}
+
+.list-item.dragging {
+    background: rgb(223, 215, 255);
+}

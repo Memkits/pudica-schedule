@@ -3,37 +3,106 @@ body {
     margin: 0;
 }
 
-#app {}
+#app {
+    background-image: url('../png/pudica.jpg');
+    background-size: cover;
+    background-attachment: fixed;
+}
 
-body * {}
+body * {
+    box-sizing: border-box;
+}
 
 #paper {
-    width: 400px;
-    margin: auto;
+    width: 600px;
+    height: 100%;
+    padding: 200px 0px;
+    margin-left: 100px;
+}
+
+#add-wrap {
+    margin: 80px 0px 120px;
 }
 
 #add {
-    background: blue;
+    background: rgb(172, 172, 255);
     color: white;
-    border: none;
     cursor: pointer;
-    outline: none;
+    font-size: 16px;
+    padding: 4px 16px;
+    display: inline-block;
+}
+#reset {
+    display: inline-block;
+    color: white;
+    background: rgb(236, 75, 75);
+    padding: 4px 10px;
+    margin-left: 22px;
+    font-size: 16px;
+    cursor: pointer;
 }
 
 .list-item {
-    width: 200px;
-    line-height: 30px;
-    background: rgb(170, 180, 255);
-    margin: 2px 0;
-    height: 30px;
-    padding: 0 10px;
-    color: white;
-    border-radius: 9px;
+    line-height: 40px;
+    background: rgb(227, 230, 255);
+    margin: 12px 0;
+    height: 40px;
+    padding: 0;
     outline: none;
-    text-align: center;
+    cursor: move;
+    display: flex;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.21);
 }
 
 .list-item.dragging {
     background: rgb(223, 215, 255);
-    margin-left: 20px;
+    margin-left: 80px;
+}
+
+.dead-item {
+    height: 40px;
+    margin: 10px 0;
+    padding: 0;
+    line-height: 40px;
+    display: flex;
+    opacity: 0.5;
+    background: rgb(198, 198, 255);
+}
+.dead-item * {
+    color: gray;
+}
+
+.item-text {
+    font-size: 16px;
+    line-height: 30px;
+    border: none;
+    margin: 0;
+    background: white;
+    color: black;
+    outline: none;
+    width: 70%;
+    padding-left: 16px;
+}
+
+.dead-item .item-done {
+    background-color: rgb(117, 117, 117);
+}
+.item-done {
+    width: 40px;
+    height: 40px;
+    vertical-align: middle;
+    outline: none;
+    cursor: pointer;
+}
+
+.item-remove {
+    font-size: 12px;
+    color: rgb(46, 0, 128);
+    cursor: pointer;
+    margin-left: 10px;
+    opacity: 0.3;
+}
+
+.item-remove:hover {
+    opacity: 1;
 }

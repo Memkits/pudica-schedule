@@ -31,41 +31,35 @@ ListItem = React.createClass
       onDragStart: (event) -> view.onDragStart event, item
       onDragEnd: (event) -> view.onDragEnd event, item
       onDragEnter: (event) -> view.onDragEnter event, item
+      @span
+        className: 'item-done'
+        onClick: (event) -> view.onClick event, item
       @input
         ref: 'input'
         className: 'item-text'
-        onChange: (event) -> view.onEdit event, item
+        onChange: (event) -> view.onChange event, item
         onBlur: (event) -> view.onBlur event, item
         onKeyDown: (event) -> view.onKeyDown event, item
         value: item.text
-      @input
-        type: 'checkbox'
-        checked: item.done
-        onChange: (event) -> view.onChange event, item
-      @span
-        onClick: -> view.remove item.id
-        'rm'
 
   onDragStart: (event, item) ->
     event.dataTransfer.setDragImage event.target, 0, 0
     store.setDragging item.id
   onDragEnd: (event, item) -> store.unsetDragging()
   onDragEnter: (event, item) -> store.swap item.id
-  onEdit: (event, item) ->
-    text = event.currentTarget.value.trim()
+  onChange: (event, item) ->
+    text = event.currentTarget.value.trimLeft()
     store.edit item.id, text
   onBlur: (event, item) ->
-    text = event.currentTarget.value.trim()
+    text = event.currentTarget.value.trimLeft()
     if text.length is 0
       store.remove item.id
   onKeyDown: (event, item) ->
     if event.keyCode is 13
       event.preventDefault()
       store.after item.id
-  onChange: (event, item) ->
+  onClick: (event, item) ->
     store.toggle item.id
-  remove: (id) ->
-    store.remove id
 
 DeadItem = React.createClass
   displayName: 'DeadItem'
@@ -74,22 +68,20 @@ DeadItem = React.createClass
     props = @props
     item = props.item
     dom -> @div className: 'dead-item',
+      @span
+        className: 'item-done'
+        onClick: (event) -> view.onClick event, item
       @input
+        className: 'item-text'
         type: 'text'
         value: item.text
         readOnly: yes
-      @input
-        type: 'checkbox'
-        checked: item.done
-        onChange: (event) -> view.onChange event, item
 
-  onChange: (event, item) ->
+  onClick: (event, item) ->
     store.toggle item.id
 
 App = React.createClass
   displayName: 'App'
-  add: ->
-    store.add()
 
   getInitialState: ->
     store.get()
@@ -114,12 +106,21 @@ App = React.createClass
 
     dom -> @div id: 'paper',
       itemsList
-      @div {},
-        @button
+      @div id: 'add-wrap',
+        @div
           id: 'add'
           onClick: view.add
-          'Add'
+          'add'
+        @div
+          id: 'reset'
+          onClick: view.reset
+          'reset'
       deadList
+
+  add: ->
+    store.add()
+  reset: ->
+    store.reset()
 
 React.renderComponent (App {}),
   document.querySelector '#app'

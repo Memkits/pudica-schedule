@@ -80,6 +80,10 @@ store.toggle = (id) ->
   item.done = not item.done
   @emit 'change'
 
+store.reset = ->
+  @_data = []
+  @emit 'change'
+
 try
   raw = localStorage.getItem 'pudica'
   store._data = (JSON.parse raw) or []

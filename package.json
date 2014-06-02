@@ -1,0 +1,28 @@
+{
+  "name": "pudica-schedule",
+  "version": "0.0.0",
+  "description": "Note: I reinstalled may laptop and now I can't find the old code, I even forgot what's the difference between Lithops. Hopefully updating a file to the repo will show the descreptions again.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jiyinyiyong/pudica-schedule.git"
+  },
+  "keywords": [
+    "schedule"
+  ],
+  "author": "jiyinyiyong",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jiyinyiyong/pudica-schedule/issues"
+  },
+  "homepage": "https://github.com/jiyinyiyong/pudica-schedule",
+  "devDependencies": {
+    "coffee-react-dom": "0.0.4",
+    "mission": "0.0.6",
+    "shelljs": "^0.3.0"
+  },
+  "dependencies": {}
+}

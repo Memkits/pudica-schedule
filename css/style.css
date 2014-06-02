@@ -8,7 +8,7 @@ body {
 body * {}
 
 #paper {
-    width: 1000px;
+    width: 400px;
     margin: auto;
 }
 
@@ -35,4 +35,5 @@ body * {}
 
 .list-item.dragging {
     background: rgb(223, 215, 255);
+    margin-left: 20px;
 }

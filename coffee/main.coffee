@@ -28,21 +28,63 @@ ListItem = React.createClass
         else
           'list-item'
       draggable: yes
-      contentEditable: 'true'
       onDragStart: (event) -> view.onDragStart event, item
       onDragEnd: (event) -> view.onDragEnd event, item
       onDragEnter: (event) -> view.onDragEnter event, item
-      ref: 'input'
-      item.text
+      @input
+        ref: 'input'
+        className: 'item-text'
+        onChange: (event) -> view.onEdit event, item
+        onBlur: (event) -> view.onBlur event, item
+        onKeyDown: (event) -> view.onKeyDown event, item
+        value: item.text
+      @input
+        type: 'checkbox'
+        checked: item.done
+        onChange: (event) -> view.onChange event, item
+      @span
+        onClick: -> view.remove item.id
+        'rm'
 
   onDragStart: (event, item) ->
+    event.dataTransfer.setDragImage event.target, 0, 0
     store.setDragging item.id
+  onDragEnd: (event, item) -> store.unsetDragging()
+  onDragEnter: (event, item) -> store.swap item.id
+  onEdit: (event, item) ->
+    text = event.currentTarget.value.trim()
+    store.edit item.id, text
+  onBlur: (event, item) ->
+    text = event.currentTarget.value.trim()
+    if text.length is 0
+      store.remove item.id
+  onKeyDown: (event, item) ->
+    if event.keyCode is 13
+      event.preventDefault()
+      store.after item.id
+  onChange: (event, item) ->
+    store.toggle item.id
+  remove: (id) ->
+    store.remove id
 
-  onDragEnd: (event, item) ->
-    store.unsetDragging()
+DeadItem = React.createClass
+  displayName: 'DeadItem'
+  render: ->
+    view = @
+    props = @props
+    item = props.item
+    dom -> @div className: 'dead-item',
+      @input
+        type: 'text'
+        value: item.text
+        readOnly: yes
+      @input
+        type: 'checkbox'
+        checked: item.done
+        onChange: (event) -> view.onChange event, item
 
-  onDragEnter: (event, item) ->
-    store.swap item.id
+  onChange: (event, item) ->
+    store.toggle item.id
 
 App = React.createClass
   displayName: 'App'
@@ -58,8 +100,18 @@ App = React.createClass
 
   render: ->
     view = @
-    itemsList = @state.list.map (item) =>
+    itemsList = @state.list
+    .filter (item) =>
+      not item.done
+    .map (item) =>
       ListItem key: item.id, item: item, dragging: @state.dragging
+
+    deadList = @state.list
+    .filter (item) =>
+      item.done
+    .map (item) =>
+      DeadItem key: item.id, item: item
+
     dom -> @div id: 'paper',
       itemsList
       @div {},
@@ -67,6 +119,7 @@ App = React.createClass
           id: 'add'
           onClick: view.add
           'Add'
+      deadList
 
 React.renderComponent (App {}),
   document.querySelector '#app'

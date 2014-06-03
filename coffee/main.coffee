@@ -1,7 +1,7 @@
 
-dom = require 'coffee-react-dom'
-
 store = require './store'
+
+$ = React.DOM
 
 ListItem = React.createClass
   displayName: 'ListItem'
@@ -18,29 +18,26 @@ ListItem = React.createClass
     @refs.input.getDOMNode().focus()
 
   render: ->
-    view = @
-    props = @props
-    item = props.item
-    dom -> @div
+    $.div
       className:
-        if props.dragging is item.id
+        if @props.dragging is @props.item.id
           'list-item dragging'
         else
           'list-item'
       draggable: yes
-      onDragStart: (event) -> view.onDragStart event, item
-      onDragEnd: (event) -> view.onDragEnd event, item
-      onDragEnter: (event) -> view.onDragEnter event, item
-      @span
+      onDragStart: (event) => @onDragStart event, @props.item
+      onDragEnd: (event) => @onDragEnd event, @props.item
+      onDragEnter: (event) => @onDragEnter event, @props.item
+      $.span
         className: 'item-done'
-        onClick: (event) -> view.onClick event, item
-      @input
+        onClick: (event) => @onClick event, @props.item
+      $.input
         ref: 'input'
         className: 'item-text'
-        onChange: (event) -> view.onChange event, item
-        onBlur: (event) -> view.onBlur event, item
-        onKeyDown: (event) -> view.onKeyDown event, item
-        value: item.text
+        onChange: (event) => @onChange event, @props.item
+        onBlur: (event) => @onBlur event, @props.item
+        onKeyDown: (event) => @onKeyDown event, @props.item
+        value: @props.item.text
 
   onDragStart: (event, item) ->
     event.dataTransfer.setDragImage event.target, 0, 0
@@ -64,17 +61,14 @@ ListItem = React.createClass
 DeadItem = React.createClass
   displayName: 'DeadItem'
   render: ->
-    view = @
-    props = @props
-    item = props.item
-    dom -> @div className: 'dead-item',
-      @span
+    $.div className: 'dead-item',
+      $.span
         className: 'item-done'
-        onClick: (event) -> view.onClick event, item
-      @input
+        onClick: (event) => @onClick event,  @props.item
+      $.input
         className: 'item-text'
         type: 'text'
-        value: item.text
+        value:  @props.item.text
         readOnly: yes
 
   onClick: (event, item) ->
@@ -91,7 +85,6 @@ App = React.createClass
       @setState store.get()
 
   render: ->
-    view = @
     itemsList = @state.list
     .filter (item) =>
       not item.done
@@ -104,16 +97,16 @@ App = React.createClass
     .map (item) =>
       DeadItem key: item.id, item: item
 
-    dom -> @div id: 'paper',
+    $.div id: 'paper',
       itemsList
-      @div id: 'add-wrap',
-        @div
+      $.div id: 'add-wrap',
+        $.div
           id: 'add'
-          onClick: view.add
+          onClick: @add
           'add'
-        @div
+        $.div
           id: 'reset'
-          onClick: view.reset
+          onClick: @reset
           'reset'
       deadList
 

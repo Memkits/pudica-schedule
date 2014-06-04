@@ -31,6 +31,7 @@ ListItem = React.createClass
       $.span
         className: 'item-done'
         onClick: (event) => @onClick event, @props.item
+        $.span {}, '✓'
       $.input
         ref: 'input'
         className: 'item-text'
@@ -52,9 +53,13 @@ ListItem = React.createClass
     if text.length is 0
       store.remove item.id
   onKeyDown: (event, item) ->
-    if event.keyCode is 13
-      event.preventDefault()
-      store.after item.id
+    event.stopPropagation()
+    switch event.keyCode
+      when 13
+        event.preventDefault()
+        store.after item.id
+      when 27
+        event.currentTarget.blur()
   onClick: (event, item) ->
     store.toggle item.id
 
@@ -99,21 +104,20 @@ App = React.createClass
 
     $.div id: 'paper',
       itemsList
+      $.div id: 'space'
+      deadList
       $.div id: 'add-wrap',
-        $.div
-          id: 'add'
-          onClick: @add
-          'add'
         $.div
           id: 'reset'
           onClick: @reset
           'reset'
-      deadList
 
-  add: ->
-    store.add()
   reset: ->
     store.reset()
 
 React.renderComponent (App {}),
   document.querySelector '#app'
+
+document.body.addEventListener 'keydown', (event) ->
+  if event.keyCode is 13 and event.currentTarget is @
+    store.add()

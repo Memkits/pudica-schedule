@@ -1,6 +1,11 @@
 
 body {
     margin: 0;
+    -webkit-user-select: none;
+}
+
+body, input {
+    font-family: AppleGothic, "Hiragino Sans GB";
 }
 
 #app {
@@ -16,47 +21,47 @@ body * {
 #paper {
     width: 600px;
     height: 100%;
-    padding: 200px 0px;
+    padding: 100px 0px;
     margin-left: 100px;
 }
 
 #add-wrap {
-    margin: 80px 0px 120px;
+    flex: 1;
+    text-align: right;
+    padding-top: 4em;
 }
 
-#add {
-    background: rgb(172, 172, 255);
-    color: white;
-    cursor: pointer;
-    font-size: 16px;
-    padding: 4px 16px;
-    display: inline-block;
-}
 #reset {
     display: inline-block;
     color: white;
     background: rgb(236, 75, 75);
     padding: 4px 10px;
-    margin-left: 22px;
     font-size: 16px;
     cursor: pointer;
 }
 
 .list-item {
-    line-height: 40px;
-    background: rgb(227, 230, 255);
-    margin: 12px 0;
-    height: 40px;
+    line-height: 1em;
+    background: rgb(231, 233, 255);
+    margin: 13px 0;
+    height: 38px;
     padding: 0;
     outline: none;
     cursor: move;
     display: flex;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.21);
+    transition-duration: 300ms;
+}
+
+#space {
+    height: 5em;
+    width: 100%;
 }
 
 .list-item.dragging {
     background: rgb(223, 215, 255);
     margin-left: 80px;
+    margin-right: -80px;
 }
 
 .dead-item {
@@ -65,34 +70,40 @@ body * {
     padding: 0;
     line-height: 40px;
     display: flex;
-    opacity: 0.5;
-    background: rgb(198, 198, 255);
+    background: rgba(224, 224, 233, 0.66);
+    cursor: not-allowed;
 }
 .dead-item * {
     color: gray;
+    cursor: not-allowed;
 }
 
 .item-text {
     font-size: 16px;
-    line-height: 30px;
     border: none;
     margin: 0;
-    background: white;
+    background: rgba(255, 255, 255, 0.86);
     color: black;
     outline: none;
     width: 70%;
     padding-left: 16px;
+    line-height: 1em;
+    box-sizing: content-box;
 }
 
 .dead-item .item-done {
-    background-color: rgb(117, 117, 117);
 }
 .item-done {
-    width: 40px;
-    height: 40px;
+    width: 36px;
     vertical-align: middle;
     outline: none;
     cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 22px;
+    text-shadow: 1px 0px 1px rgba(0, 0, 0, 0.4);
 }
 
 .item-remove {

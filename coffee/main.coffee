@@ -3,6 +3,9 @@ store = require './store'
 
 $ = React.DOM
 
+$.if = (cond, trueExpr, falseExpr) ->
+  if cond then trueExpr else falseExpr
+
 ListItem = React.createClass
   displayName: 'ListItem'
 
@@ -18,11 +21,11 @@ ListItem = React.createClass
     @refs.input.getDOMNode().focus()
 
   render: ->
+    isDragging = @props.dragging is @props.item.id
     $.div
       className:
-        if @props.dragging is @props.item.id
+        $.if isDragging,
           'list-item dragging'
-        else
           'list-item'
       draggable: yes
       onDragStart: (event) => @onDragStart event, @props.item
@@ -102,18 +105,23 @@ App = React.createClass
     .map (item) =>
       DeadItem key: item.id, item: item
 
-    $.div id: 'paper',
-      itemsList
-      $.div id: 'space'
-      deadList
-      $.div id: 'add-wrap',
-        $.div
-          id: 'reset'
-          onClick: @reset
-          'reset'
+    isListRich = @state.list.length > 0
 
-  reset: ->
-    store.reset()
+    $.if isListRich,
+      $.div id: 'paper',
+        itemsList
+        $.div id: 'space'
+        deadList
+        $.div id: 'add-wrap',
+          $.div
+            id: 'clear'
+            onClick: @clear
+            'clear'
+      $.div id: 'start-guide',
+        "Press Enter to start..."
+
+  clear: ->
+    store.clear()
 
 React.renderComponent (App {}),
   document.querySelector '#app'

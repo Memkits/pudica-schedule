@@ -25,13 +25,23 @@ body * {
     margin-left: 100px;
 }
 
+#start-guide {
+    color: wheat;
+    font-family: "Helvetica Neue";
+    font-weight: 100;
+    letter-spacing: 1px;
+    font-size: 80px;
+    padding: 160px 100px;
+    text-shadow: 3px 3px 8px black;
+}
+
 #add-wrap {
     flex: 1;
     text-align: right;
     padding-top: 4em;
 }
 
-#reset {
+#clear {
     display: inline-block;
     color: white;
     background: rgb(236, 75, 75);
@@ -41,7 +51,6 @@ body * {
 }
 
 .list-item {
-    line-height: 1em;
     background: rgb(231, 233, 255);
     margin: 13px 0;
     height: 38px;

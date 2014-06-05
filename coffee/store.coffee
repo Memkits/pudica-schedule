@@ -80,7 +80,7 @@ store.toggle = (id) ->
   item.done = not item.done
   @emit 'change'
 
-store.reset = ->
+store.clear = ->
   @_data = []
   @emit 'change'
 

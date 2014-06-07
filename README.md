@@ -6,7 +6,7 @@ Demo: http://repo.tiye.me/pudica-schedule/
 
 Dead simple schedule for basic use cases:
 
-* presss enter to create new one
+* press enter to create new one
 * add note and edit
 * sort by dragging
 * archive a note by click

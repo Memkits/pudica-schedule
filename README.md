@@ -6,11 +6,11 @@ Demo: http://repo.tiye.me/pudica-schedule/
 
 Dead simple schedule for basic use cases:
 
-* presss enter to create new one
-* add note and edit
+* press Enter to create new task
+* add task and edit
 * sort by dragging
-* archive a note by click
-* don't be ugly
+* archive tasks by clicking
+* be pretty
 
 ![](http://ww2.sinaimg.cn/bmiddle/62752320tw1egzxlacspwj21540nswjy.jpg)
 
@@ -18,8 +18,8 @@ Dead simple schedule for basic use cases:
 
 Besides React, these two docs helped my a lot:
 
-https://github.com/danielstocks/react-sortable
-http://csspod.com/archives/html5-drag-and-drop
+* https://github.com/danielstocks/react-sortable
+* http://csspod.com/archives/html5-drag-and-drop
 
 ### License
 

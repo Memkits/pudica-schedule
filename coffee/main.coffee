@@ -18,7 +18,9 @@ ListItem = React.createClass
     @props
 
   componentDidMount: ->
-    @refs.input.getDOMNode().focus()
+    el = @refs.input.getDOMNode()
+    if el.value.length is 0
+      el.focus()
 
   render: ->
     isDragging = @props.dragging is @props.item.id

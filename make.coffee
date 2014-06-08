@@ -39,7 +39,7 @@ target.cirru = -> cirru inDev: yes
 target.cirruBuild = -> cirru inBuild: yes
 target.browserify = -> browserify()
 
-target.compile = ->
+target.dev = ->
   cirru inDev: yes
   target.coffee yes
   browserify()
@@ -69,7 +69,6 @@ target.watch = ->
             station.reload project
 
 target.patch = ->
-  target.compile()
   mission.bump
     file: 'package.json'
     options:

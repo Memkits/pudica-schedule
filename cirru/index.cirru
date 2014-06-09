@@ -6,7 +6,7 @@ html
     title Pudica
     meta (:charset utf-8)
     link (:rel stylesheet) (:href css/style.css)
-    link (:rel icon) (:href png/icon.png)
+    link (:rel icon) (:type image/png) (:href png/icon.png)
     @if (@ inDev) $ @block
       link (:rel stylesheet) (:href css/resource-dev.css)
       script (:src bower_components/react/react.js)

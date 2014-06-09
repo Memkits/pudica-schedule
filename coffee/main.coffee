@@ -62,7 +62,10 @@ ListItem = React.createClass
     switch event.keyCode
       when 13
         event.preventDefault()
-        store.after item.id
+        if event.shiftKey
+          store.before item.id
+        else
+          store.after item.id
       when 27
         event.currentTarget.blur()
   onClick: (event, item) ->
@@ -75,11 +78,11 @@ DeadItem = React.createClass
       $.span
         className: 'item-done'
         onClick: (event) => @onClick event,  @props.item
-      $.input
+        '×'
+      $.div
         className: 'item-text'
         type: 'text'
-        value:  @props.item.text
-        readOnly: yes
+        @props.item.text
 
   onClick: (event, item) ->
     store.toggle item.id

@@ -19,46 +19,46 @@ body * {
 }
 
 #paper {
-    width: 600px;
+    width: 700px;
     height: 100%;
     padding: 100px 0px;
     margin-left: 100px;
 }
 
 #start-guide {
+    text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.64);
     color: wheat;
-    font-family: "Helvetica Neue";
+    font-family: AppleGothic;
     font-weight: 100;
     letter-spacing: 1px;
-    font-size: 80px;
+    font-size: 20px;
     padding: 160px 100px;
-    text-shadow: 3px 3px 8px black;
 }
 
 #add-wrap {
     flex: 1;
-    text-align: right;
+    text-align: left;
     padding-top: 4em;
 }
 
 #clear {
     display: inline-block;
-    color: white;
-    background: rgb(236, 75, 75);
+    color: rgba(255, 53, 69, 0.86);
     padding: 4px 10px;
     font-size: 16px;
     cursor: pointer;
+    letter-spacing: 1px;
+    text-shadow: 1px 0px 4px rgba(255, 255, 255, 0);
 }
 
 .list-item {
-    background: rgb(231, 233, 255);
     margin: 13px 0;
     height: 38px;
     padding: 0;
     outline: none;
     cursor: move;
     display: flex;
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.21);
+    box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.42);
     transition-duration: 300ms;
 }
 
@@ -68,41 +68,23 @@ body * {
 }
 
 .list-item.dragging {
-    background: rgb(223, 215, 255);
-    margin-left: 80px;
-    margin-right: -80px;
-}
-
-.dead-item {
-    height: 40px;
-    margin: 10px 0;
-    padding: 0;
-    line-height: 40px;
-    display: flex;
-    background: rgba(224, 224, 233, 0.66);
-    cursor: not-allowed;
+    -webkit-transform: scale(1.1);
+    opacity: 0.9;
 }
 
 .item-text {
     font-size: 16px;
     border: none;
     margin: 0;
-    background: rgba(255, 255, 255, 0.86);
-    color: black;
+    color: white;
     outline: none;
     width: 70%;
     padding-left: 16px;
-    line-height: 1em;
     box-sizing: content-box;
+    background: transparent;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.72);
 }
 
-.dead-item * {
-    color: gray;
-    cursor: not-allowed;
-}
-
-.dead-item .item-done {
-}
 .item-done {
     width: 36px;
     vertical-align: middle;
@@ -111,7 +93,7 @@ body * {
     display: flex;
     justify-content: center;
     align-items: center;
-    color: white;
+    color: rgba(255, 255, 255, 0.83);
     font-size: 22px;
     text-shadow: 1px 0px 1px rgba(0, 0, 0, 0.4);
 }
@@ -125,5 +107,18 @@ body * {
 }
 
 .item-remove:hover {
+    opacity: 1;
+}
+
+.dead-item {
+    height: 40px;
+    margin: 10px 0;
+    padding: 0;
+    line-height: 40px;
+    display: flex;
+    opacity: 0.7;
+}
+
+.dead-item:hover {
     opacity: 1;
 }

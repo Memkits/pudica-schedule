@@ -57,7 +57,7 @@ target.watch = ->
     trigger: (filepath, extname) ->
       switch extname
         when '.cirru'
-          cirru()
+          cirru inDev: yes
           station.reload project
         when '.coffee'
           filepath = path.relative 'coffee/', filepath

@@ -74,6 +74,15 @@ store.after = (id) ->
   @_data.splice (itemIndex + 1), 0, item
   @emit 'change'
 
+store.before = (id) ->
+  itemIndex = @locateById id
+  item =
+    id: uid.make()
+    text: ''
+    done: no
+  @_data.splice itemIndex, 0, item
+  @emit 'change'
+
 store.toggle = (id) ->
   itemIndex = @locateById id
   item = @_data[itemIndex]

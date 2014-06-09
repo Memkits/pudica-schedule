@@ -6,11 +6,10 @@ Demo: http://repo.tiye.me/pudica-schedule/
 
 Dead simple schedule for basic use cases:
 
-* press Enter to create new task
-* add task and edit
+* press Enter and Shift+Enter to add task
+* editing
 * sort by dragging
-* archive tasks by clicking
-* be pretty
+* archive and revert archiving tasks by clicking
 
 ![](http://ww2.sinaimg.cn/bmiddle/62752320tw1egzxlacspwj21540nswjy.jpg)
 

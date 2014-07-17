@@ -10,18 +10,18 @@ module.exports = React.createClass
   mixins: [mixins.listenTo]
 
   getInitialState: ->
+    schedule: model.get()
     dragging: null
 
   componentDidMount: ->
     @listenTo model, @_onChange
 
   _onChange: ->
-    @forceUpdate()
+    @setState schedule: model.get()
 
   render: ->
-    schedule = model.get()
 
-    itemsList = schedule
+    itemsList = @state.schedule
     .filter (item) => not item.done
     .map (item) => Item
       key: item.id
@@ -34,11 +34,11 @@ module.exports = React.createClass
       onDragEnter: (itemId) =>
         model.swap @state.dragging, itemId
 
-    deadList = schedule
+    deadList = @state.schedule
     .filter (item) => item.done
     .map (item) => DoneItem key: item.id, item: item
 
-    isListRich = schedule.length > 0
+    isListRich = @state.schedule.length > 0
 
     $$.if isListRich,
       => $.div id: 'paper',

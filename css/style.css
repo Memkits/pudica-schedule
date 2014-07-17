@@ -8,7 +8,7 @@ body, input {
     font-family: AppleGothic, "Hiragino Sans GB";
 }
 
-#app {
+body {
     background-image: url('../png/pudica.jpg');
     background-size: cover;
     background-attachment: fixed;
@@ -110,7 +110,7 @@ body * {
     opacity: 1;
 }
 
-.dead-item {
+.done-item {
     height: 40px;
     margin: 10px 0;
     padding: 0;
@@ -119,6 +119,6 @@ body * {
     opacity: 0.7;
 }
 
-.dead-item:hover {
+.done-item:hover {
     opacity: 1;
 }

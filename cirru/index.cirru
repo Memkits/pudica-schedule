@@ -14,4 +14,4 @@ html
       link (:rel stylesheet) (:href css/resource-build.css)
       script (:src http://cdn.staticfile.org/react/0.10.0/react.min.js)
     script (:defer) (:src build/main.js)
-  body#app
+  body

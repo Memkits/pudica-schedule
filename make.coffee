@@ -1,5 +1,5 @@
 #!/usr/bin/env coffee
-project = 'repo/pudica-schedule'
+project = 'repo/Memkits/pudica-schedule'
 
 require 'shelljs/make'
 path = require 'path'

@@ -26,7 +26,13 @@ module.exports = React.createClass
     .map (item) => Item
       key: item.id
       item: item
-      dragging: @state.dragging
+      isDragging: @state.dragging is item.id
+      onDragStart: (itemId) =>
+        @setState dragging: itemId
+      onDragEnd: (itemId) =>
+        @setState dragging: null
+      onDragEnter: (itemId) =>
+        model.swap @state.dragging, itemId
 
     deadList = schedule
     .filter (item) => item.done

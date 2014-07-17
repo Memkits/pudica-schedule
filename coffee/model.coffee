@@ -82,3 +82,4 @@ oop.mixin model,
 
   reset: (data) ->
     schedule = data
+    @emit()

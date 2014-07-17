@@ -11,7 +11,6 @@ try
   raw = localStorage.getItem 'pudica'
   data = (JSON.parse raw) or []
   model.reset data
-  model.reset []
 
 window.onbeforeunload = ->
   raw = JSON.stringify model.get()

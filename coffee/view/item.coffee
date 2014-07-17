@@ -18,16 +18,16 @@ module.exports = React.createClass
     isDragging = @props.dragging is @props.item.id
     $.div
       className:
-        if isDragging then 'list-item dragging'
+        if @props.isDragging then 'list-item dragging'
         else 'list-item'
       draggable: yes
       onDragStart: (event) =>
         event.dataTransfer.setDragImage event.target, 0, 0
-        model.setDragging @props.item.id
+        @props.onDragStart @props.item.id
       onDragEnd: (event) =>
-        model.unsetDragging()
+        @props.onDragEnd @props.item.id
       onDragEnter: (event) =>
-        model.swap @props.item.id
+        @props.onDragEnter @props.item.id
       $.span
         className: 'item-done'
         onClick: (event) =>

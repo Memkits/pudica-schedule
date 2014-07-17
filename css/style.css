@@ -9,7 +9,6 @@ body, input {
 }
 
 body {
-    background-image: url('../png/lambda.jpg');
     background-size: cover;
     background-attachment: fixed;
 }

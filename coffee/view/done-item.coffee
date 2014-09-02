@@ -14,6 +14,6 @@ module.exports = React.createClass
   render: ->
     $.div className: 'item is-done',
       $.span className: 'toggler', onClick: @onClick,
-        '×'
+        '↺'
       $.div className: 'text', type: 'text',
         @props.item.text

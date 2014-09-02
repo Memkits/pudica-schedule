@@ -4,9 +4,13 @@
     padding: 0;
     outline: none;
     transition-duration: 300ms;
-    background: white;
     display: flex;
     flex-direction: row;
+}
+
+.item > * {
+    font-size: 18px;
+    line-height: 2em;
 }
 
 .item + .item {
@@ -24,6 +28,12 @@
     display: flex;
 }
 
+.item.is-done > * {
+    font-size: 15px;
+    line-height: 30px;
+    height: 30px;
+}
+
 .item.is-done:hover {
     opacity: 1;
 }
@@ -31,19 +41,20 @@
 .item > .toggler {
     width: 36px;
     vertical-align: middle;
-    outline: none;
     cursor: pointer;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 22px;
+    text-align: center;
 }
 
 .item > .text {
-    font-size: 16px;
     border: none;
     margin: 0;
     outline: none;
-    box-sizing: content-box;
     flex: 1;
+}
+
+.is-done .item > .text {
+    text-decoration: line-through;
 }

@@ -7,37 +7,35 @@
 /* module styles */
 
 @import url('modules/item.css');
+@import url('modules/board.css');
+@import url('modules/trigger.css');
 
 #paper {
-    width: 700px;
+    display: flex;
+    flex-direction: column;
+    position: absolute;
     height: 100%;
-    padding: 100px 0px;
-    margin-left: 100px;
+    width: 100%;
+    background: rgb(0, 81, 44);
+}
+
+#items-all {
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+    padding: 10px 60px 30px 180px;
+    align-items: center;
 }
 
 #start-guide {
-    color: black;
     font-weight: 100;
     letter-spacing: 1px;
     font-size: 20px;
-    padding: 160px 100px;
-}
-
-#add-wrap {
-    flex: 1;
-    text-align: left;
-    padding-top: 4em;
+    padding: 140px 100px;
+    font-family: Helvetica Neue;
 }
 
 #clear {
-    display: inline-block;
-    padding: 4px 10px;
-    font-size: 16px;
-    cursor: pointer;
-    letter-spacing: 1px;
-}
-
-#space {
-    height: 5em;
-    width: 100%;
+    text-align: right;
+    height: 40px;
 }

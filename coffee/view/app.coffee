@@ -48,18 +48,28 @@ module.exports = React.createClass
         isDragging: dragging, onDragStart: @dragItem
         onDragEnd: @releaseDrag, onDragEnter: @swapItems
 
-    deadList = @state.schedule
+    doneList = @state.schedule
     .filter (item) => item.done
     .map (item) =>
       DoneItem key: item.id, item: item
 
     $$.if isListRich,
+      =>
+        $.div id: 'paper',
+          $.div id: 'items-all',
+            if itemsList.length > 0
+              $.div className: 'board is-active',
+                $.div className: 'title',
+                  'To be done:'
+                itemsList
+            if doneList.length > 0
+              $.div className: 'board is-done',
+                $.div className: 'title',
+                  'Already finished:'
+                doneList
+          $.div id: 'clear',
+            $.div className: 'trigger', onClick: @clearTask,
+              '⌫'
       => $.div id: 'paper',
-        itemsList
-        $.div id: 'space'
-        deadList
-        $.div id: 'add-wrap',
-          $.div id: 'clear', onClick: @clearTask,
-            'clear'
-      => $.div id: 'start-guide',
-        "Press Enter to start..."
+        $.div id: 'start-guide',
+          "Press Enter to start..."

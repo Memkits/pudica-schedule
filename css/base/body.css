@@ -1,13 +1,11 @@
 
 body {
     margin: 0;
-    position: absolute;
-    height: 100%;
-    width: 100%;
-    background: rgb(176, 221, 229);
     -webkit-user-select: none;
+    color: white;
 }
 
 body * {
     box-sizing: border-box;
+    /* box-shadow: inset 0 0 1px white; */
 }

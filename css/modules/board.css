@@ -1,0 +1,29 @@
+
+.board {
+}
+
+.board.is-active {
+    flex: 1;
+}
+
+.board + .board {
+    margin-left: 20px;
+}
+
+.board.is-done {
+    width: 400px;
+    opacity: 0.8;
+}
+
+.board > .title {
+    font-size: 24px;
+    color: rgba(255, 255, 255, 0.63);
+    line-height: 2em;
+    font-weight: 100;
+    font-family: Helvetica Neue;
+    margin-bottom: 1em;
+}
+
+.board.is-done > .title {
+    font-size: 16px;
+}

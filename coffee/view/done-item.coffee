@@ -1,18 +1,19 @@
 
+React = require 'react'
+
+$ = React.DOM
+
 model = require '../model'
 
 module.exports = React.createClass
   displayName: 'DoneItem'
-  render: ->
-    $.div className: 'done-item',
-      $.span
-        className: 'item-done'
-        onClick: (event) => @onClick event,  @props.item
-        '×'
-      $.div
-        className: 'item-text'
-        type: 'text'
-        @props.item.text
 
   onClick: (event, item) ->
-    model.toggle item.id
+    model.toggle @props.item.id
+
+  render: ->
+    $.div className: 'item is-done',
+      $.span className: 'toggler', onClick: @onClick,
+        '×'
+      $.div className: 'text', type: 'text',
+        @props.item.text

@@ -1,17 +1,16 @@
-
 doctype
 
 html
   head
     title Pudica
     meta (:charset utf-8)
-    link (:rel stylesheet) (:href css/style.css)
-    link (:rel icon) (:type image/png) (:href png/icon.png)
-    @if (@ inDev) $ @block
-      link (:rel stylesheet) (:href css/resource-dev.css)
-      script (:src bower_components/react/react.js)
-    @if (@ inBuild) $ @block
-      link (:rel stylesheet) (:href css/resource-build.css)
-      script (:src http://cdn.staticfile.org/react/0.10.0/react.min.js)
-    script (:defer) (:src build/main.js)
+    link (:rel icon) (:href png/icon.png)
+    script(:src dist/vendor.min.js)
+    @if (@ dev)
+      @block
+        link (:rel stylesheet) (:href css/main.css)
+        script (:defer) (:src build/main.js)
+      @block
+        link (:rel stylesheet) (:href dist/main.min.css)
+        script (:defer) (:src dist/main.min.js)
   body

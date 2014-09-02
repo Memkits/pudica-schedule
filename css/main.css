@@ -1,0 +1,43 @@
+
+/* base styles */
+
+@import url('base/body.css');
+@import url('base/fonts.css');
+
+/* module styles */
+
+@import url('modules/item.css');
+
+#paper {
+    width: 700px;
+    height: 100%;
+    padding: 100px 0px;
+    margin-left: 100px;
+}
+
+#start-guide {
+    color: black;
+    font-weight: 100;
+    letter-spacing: 1px;
+    font-size: 20px;
+    padding: 160px 100px;
+}
+
+#add-wrap {
+    flex: 1;
+    text-align: left;
+    padding-top: 4em;
+}
+
+#clear {
+    display: inline-block;
+    padding: 4px 10px;
+    font-size: 16px;
+    cursor: pointer;
+    letter-spacing: 1px;
+}
+
+#space {
+    height: 5em;
+    width: 100%;
+}

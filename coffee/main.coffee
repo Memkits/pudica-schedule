@@ -1,5 +1,5 @@
 
-require './utils/extend'
+React = require 'react'
 
 model = require './model'
 

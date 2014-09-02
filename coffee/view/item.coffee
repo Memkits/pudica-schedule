@@ -1,4 +1,9 @@
 
+React = require 'react'
+
+$ = React.DOM
+$$ = require '../utils/extend'
+
 model = require '../model'
 
 module.exports = React.createClass
@@ -14,42 +19,52 @@ module.exports = React.createClass
     if el.value.length is 0
       el.focus()
 
+  editTask: (event) ->
+    text = event.currentTarget.value.trimLeft()
+    model.edit @props.item.id, text
+
+  blurFromTarget: (event) ->
+    event.currentTarget.blur()
+
+  insertTask: (event) ->
+    event.preventDefault()
+    if event.shiftKey then model.before @props.item.id
+    else model.after @props.item.id
+
+  leaveTask: (event) ->
+    text = event.currentTarget.value.trimLeft()
+    if text.length is 0
+      model.remove @props.item.id
+
+  toggle: (event) ->
+    model.toggle @props.item.id
+
+  switchKeys: (event) ->
+    event.stopPropagation()
+    switch event.keyCode
+      when 13 then @insertTask event
+      when 27 then @blurFromTarget event
+
+  dragItem: (event) ->
+    event.dataTransfer.setDragImage event.target, 0, 0
+    @props.onDragStart @props.item.id
+
+  releaseDrag: (event) ->
+    @props.onDragEnd @props.item.id
+
+  onDragEnter: (event) ->
+    @props.onDragEnter @props.item.id
+
   render: ->
     isDragging = @props.dragging is @props.item.id
+    itemClass = if isDragging then 'item dragging' else 'item'
+
     $.div
-      className:
-        if @props.isDragging then 'list-item dragging'
-        else 'list-item'
-      draggable: yes
-      onDragStart: (event) =>
-        event.dataTransfer.setDragImage event.target, 0, 0
-        @props.onDragStart @props.item.id
-      onDragEnd: (event) =>
-        @props.onDragEnd @props.item.id
-      onDragEnter: (event) =>
-        @props.onDragEnter @props.item.id
-      $.span
-        className: 'item-done'
-        onClick: (event) =>
-          model.toggle @props.item.id
-        $.span {}, '✓'
+      draggable: yes,
+      className: itemClass
+      onDragStart: @dragItem, onDragEnd: @releaseDrag, onDragEnter: @onDragEnter
+      $.span className: 'toggler', onClick: @toggle,
+        '✓'
       $.input
-        ref: 'input'
-        className: 'item-text'
-        onChange: (event) =>
-          text = event.currentTarget.value.trimLeft()
-          model.edit @props.item.id, text
-        onBlur: (event) =>
-          text = event.currentTarget.value.trimLeft()
-          if text.length is 0
-            model.remove @props.item.id
-        onKeyDown: (event) =>
-          event.stopPropagation()
-          switch event.keyCode
-            when 13
-              event.preventDefault()
-              if event.shiftKey then model.before @props.item.id
-              else model.after @props.item.id
-            when 27
-              event.currentTarget.blur()
-        value: @props.item.text
+        ref: 'input', className: 'text', value: @props.item.text
+        onChange: @editTask, onBlur: @leaveTask, onKeyDown: @switchKeys

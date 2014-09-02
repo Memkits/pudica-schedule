@@ -1,4 +1,9 @@
 
+React = require 'react'
+
+$ = React.DOM
+$$ = require '../utils/extend'
+
 model = require '../model'
 mixins = require '../utils/mixins'
 
@@ -19,26 +24,34 @@ module.exports = React.createClass
   _onChange: ->
     @setState schedule: model.get()
 
+  clearTask: ->
+    model.clear()
+
+  swapItems: (itemId) ->
+    model.swap @state.dragging, itemId
+
+  dragItem: (itemId) ->
+    @setState dragging: itemId
+
+  releaseDrag: ->
+    @setState dragging: null
+
   render: ->
+    isListRich = @state.schedule.length > 0
 
     itemsList = @state.schedule
     .filter (item) => not item.done
-    .map (item) => Item
-      key: item.id
-      item: item
-      isDragging: @state.dragging is item.id
-      onDragStart: (itemId) =>
-        @setState dragging: itemId
-      onDragEnd: (itemId) =>
-        @setState dragging: null
-      onDragEnter: (itemId) =>
-        model.swap @state.dragging, itemId
+    .map (item) =>
+      dragging = @state.dragging is item.id
+      Item
+        key: item.id, item: item
+        isDragging: dragging, onDragStart: @dragItem
+        onDragEnd: @releaseDrag, onDragEnter: @swapItems
 
     deadList = @state.schedule
     .filter (item) => item.done
-    .map (item) => DoneItem key: item.id, item: item
-
-    isListRich = @state.schedule.length > 0
+    .map (item) =>
+      DoneItem key: item.id, item: item
 
     $$.if isListRich,
       => $.div id: 'paper',
@@ -46,10 +59,7 @@ module.exports = React.createClass
         $.div id: 'space'
         deadList
         $.div id: 'add-wrap',
-          $.div
-            id: 'clear'
-            onClick: =>
-              model.clear()
+          $.div id: 'clear', onClick: @clearTask,
             'clear'
       => $.div id: 'start-guide',
         "Press Enter to start..."

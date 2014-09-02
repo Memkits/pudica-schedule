@@ -4,14 +4,12 @@ Pudica Schedule
 
 Demo: http://repo.tiye.me/pudica-schedule/
 
-Dead simple schedule for basic use cases:
+Dead simple schedule for basic usages:
 
-* press Enter and Shift+Enter to add task
+* press Return and Shift+Return to add task
 * editing
 * sort by dragging
 * archive and revert archiving tasks by clicking
-
-![](http://ww2.sinaimg.cn/bmiddle/62752320tw1egzxlacspwj21540nswjy.jpg)
 
 ### Resouces
 

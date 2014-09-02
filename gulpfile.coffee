@@ -118,7 +118,7 @@ gulp.task 'prefixer', ->
 gulp.task 'cssmin', ->
   gulp
   .src 'build/css/main.css'
-  .pipe cssmin()
+  .pipe cssmin(relativeTo: 'css/')
   .pipe rename(suffix: '.min')
   .pipe gulp.dest('dist/')
 
@@ -142,7 +142,7 @@ gulp.task 'rsync', ->
     src: '.'
     recursive: true
     args: ['--verbose']
-    dest: "tiye:~/repo/simple-chat"
+    dest: "tiye:~/repo/pudica-schedule"
     deleteAll: yes
     exclude: [
       'bower_components/'

@@ -6,6 +6,7 @@
     transition-duration: 300ms;
     display: flex;
     flex-direction: row;
+    background: hsla(91, 45%, 18%, 0.33);
 }
 
 .item > * {
@@ -24,8 +25,8 @@
 
 .item.is-done {
     padding: 0;
-    line-height: 40px;
     display: flex;
+    height: 30px;
 }
 
 .item.is-done > * {

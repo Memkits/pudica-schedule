@@ -7,8 +7,8 @@ $$ = require '../utils/extend'
 model = require '../model'
 mixins = require '../utils/mixins'
 
-Item = require './item'
-DoneItem = require './done-item'
+Item = React.createFactory require './item'
+DoneItem = React.createFactory require './done-item'
 
 module.exports = React.createClass
   displayName: 'App'

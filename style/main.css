@@ -16,7 +16,9 @@
     position: absolute;
     height: 100%;
     width: 100%;
-    background: rgb(0, 81, 44);
+    background-image: url('../images/maple.jpg');
+    background-size: cover;
+    background-position: center center;
 }
 
 #items-all {

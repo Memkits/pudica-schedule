@@ -3,9 +3,9 @@ React = require 'react'
 
 model = require './model'
 
-App = require './view/app'
+App = React.createFactory require './view/app'
 
-React.renderComponent (App {}), document.body
+React.render (App {}), document.body
 
 try
   raw = localStorage.getItem 'pudica'

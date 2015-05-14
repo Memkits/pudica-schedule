@@ -2,7 +2,7 @@
 body {
     margin: 0;
     -webkit-user-select: none;
-    color: white;
+    background-color: #000;
 }
 
 body * {

@@ -2,7 +2,13 @@
 var
   React $ require :react
   store $ require :./store
-  App $ React.createFactory $ require :./component/app
+  Layout $ React.createFactory $ require :./app/layout
 
-React.render (App) document.body
+var render $ \ ()
+  React.render
+    Layout $ object
+      :tasks (store.get)
+    , document.body
 
+render
+store.on :change render

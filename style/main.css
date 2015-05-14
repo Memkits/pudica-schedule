@@ -6,38 +6,19 @@
 
 /* module styles */
 
-@import url('modules/item.css');
-@import url('modules/board.css');
-@import url('modules/trigger.css');
+@import url('./layout.css');
+@import url('./list.css');
+@import url('./task.css');
 
-#paper {
+/* page */
+
+body {
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    align-items: start;
     position: absolute;
     height: 100%;
     width: 100%;
-    background-image: url('../images/maple.jpg');
-    background-size: cover;
-    background-position: center center;
-}
-
-#items-all {
-    display: flex;
-    flex-direction: row;
-    flex: 1;
-    padding: 10px 60px 30px 180px;
-    align-items: center;
-}
-
-#start-guide {
-    font-weight: 100;
-    letter-spacing: 1px;
-    font-size: 20px;
-    padding: 140px 100px;
-    font-family: Helvetica Neue;
-}
-
-#clear {
-    text-align: right;
-    height: 40px;
+    padding-left: 10%;
 }

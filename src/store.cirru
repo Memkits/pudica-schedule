@@ -12,10 +12,12 @@ var EventEmitter events.EventEmitter
 
 var store $ new EventEmitter
 var _store $ List
-  immutable.Map $ object
-    :id $ shortid.generate
-    :done false
-    :text :
+
+var firstTask $ immutable.Map $ object
+  :id $ shortid.generate
+  :done false
+  :text :
+= _store $ _store.push firstTask
 
 = store.get $ \ ()
   _store

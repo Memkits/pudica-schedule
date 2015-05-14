@@ -6,6 +6,8 @@ var
 var actions $ require :../actions
 
 var div $ React.createFactory :div
+var span $ React.createFactory :span
+
 var T React.PropTypes
 
 = module.exports $ React.createClass $ object
@@ -22,6 +24,7 @@ var T React.PropTypes
     return $ div (object (:className :app-layout))
       div
         object (:className :title)
-          :onClick this.onClick
-        , :Tasks:
+        span
+          object (:onClick this.onClick) (:className :reset)
+          , :Tasks:
       AppList $ object (:tasks this.props.tasks)

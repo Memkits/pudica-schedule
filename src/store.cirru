@@ -14,25 +14,27 @@ var EventEmitter events.EventEmitter
 var store $ new EventEmitter
 var _store $ List
 
-var firstTask $ immutable.Map $ object
-  :id $ shortid.generate
-  :done false
-  :text :
-= _store $ _store.push firstTask
-
 = store.get $ \ ()
   _store
 
 try
   do
     var raw $ localStorage.getItem :pudica
-    var data $ JSON.parse raw
+    var data $ JSON.parse (or raw :[])
     = _store $ immutable.fromJS data
   err
 
 = window.onbeforeunload $ \ ()
   var raw $ JSON.stringify $ _store.toJS
   localStorage.setItem :pudica raw
+
+var firstTask $ immutable.Map $ object
+  :id $ shortid.generate
+  :done false
+  :text :
+
+if (is _store.size 0) $ do
+  = _store $ _store.push firstTask
 
 assign store $ object
   :emitChange $ \ ()

@@ -14,4 +14,4 @@ var
         meta $ object (:charset :utf-8)
         script $ object (:src data.main) (:defer true)
       body null
-        div null :empty
+        div null :loading

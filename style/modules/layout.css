@@ -6,3 +6,7 @@
 .app-layout .title {
     line-height: 40px;
 }
+
+.app-layout .reset {
+  cursor: pointer;
+}

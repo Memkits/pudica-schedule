@@ -13,7 +13,7 @@ Dead simple schedule for basic usages:
 
 ### Resouces
 
-Besides React, these two docs helped my a lot:
+Besides React, these docs helped a lot:
 
 * https://github.com/danielstocks/react-sortable
 * http://csspod.com/archives/html5-drag-and-drop

@@ -23,6 +23,12 @@ var dispatcher $ require :./dispatcher
     :type :toggle
     :id id
 
-= exports.clear $ \ ()
+= exports.reset $ \ ()
   dispatcher.dispatch $ object
-    :type :clear
+    :type :reset
+
+= exports.swap $ \ (id1 id2)
+  dispatcher.dispatch $ object
+    :type :swap
+    :id1 id1
+    :id2 id2

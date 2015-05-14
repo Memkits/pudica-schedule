@@ -6,6 +6,7 @@ var
   shortid $ require :shortid
 
 var dispatcher $ require :./dispatcher
+var prelude $ require :./util/prelude
 
 var List immutable.List
 var EventEmitter events.EventEmitter
@@ -26,6 +27,7 @@ try
   do
     var raw $ localStorage.getItem :pudica
     var data $ JSON.parse raw
+    = _store $ immutable.fromJS data
   err
 
 = window.onbeforeunload $ \ ()
@@ -46,19 +48,10 @@ assign store $ object
     return _store
 
 = store.dispatchToken $ dispatcher.register $ \ (action)
+  console.info :action: action
   switch action.type
     :insert
-      var newItem $ immutable.Map $ object
-        :done false
-        :text :
-      var emptyList $ List (array)
-      var piled $ _store.map $ \ (item)
-        if (is (item.get :id) action.id)
-          do $ if action.atBefore
-            do $ return $ List newItem item
-            do $ return $ List item newItem
-          do $ return $ List item
-      = _store $ emptyList.concat (... piled)
+      = _store $ prelude.insert _store action.id action.atBefore
       store.emitChange
     :update
       = _store $ _store.map $ \ (item)
@@ -67,11 +60,14 @@ assign store $ object
             var newState $ immutable.Map $ object
               :text action.text
             return $ item.merge newState
+          do
+            return item
       store.emitChange
     :delete
-      = _store $ _store.filter $ \ (item)
-        return $ isnt (item.get :id) action.id
-      store.emitChange
+      if (> _store.size 1) $ do
+        = _store $ _store.filter $ \ (item)
+          return $ isnt (item.get :id) action.id
+        store.emitChange
     :toggle
       = _store $ _store.map $ \ (item)
         if (is (item.get :id) action.id)
@@ -82,8 +78,24 @@ assign store $ object
           do
             return item
       store.emitChange
-    :clear
-      = _store $ List (array)
+    :reset
+      = _store $ List (array firstTask)
+      store.emitChange
+
+    :swap
+      var item1 $ _store.find $ \ (item)
+        return $ is (item.get :id) action.id1
+      var item2 $ _store.find $ \ (item)
+        return $ is (item.get :id) action.id2
+      = _store $ _store.map $ \ (item)
+        switch item
+          item1
+            return item2
+          item2
+            return item1
+          else
+            return item
+      console.log (_store.toJS)
       store.emitChange
 
 = module.exports store

@@ -6,19 +6,19 @@
 
 /* module styles */
 
-@import url('./layout.css');
-@import url('./list.css');
-@import url('./task.css');
+@import url('./modules/layout.css');
+@import url('./modules/list.css');
+@import url('./modules/task.css');
 
 /* page */
 
 body {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: start;
     position: absolute;
     height: 100%;
     width: 100%;
     padding-left: 10%;
+    background-image: url(../images/maple.jpg);
+    background-size: cover;
+    background-color: #83A436;
+    background-attachment: fixed;
 }

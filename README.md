@@ -11,6 +11,10 @@ Dead simple schedule for basic usages:
 * sort by dragging
 * archive and revert archiving tasks by clicking
 
+### Resources
+
+Icon: https://www.iconfinder.com/icons/175730/leaf_icon#size=32
+
 ### Resouces
 
 Besides React, these docs helped a lot:

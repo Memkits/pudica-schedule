@@ -9,7 +9,7 @@ var
     html null
       head null
         title null ":Pudica Schedule"
-        link $ object (:rel :icon) (:href :images/icon.png)
+        link $ object (:rel :icon) (:href :images/leaf.png)
         link $ object (:rel :stylesheet) (:href :style/main.css)
         meta $ object (:charset :utf-8)
         script $ object (:src data.main) (:defer true)

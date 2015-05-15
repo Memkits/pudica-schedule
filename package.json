@@ -29,8 +29,9 @@
     "immutable": "^3.7.2",
     "keycode": "^2.1.0",
     "object-assign": "^2.0.0",
-    "react": "^0.13.2",
-    "shortid": "^2.2.2"
+    "react": "0.13.2",
+    "shortid": "^2.2.2",
+    "timeout-transition-group": "^1.0.1"
   },
   "repository": {
     "type": "git",

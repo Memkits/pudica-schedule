@@ -7,7 +7,29 @@
     flex-direction: row;
     position: absolute;
     transition-duration: 400ms;
-    transition-timing-function: ease-in-out;
+}
+
+.app-task.is-pop-enter {
+    transition-duration: 0ms;
+    opacity: 0;
+    margin-left: 80px;
+}
+
+.app-task.is-pop-enter.is-pop-enter-active {
+    transition-duration: 400ms;
+    opacity: 1;
+    margin-left: 0px;
+}
+
+.app-task.is-pop-leave,
+.app-task.is-done.is-pop-leave {
+    opacity: 1;
+}
+
+.app-task.is-pop-leave.is-pop-leave-active,
+.app-task.is-done.is-pop-leave.is-pop-leave-active {
+    opacity: 0.01;
+    margin-left: 80px;
 }
 
 .app-task.is-done {

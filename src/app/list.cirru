@@ -2,6 +2,7 @@
 var
   React $ require :react
   Task $ React.createFactory $ require :./task
+  Transition $ React.createFactory $ require :timeout-transition-group
 
 var actions $ require :../actions
 var config $ require :../config
@@ -38,4 +39,8 @@ var T React.PropTypes
       object (:className :app-list)
         :style $ object
           :height (* this.props.tasks.size config.height)
-      this.renderTasks
+      Transition
+        object (:transitionName :is-pop) (:component :div)
+          :enterTimeout 400
+          :leaveTimeout 400
+        this.renderTasks

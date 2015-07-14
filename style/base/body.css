@@ -9,3 +9,7 @@ input.text {
     box-sizing: border-box;
     /* box-shadow: inset 0 0 1px white; */
 }
+
+body * {
+  box-sizing: border-box;
+}

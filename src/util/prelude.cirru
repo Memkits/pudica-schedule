@@ -27,6 +27,8 @@ var List immutable.List
           do
             var piece $ List $ array first
             return $ iter (before.concat piece) rest
+        return undefined
+    return undefined
 
   var emptyList $ List (array)
   return $ iter emptyList data

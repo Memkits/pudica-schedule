@@ -23,6 +23,7 @@ var T React.PropTypes
     if (isnt id this._draggingId)
       do
         actions.swap id this._draggingId
+    return undefined
 
   :renderTasks $ \ ()
     var self this

@@ -3,11 +3,3 @@
     padding: 10% 0 10% 0;
     margin-left: 10%;
 }
-
-.app-layout .title {
-    line-height: 40px;
-}
-
-.app-layout .reset {
-  cursor: pointer;
-}

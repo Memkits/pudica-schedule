@@ -5,7 +5,9 @@ var
   exec $ . (require :child_process) :exec
   env $ object
     :dev true
-    :main :http://localhost:8080/build/main.js
+    :main :http://192.168.0.129:8080/build/main.js
+    :vendor :http://192.168.0.129:8080/build/vendor.js
+    :style :http://192.168.0.129:8080/build/style.css
 
 gulp.task :rsync $ \ (cb)
   var
@@ -13,7 +15,7 @@ gulp.task :rsync $ \ (cb)
   wrapper.rsync
     object
       :ssh true
-      :src $ array :index.html :build :images :style
+      :src $ array :index.html :build
       :recursive true
       :args $ array :--verbose
       :dest :tiye:~/repo/pudica-schedule/
@@ -25,6 +27,15 @@ gulp.task :rsync $ \ (cb)
       console.log cmd
       cb
 
+gulp.task :script $ \ ()
+  var
+    script $ require :gulp-cirru-script
+
+  ... gulp
+    src :src/*.cirru
+    pipe $ script
+    pipe $ gulp.dest :lib/
+
 gulp.task :html $ \ (cb)
   var
     html $ require :./template
@@ -32,7 +43,9 @@ gulp.task :html $ \ (cb)
     assets
   if (not env.dev) $ do
     = assets $ require :./build/assets.json
-    = env.main $ + :./build/ assets.main
+    = env.main $ + :./build/ $ . assets.main 0
+    = env.style $ + :./build/ $ . assets.main 1
+    = env.vendor $ + :./build/ assets.vendor
   fs.writeFile :index.html (html env) cb
 
 gulp.task :del $ \ (cb)
@@ -42,7 +55,7 @@ gulp.task :del $ \ (cb)
 
 gulp.task :webpack $ \ (cb)
   var
-    command $ cond env.dev :webpack ":webpack --config webpack.min.cirru"
+    command $ cond env.dev :webpack ":webpack --config webpack.min.cirru --progress"
   exec command $ \ (err stdout stderr)
     console.log stdout
     console.log stderr

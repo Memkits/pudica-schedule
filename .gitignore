@@ -1,10 +1,6 @@
 
-node_modules/
-bower_components/
-
-build/
-dist/
-js/
-png/*.jpg
-
-index.html
+/build/
+/lib/
+/node_modules/
+/assets.json
+/index.html

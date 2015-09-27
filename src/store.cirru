@@ -51,25 +51,23 @@ assign store $ object
 
 = store.dispatchToken $ dispatcher.register $ \ (action)
   console.info :action: action
-  switch action.type
+  case action.type
     :insert
       = _store $ prelude.insert _store action.id action.atBefore
       store.emitChange
     :update
       = _store $ _store.map $ \ (item)
-        if (is (item.get :id) action.id)
-          do
-            var newState $ immutable.Map $ object
-              :text action.text
-            return $ item.merge newState
-          do
-            return item
+        cond (is (item.get :id) action.id)
+          item.merge $ immutable.Map $ object
+            :text action.text
+          , item
       store.emitChange
     :delete
       if (> _store.size 1) $ do
         = _store $ _store.filter $ \ (item)
           return $ isnt (item.get :id) action.id
         store.emitChange
+      , undefined
     :toggle
       = _store $ _store.map $ \ (item)
         if (is (item.get :id) action.id)
@@ -79,6 +77,7 @@ assign store $ object
             return $ item.merge newState
           do
             return item
+        , undefined
       store.emitChange
     :reset
       = _store $ List (array firstTask)
@@ -90,13 +89,10 @@ assign store $ object
       var item2 $ _store.find $ \ (item)
         return $ is (item.get :id) action.id2
       = _store $ _store.map $ \ (item)
-        switch item
-          item1
-            return item2
-          item2
-            return item1
-          else
-            return item
+        case item
+          item1 item2
+          item2 item1
+          else item
       console.log (_store.toJS)
       store.emitChange
 

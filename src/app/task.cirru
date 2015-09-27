@@ -32,6 +32,7 @@ var T React.PropTypes
     if (is text :) $ do
       var el $ this.refs.text.getDOMNode
       el.focus
+    return undefined
 
   :getId $ \ ()
     return $ this.props.task.get :id
@@ -46,6 +47,7 @@ var T React.PropTypes
     switch (keycode event.keyCode)
       :enter
         actions.insert (this.getId) event.shiftKey
+    return undefined
 
   :onDragStart $ \ (event)
     this.props.onDragStart (this.props.task.get :id)
@@ -57,6 +59,7 @@ var T React.PropTypes
     if (is event.target.value :)
       do
         actions.delete (this.props.task.get :id)
+    return undefined
 
   :render $ \ ()
     var task this.props.task

@@ -1,34 +1,42 @@
 
-var dispatcher $ require :./dispatcher
+var
+  shortid $ require :shortid
+  recorder $ require :actions-recorder
 
 = exports.insert $ \ (id atBefore)
-  dispatcher.dispatch $ object
+  actions.dispatch $ {}
     :type :insert
-    :id id
-    :atBefore atBefore
+    :data $ {}
+      :id id
+      :atBefore atBefore
+      :newId (shortid.generate)
 
 = exports.update $ \ (id text)
-  dispatcher.dispatch $ object
+  actions.dispatch $ {}
     :type :update
-    :id id
-    :text text
+    :data $ {}
+      :id id
+      :text text
 
 = exports.delete $ \ (id)
-  dispatcher.dispatch $ object
+  actions.dispatch $ {}
     :type :delete
-    :id id
+    :data $ {}
+      :id id
 
 = exports.toggle $ \ (id)
-  dispatcher.dispatch $ object
+  actions.dispatch $ {}
     :type :toggle
-    :id id
+    :data $ {}
+      :id id
 
 = exports.reset $ \ ()
-  dispatcher.dispatch $ object
+  actions.dispatch $ {}
     :type :reset
 
 = exports.swap $ \ (id1 id2)
-  dispatcher.dispatch $ object
+  actions.dispatch $ {}
     :type :swap
-    :id1 id1
-    :id2 id2
+    :data $ {}
+      :id1 id1
+      :id2 id2

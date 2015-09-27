@@ -22,6 +22,7 @@ var
       {} (:test "/\.(png|jpg)$") (:loader :url-loader)
       {} (:test /\.css$) $ :loader
         ExtractTextPlugin.extract :style-loader :css!autoprefixer
+      {} (:test /\.json$) $ :loader :json
 
   :plugins $ array
     new webpack.optimize.CommonsChunkPlugin :vendor :vendor.[chunkhash:8].js

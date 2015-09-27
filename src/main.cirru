@@ -18,12 +18,12 @@ try
   do
     var raw $ localStorage.getItem :pudica
     var data $ JSON.parse (or raw :[])
-    -- = initialStore $ Immutable.fromJS data
+    = initialStore $ Immutable.fromJS (or data ([]))
   err
 
 = window.onbeforeunload $ \ ()
   var raw $ JSON.stringify (recorder.getState)
-  localStorage.setItem :pudica raw
+  -- localStorage.setItem :pudica raw
 
 recorder.setup $ {}
   :initial $ cond (is initialStore.size 0)
@@ -31,8 +31,6 @@ recorder.setup $ {}
     , initialStore
   :records (Immutable.List)
   :updater updater
-
-console.log $ ... recorder (getState) (toJS)
 
 var render $ \ (store core)
   React.render

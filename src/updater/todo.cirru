@@ -35,8 +35,13 @@ var helperInsert $ \ (before after id newItem atBefore)
       , item
 
 = exports.delete $ \ (store actionData)
-  store.filterNot $ \ (item)
-    is (item.get :id) (actionData.get :id)
+  bind
+    store.filterNot $ \ (item)
+      is (item.get :id) (actionData.get :id)
+    \ (newStore)
+      cond (is newStore.size 0)
+        schema.store.push store.task
+        , newStore
 
 = exports.toggle $ \ (store actionData)
   store.map $ \ (item)
@@ -46,7 +51,7 @@ var helperInsert $ \ (before after id newItem atBefore)
       , item
 
 = exports.reset $ \ (store actionData)
-  schema.store
+  schema.store.push schema.task
 
 = exports.swap $ \ (store actionData)
   var

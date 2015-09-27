@@ -1,3 +1,3 @@
 
 = module.exports $ object
-  :height 44
+  :height 50

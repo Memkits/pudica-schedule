@@ -13,13 +13,13 @@ var
   :output $ object
     :path :build/
     :filename :[name].[chunkhash:8].js
-    :publicPath :./build/
 
   :resolve config.resolve
   :module $ {}
     :loaders $ []
       {} (:test /\.cirru$) (:loader :cirru-script) (:ignore /node_modules)
       {} (:test "/\.(png|jpg)$") (:loader :url-loader)
+        :query $ {} (:limit 100) (:name :images/[name].[hash:8].[ext])
       {} (:test /\.css$) $ :loader
         ExtractTextPlugin.extract :style-loader :css!autoprefixer
       {} (:test /\.json$) $ :loader :json

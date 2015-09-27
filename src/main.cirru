@@ -18,7 +18,9 @@ try
   do
     var raw $ localStorage.getItem :pudica
     var data $ JSON.parse (or raw :[])
-    = initialStore $ Immutable.fromJS (or data ([]))
+    = initialStore $ ...
+      Immutable.fromJS (or data ([]))
+      filter $ \ (item) (? item)
   err
 
 = window.onbeforeunload $ \ ()
@@ -31,6 +33,7 @@ recorder.setup $ {}
     , initialStore
   :records (Immutable.List)
   :updater updater
+  :inProduction true
 
 var render $ \ (store core)
   React.render

@@ -13,7 +13,7 @@ Dead simple schedule for basic usages:
 
 ### Resources
 
-Icon: https://www.iconfinder.com/icons/175730/leaf_icon#size=32
+Background: http://wallpapers.7savers.com/3d-autumn-wallpapers_6991_1920x1200.jpg
 
 ### Resouces
 

@@ -23,7 +23,7 @@ try
 
 = window.onbeforeunload $ \ ()
   var raw $ JSON.stringify (recorder.getState)
-  -- localStorage.setItem :pudica raw
+  localStorage.setItem :pudica raw
 
 recorder.setup $ {}
   :initial $ cond (is initialStore.size 0)

@@ -8,6 +8,7 @@ var
     :vendor $ array
       , :webpack-dev-server/client?http://192.168.0.129:8080
       , :webpack/hot/dev-server
+      , :immutable :react
     :main $ array :./src/main
 
   :output $ {}

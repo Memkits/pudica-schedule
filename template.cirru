@@ -12,8 +12,6 @@ var
         meta $ {} (:charset :utf-8)
         link $ {} (:rel :icon)
           :href :images/leaf.png
-        link $ {} (:rel :stylesheet)
-          :href :style/main.css
         cond (not data.dev)
           link $ {} (:rel :stylesheet)
             :href data.style

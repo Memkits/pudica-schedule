@@ -3,7 +3,6 @@ var
   React $ require :react
   keycode $ require :keycode
   classnames $ require :classnames
-  assign $ require :object-assign
 
 var actions $ require :../actions
 var config $ require :../config

@@ -1,6 +1,7 @@
 
 var
   schema $ require :../schema
+  Immutable $ require :immutable
 
 var
   bind $ \ (v k) (k v)
@@ -17,7 +18,7 @@ var helperInsert $ \ (before after id newItem atBefore)
           [] (after.first) newItem
         after.rest
       helperInsert
-        before.concat (after.first)
+        before.push (after.first)
         after.rest
         , id newItem atBefore
 
@@ -25,7 +26,7 @@ var helperInsert $ \ (before after id newItem atBefore)
   helperInsert schema.store store
     actionData.get :id
     schema.task.set :id (actionData.get :newId)
-    , atBefore
+    actionData.get :atBefore
 
 = exports.update $ \ (store actionData)
   store.map $ \ (item)
@@ -34,13 +35,12 @@ var helperInsert $ \ (before after id newItem atBefore)
       , item
 
 = exports.delete $ \ (store actionData)
-  :delete
-    store.filterNot $ \ (item)
-      is (item.get :id) (actionData.get :id)
+  store.filterNot $ \ (item)
+    is (item.get :id) (actionData.get :id)
 
 = exports.toggle $ \ (store actionData)
   store.map $ \ (item)
-    icond (is (item.get :id) (actionData.get :id))
+    cond (is (item.get :id) (actionData.get :id))
       item.update :done $ \ (status)
         not status
       , item

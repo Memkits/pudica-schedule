@@ -16,7 +16,7 @@ body {
     position: absolute;
     height: 100%;
     width: 100%;
-    background-image: url(../images/autumn.jpg);
+    background-image: url(../images/frost.jpg);
     background-size: cover;
     background-color: hsl(13, 100%, 22%);
     background-attachment: fixed;

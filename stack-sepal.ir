@@ -1,0 +1,72 @@
+{:package "client",
+ :files {"comp.container" {:ns ["ns"
+                                "client.comp.container"
+                                [":require"
+                                 ["[]" "hsl.core" ":refer" ["[]" "hsl"]]
+                                 ["[]" "respo-ui.style" ":as" "ui"]
+                                 ["[]" "respo.alias" ":refer" ["[]" "create-comp" "div" "span"]]
+                                 ["[]" "respo.comp.space" ":refer" ["[]" "comp-space"]]
+                                 ["[]" "respo.comp.text" ":refer" ["[]" "comp-text"]]]],
+                           :defs {"comp-container" ["def"
+                                                    "comp-container"
+                                                    ["create-comp"
+                                                     ":container"
+                                                     ["fn"
+                                                      ["store"]
+                                                      ["fn"
+                                                       ["state" "mutate!"]
+                                                       ["div"
+                                                        ["{}" [":style" ["merge" "ui/global"]]]
+                                                        ["comp-space" "|8px" "nil"]
+                                                        ["div"
+                                                         ["{}" [":style" "ui/button"]]
+                                                         ["comp-text" "|Demo" "nil"]]]]]]]},
+                           :procs []},
+         "main" {:ns ["ns"
+                      "client.main"
+                      [":require"
+                       ["[]"
+                        "respo.core"
+                        ":refer"
+                        ["[]" "render!" "clear-cache!" "falsify-stage!" "render-element" "gc-states!"]]
+                       ["[]" "client.comp.container" ":refer" ["[]" "comp-container"]]
+                       ["[]" "cljs.reader" ":refer" ["[]" "read-string"]]]],
+                 :defs {"dispatch!" ["defn" "dispatch!" ["op" "op-data"]],
+                        "-main!" ["defn"
+                                  "-main!"
+                                  []
+                                  ["enable-console-print!"]
+                                  ["if"
+                                   ["not" ["empty?" "ssr-stages"]]
+                                   ["let"
+                                    [["target" [".querySelector" "js/document" "|#app"]]]
+                                    ["falsify-stage!"
+                                     "target"
+                                     ["render-element" ["comp-container" "@store-ref" "ssr-stages"] "states-ref"]
+                                     "dispatch!"]]]
+                                  ["render-app!"]
+                                  ["add-watch" "store-ref" ":gc" ["fn" [] ["gc-states!" "states-ref"]]]
+                                  ["add-watch" "store-ref" ":changes" "render-app!"]
+                                  ["add-watch" "states-ref" ":changes" "render-app!"]
+                                  ["println" "|App started!"]],
+                        "on-jsload!" ["defn"
+                                      "on-jsload!"
+                                      []
+                                      ["clear-cache!"]
+                                      ["render-app!"]
+                                      ["println" "|Code updated."]],
+                        "render-app!" ["defn"
+                                       "render-app!"
+                                       []
+                                       ["let"
+                                        [["target" [".querySelector" "js/document" "|#app"]]]
+                                        ["render!" ["comp-container" "@store-ref"] "target" "dispatch!" "states-ref"]]],
+                        "ssr-stages" ["def"
+                                      "ssr-stages"
+                                      ["let"
+                                       [["ssr-element" [".querySelector" "js/document" "|#ssr-stages"]]
+                                        ["ssr-markup" [".getAttribute" "ssr-element" "|content"]]]
+                                       ["read-string" "ssr-markup"]]],
+                        "store-ref" ["defonce" "store-ref" ["atom" ["{}"]]],
+                        "states-ref" ["defonce" "states-ref" ["atom" ["{}"]]]},
+                 :procs [["set!" [".-onload" "js/window"] "-main!"]]}}}

@@ -1,6 +1,10 @@
 
-/build/
-/lib/
-/node_modules/
-/assets.json
-/index.html
+/target/
+/.nrepl*
+/src/*.*
+/src/.*
+
+/node_modules
+
+.lumo_cache
+tasks/class-path.sh

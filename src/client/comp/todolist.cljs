@@ -8,8 +8,7 @@
             [client.comp.task :refer [comp-task]]
             [clojure.string :as string]))
 
-(def style-container
-  {:min-height 100, :min-width 400, :background-color (hsl 0 0 0 0.4), :padding 16})
+(def style-container {:min-height 100, :min-width 400, :padding 16})
 
 (defn on-input [mutate!] (fn [e dispatch!] (mutate! :draft (:value e))))
 

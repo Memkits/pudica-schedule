@@ -4,11 +4,17 @@
              :refer
              [render! clear-cache! falsify-stage! render-element gc-states!]]
             [client.comp.container :refer [comp-container]]
-            [cljs.reader :refer [read-string]]))
+            [cljs.reader :refer [read-string]]
+            [client.updater.core :refer [updater]]
+            [client.schema :as schema]))
 
-(defn dispatch! [op op-data] )
+(defonce store-ref (atom schema/store))
 
-(defonce store-ref (atom {}))
+(defn dispatch! [op op-data]
+  (println "Dispatch:" op op-data)
+  (let [new-store (updater @store-ref op op-data (.now js/Date))]
+    (comment println "New store:" new-store)
+    (reset! store-ref new-store)))
 
 (defonce states-ref (atom {}))
 

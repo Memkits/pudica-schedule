@@ -6,12 +6,13 @@
             [respo.comp.space :refer [comp-space]]
             [respo.comp.text :refer [comp-text]]))
 
+(def style-container
+  {:background-image "url(\"peach.jpg\")",
+   :background-size :cover,
+   :background-position :center})
+
 (def comp-container
   (create-comp
    :container
    (fn [store]
-     (fn [state mutate!]
-       (div
-        {:style (merge ui/global)}
-        (comp-space "8px" nil)
-        (div {:style ui/button} (comp-text "Demo" nil)))))))
+     (fn [state mutate!] (div {:style (merge ui/global ui/fullscreen style-container)})))))

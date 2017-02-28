@@ -16,11 +16,15 @@
                                                       ["fn"
                                                        ["state" "mutate!"]
                                                        ["div"
-                                                        ["{}" [":style" ["merge" "ui/global"]]]
-                                                        ["comp-space" "|8px" "nil"]
-                                                        ["div"
-                                                         ["{}" [":style" "ui/button"]]
-                                                         ["comp-text" "|Demo" "nil"]]]]]]]},
+                                                        ["{}"
+                                                         [":style"
+                                                          ["merge" "ui/global" "ui/fullscreen" "style-container"]]]]]]]],
+                                  "style-container" ["def"
+                                                     "style-container"
+                                                     ["{}"
+                                                      [":background-image" "|url(\"peach.jpg\")"]
+                                                      [":background-size" ":cover"]
+                                                      [":background-position" ":center"]]]},
                            :procs []},
          "main" {:ns ["ns"
                       "client.main"

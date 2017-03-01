@@ -3,4 +3,4 @@
 
 (def task {:id nil, :text "", :done? false})
 
-(def store {:tasks []})
+(def store {:tasks [], :pointer 0})

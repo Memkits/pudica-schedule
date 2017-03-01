@@ -100,31 +100,12 @@
                                                   "comp-todolist"
                                                   ["create-comp"
                                                    ":todolist"
-                                                   "init-state"
-                                                   "update-state"
                                                    ["fn"
                                                     ["tasks"]
                                                     ["fn"
                                                      ["state" "mutate!"]
                                                      ["div"
                                                       ["{}" [":style" "style-container"]]
-                                                      ["div"
-                                                       ["{}" [":style" ["merge" "ui/row"]]]
-                                                       ["input"
-                                                        ["{}"
-                                                         [":style" "ui/input"]
-                                                         [":attrs"
-                                                          ["{}"
-                                                           [":value" [":draft" "state"]]
-                                                           [":placeholder" "|Add task here..."]]]
-                                                         [":event" ["{}" [":input" ["on-input" "mutate!"]]]]]]
-                                                       ["div" ["{}"] ["comp-text" [":draft" "state"] "nil"]]
-                                                       ["button"
-                                                        ["{}"
-                                                         [":style" "ui/button"]
-                                                         [":attrs" ["{}" [":inner-text" "|Add"]]]
-                                                         [":event"
-                                                          ["{}" [":click" ["on-add" [":draft" "state"] "mutate!"]]]]]]]
                                                       ["div"
                                                        ["{}"
                                                         [":style"
@@ -138,31 +119,16 @@
                                                         ["map-indexed"
                                                          ["fn"
                                                           ["idx" "task"]
-                                                          ["[]" [":id" "task"] ["comp-task" "task" "idx"]]]]]]]]]]],
+                                                          ["[]" [":id" "task"] ["comp-task" "task" "idx"]]]]
+                                                        ["sort-by" "first"]]]]]]]],
                                  "style-container" ["def"
                                                     "style-container"
                                                     ["{}" [":min-height" "100"] [":min-width" "400"] [":padding" "16"]]],
-                                 "on-input" ["defn"
-                                             "on-input"
-                                             ["mutate!"]
-                                             ["fn" ["e" "dispatch!"] ["mutate!" ":draft" [":value" "e"]]]],
-                                 "init-state" ["defn" "init-state" ["&" "args"] ["{}" [":draft" "|"]]],
-                                 "update-state" ["defn"
-                                                 "update-state"
-                                                 ["state" "op" "op-data"]
-                                                 ["assoc" "state" "op" "op-data"]],
-                                 "on-add" ["defn"
-                                           "on-add"
-                                           ["draft" "mutate!"]
-                                           ["fn"
-                                            ["e" "dispatch!"]
-                                            ["if" ["not" ["string/blank?" "draft"]] ["dispatch!" ":task/add" "draft"]]
-                                            ["mutate!" ":draft" "|"]]],
                                  "style-list" ["def" "style-list" ["{}" [":position" ":relative"]]]},
                           :procs []},
          "schema" {:ns ["ns" "client.schema"],
                    :defs {"task" ["def" "task" ["{}" [":id" "nil"] [":text" "|"] [":done?" "false"]]],
-                          "store" ["def" "store" ["{}" [":tasks" ["[]"]]]]},
+                          "store" ["def" "store" ["{}" [":tasks" ["[]"]] [":pointer" "0"]]]},
                    :procs []},
          "updater.core" {:ns ["ns" "client.updater.core" [":require" ["[]" "client.schema" ":as" "schema"]]],
                          :defs {"updater" ["defn"
@@ -170,15 +136,8 @@
                                            ["store" "op" "op-data" "op-time"]
                                            ["case"
                                             "op"
-                                            [":task/add"
-                                             ["update"
-                                              "store"
-                                              ":tasks"
-                                              ["fn"
-                                               ["tasks"]
-                                               ["conj"
-                                                "tasks"
-                                                ["merge" "schema/task" ["{}" [":id" "op-time"] [":text" "op-data"]]]]]]]
+                                            [":task/add-before" ["add-before" "store" "op-data" "op-time"]]
+                                            [":task/add-after" ["add-after" "store" "op-data" "op-time"]]
                                             [":task/edit"
                                              ["let"
                                               [[["[]" "idx" "text"] "op-data"]]
@@ -191,26 +150,69 @@
                                             [":task/toggle"
                                              ["update-in" "store" ["[]" ":tasks" "op-data" ":done?"] "not"]]
                                             [":task/delete"
-                                             ["cond"
-                                              [["zero?" "op-data"]
-                                               ["update" "store" ":tasks" ["fn" ["tasks"] ["subvec" "tasks" "1"]]]]
-                                              [["=" "op-data" ["dec" ["count" [":tasks" "store"]]]]
-                                               ["update"
-                                                "store"
-                                                ":tasks"
-                                                ["fn" ["tasks"] ["subvec" "tasks" "0" ["dec" ["count" "tasks"]]]]]]
-                                              [":else"
-                                               ["update"
-                                                "store"
-                                                ":tasks"
-                                                ["fn"
-                                                 ["tasks"]
-                                                 ["into"
-                                                  ["[]"]
-                                                  ["concat"
-                                                   ["subvec" "tasks" "0" "op-data"]
-                                                   ["subvec" "tasks" ["inc" "op-data"]]]]]]]]]
-                                            "store"]]},
+                                             ["if"
+                                              ["=" "1" ["count" [":tasks" "store"]]]
+                                              "store"
+                                              ["cond"
+                                               [["zero?" "op-data"]
+                                                ["update" "store" ":tasks" ["fn" ["tasks"] ["subvec" "tasks" "1"]]]]
+                                               [["=" "op-data" ["dec" ["count" [":tasks" "store"]]]]
+                                                ["update"
+                                                 "store"
+                                                 ":tasks"
+                                                 ["fn" ["tasks"] ["subvec" "tasks" "0" ["dec" ["count" "tasks"]]]]]]
+                                               [":else"
+                                                ["update"
+                                                 "store"
+                                                 ":tasks"
+                                                 ["fn"
+                                                  ["tasks"]
+                                                  ["into"
+                                                   ["[]"]
+                                                   ["concat"
+                                                    ["subvec" "tasks" "0" "op-data"]
+                                                    ["subvec" "tasks" ["inc" "op-data"]]]]]]]]]]
+                                            "store"]],
+                                "add-before" ["defn"
+                                              "add-before"
+                                              ["store" "idx" "op-time"]
+                                              ["update"
+                                               "store"
+                                               ":tasks"
+                                               ["fn"
+                                                ["tasks"]
+                                                ["let"
+                                                 [["new-task"
+                                                   ["merge" "schema/task" ["{}" [":id" "op-time"] [":text" "|"]]]]]
+                                                 ["cond"
+                                                  [["zero?" "idx"] ["into" ["[]"] ["cons" "new-task" "tasks"]]]
+                                                  [":else"
+                                                   ["into"
+                                                    ["[]"]
+                                                    ["concat"
+                                                     ["subvec" "tasks" "0" "idx"]
+                                                     ["[]" "new-task"]
+                                                     ["subvec" "tasks" "idx"]]]]]]]]],
+                                "add-after" ["defn"
+                                             "add-after"
+                                             ["store" "idx" "op-time"]
+                                             ["update"
+                                              "store"
+                                              ":tasks"
+                                              ["fn"
+                                               ["tasks"]
+                                               ["let"
+                                                [["new-task"
+                                                  ["merge" "schema/task" ["{}" [":id" "op-time"] [":text" "|"]]]]]
+                                                ["cond"
+                                                 [["=" "idx" ["dec" ["count" "tasks"]]] ["conj" "tasks" "new-task"]]
+                                                 [":else"
+                                                  ["into"
+                                                   ["[]"]
+                                                   ["concat"
+                                                    ["subvec" "tasks" "0" ["inc" "idx"]]
+                                                    ["[]" "new-task"]
+                                                    ["subvec" "tasks" ["inc" "idx"]]]]]]]]]]},
                          :procs []},
          "comp.task" {:ns ["ns"
                            "client.comp.task"
@@ -221,43 +223,7 @@
                             ["[]" "respo.comp.space" ":refer" ["[]" "comp-space"]]
                             ["[]" "respo.comp.text" ":refer" ["[]" "comp-text"]]
                             ["[]" "clojure.string" ":as" "string"]]],
-                      :defs {"comp-task" ["def"
-                                          "comp-task"
-                                          ["create-comp"
-                                           ":task"
-                                           ["fn"
-                                            ["task" "idx"]
-                                            ["fn"
-                                             ["state" "mutate!"]
-                                             ["div"
-                                              ["{}"
-                                               [":style"
-                                                ["merge"
-                                                 "ui/row"
-                                                 "style-task"
-                                                 ["{}" [":top" ["str" ["+" "8" ["*" "idx" "48"]] "|px"]]]]]
-                                               [":event"
-                                                ["{}"
-                                                 [":pointerdown" ["on-pick" [":id" "task"]]]
-                                                 [":pointerup" ["on-release" [":id" "task"]]]]]]
-                                              ["div" ["{}" [":style" "style-done"]]]
-                                              ["comp-space" "8" "nil"]
-                                              ["input"
-                                               ["{}"
-                                                [":style" "ui/input"]
-                                                [":attrs"
-                                                 ["{}" [":value" [":text" "task"]] [":placeholder" "|Task content"]]]
-                                                [":event"
-                                                 ["{}"
-                                                  [":input" ["on-input" "idx"]]
-                                                  [":blur" ["on-blur" ["string/blank?" [":text" "task"]] "idx"]]]]]]]]]]],
-                             "style-done" ["def"
-                                           "style-done"
-                                           ["{}"
-                                            [":width" "32"]
-                                            [":height" "32"]
-                                            [":background-color" ["hsl" "120" "80" "60"]]]],
-                             "on-input" ["defn"
+                      :defs {"on-input" ["defn"
                                          "on-input"
                                          ["idx"]
                                          ["fn" ["e" "dispatch!"] ["dispatch!" ":task/edit" ["[]" "idx" [":value" "e"]]]]],
@@ -266,11 +232,8 @@
                                            ["{}"
                                             [":position" ":absolute"]
                                             [":background-color" ["hsl" "0" "0" "0" "0.8"]]
-                                            [":padding" "|8px"]]],
-                             "on-blur" ["defn"
-                                        "on-blur"
-                                        ["cleared?" "idx"]
-                                        ["fn" ["e" "dispatch!"] ["if" "cleared?" ["dispatch!" ":task/delete" "idx"]]]],
+                                            [":padding" "|8px"]
+                                            [":transition-duration" "|300ms"]]],
                              "on-pick" ["defn"
                                         "on-pick"
                                         ["task-id"]
@@ -278,5 +241,75 @@
                              "on-release" ["defn"
                                            "on-release"
                                            ["task-id"]
-                                           ["fn" ["e" "dispatch!"] ["println" "|Release:" "task-id"]]]},
+                                           ["fn" ["e" "dispatch!"] ["println" "|Release:" "task-id"]]],
+                             "style-done" ["def"
+                                           "style-done"
+                                           ["{}"
+                                            [":width" "32"]
+                                            [":height" "32"]
+                                            [":background-color" ["hsl" "120" "80" "60"]]
+                                            [":cursor" ":pointer"]]],
+                             "comp-task" ["def"
+                                          "comp-task"
+                                          ["create-comp"
+                                           ":task"
+                                           ["fn"
+                                            ["task" "idx"]
+                                            ["fn"
+                                             ["state" "mutate!"]
+                                             ["println" "|Task" "task"]
+                                             ["div"
+                                              ["{}"
+                                               [":style"
+                                                ["merge"
+                                                 "ui/row"
+                                                 "style-task"
+                                                 ["{}" [":top" ["str" ["+" "8" ["*" "idx" "48"]] "|px"]]]
+                                                 ["if" [":done?" "task"] ["{}" [":margin-left" "32"]]]]]
+                                               [":event"
+                                                ["{}"
+                                                 [":pointerdown" ["on-pick" [":id" "task"]]]
+                                                 [":pointerup" ["on-release" [":id" "task"]]]]]]
+                                              ["div"
+                                               ["{}"
+                                                [":style"
+                                                 ["merge"
+                                                  "style-done"
+                                                  ["if"
+                                                   [":done?" "task"]
+                                                   ["{}" [":background-color" ["hsl" "120" "80" "30"]]]]]]
+                                                [":event" ["{}" [":click" ["on-toggle" "idx"]]]]]]
+                                              ["comp-space" "8" "nil"]
+                                              ["input"
+                                               ["{}"
+                                                [":style" ["merge" "ui/input" "style-text"]]
+                                                [":attrs"
+                                                 ["{}" [":value" [":text" "task"]] [":placeholder" "|Task content"]]]
+                                                [":event"
+                                                 ["{}"
+                                                  [":input" ["on-input" "idx"]]
+                                                  [":blur" ["on-blur" ["string/blank?" [":text" "task"]] "idx"]]
+                                                  [":keydown" ["on-keydown" "idx"]]]]]]]]]]],
+                             "on-toggle" ["defn"
+                                          "on-toggle"
+                                          ["idx"]
+                                          ["fn" ["e" "dispatch!"] ["dispatch!" ":task/toggle" "idx"]]],
+                             "on-blur" ["defn"
+                                        "on-blur"
+                                        ["cleared?" "idx"]
+                                        ["fn" ["e" "dispatch!"] ["if" "cleared?" ["dispatch!" ":task/delete" "idx"]]]],
+                             "style-text" ["def" "style-text" ["{}" [":width" "320"]]],
+                             "on-keydown" ["defn"
+                                           "on-keydown"
+                                           ["idx"]
+                                           ["fn"
+                                            ["e" "dispatch!"]
+                                            ["if"
+                                             ["=" "13" [":key-code" "e"]]
+                                             ["let"
+                                              [["event" [":original-event" "e"]]]
+                                              ["if"
+                                               [".-shiftKey" "event"]
+                                               ["dispatch!" ":task/add-before" "idx"]
+                                               ["dispatch!" ":task/add-after" "idx"]]]]]]},
                       :procs []}}}

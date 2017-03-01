@@ -63,6 +63,7 @@
                                   ["render-app!"]
                                   ["add-watch" "store-ref" ":gc" ["fn" [] ["gc-states!" "states-ref"]]]
                                   ["add-watch" "store-ref" ":changes" "render-app!"]
+                                  ["add-watch" "store-ref" ":focus" "adjust-focus!"]
                                   ["add-watch" "states-ref" ":changes" "render-app!"]
                                   ["println" "|App started!"]],
                         "on-jsload!" ["defn"
@@ -76,15 +77,38 @@
                                        []
                                        ["let"
                                         [["target" [".querySelector" "js/document" "|#app"]]]
-                                        ["render!" ["comp-container" "@store-ref"] "target" "dispatch!" "states-ref"]]],
+                                        ["render!" ["comp-container" "@store-ref"] "target" "dispatch!" "states-ref"]
+                                        ["--" "println" "|Finished rerendering!"]]],
                         "ssr-stages" ["def"
                                       "ssr-stages"
                                       ["let"
                                        [["ssr-element" [".querySelector" "js/document" "|#ssr-stages"]]
                                         ["ssr-markup" [".getAttribute" "ssr-element" "|content"]]]
                                        ["read-string" "ssr-markup"]]],
-                        "store-ref" ["defonce" "store-ref" ["atom" "schema/store"]],
-                        "states-ref" ["defonce" "states-ref" ["atom" ["{}"]]]},
+                        "store-ref" ["defonce"
+                                     "store-ref"
+                                     ["atom"
+                                      ["assoc"
+                                       "schema/store"
+                                       ":tasks"
+                                       ["[]" ["merge" "schema/task" ["{}" [":id" [".now" "js/Date"]] [":text" "|"]]]]]]],
+                        "states-ref" ["defonce" "states-ref" ["atom" ["{}"]]],
+                        "adjust-focus!" ["defn"
+                                         "adjust-focus!"
+                                         []
+                                         ["js/setTimeout"
+                                          ["fn"
+                                           []
+                                           ["let"
+                                            [["pointer" [":pointer" "@store-ref"]]
+                                             ["maybe-input"
+                                              [".getElementById" "js/document" ["str" "|input-" "pointer"]]]]
+                                            ["--" "println" "|Focus to:" "pointer" "maybe-input"]
+                                            ["if"
+                                             ["and"
+                                              ["some?" "maybe-input"]
+                                              ["not=" "maybe-input" [".-activeElement" "js/document"]]]
+                                             [".focus" "maybe-input"]]]]]]},
                  :procs [["set!" [".-onload" "js/window"] "-main!"]]},
          "comp.todolist" {:ns ["ns"
                                "client.comp.todolist"
@@ -157,21 +181,26 @@
                                                [["zero?" "op-data"]
                                                 ["update" "store" ":tasks" ["fn" ["tasks"] ["subvec" "tasks" "1"]]]]
                                                [["=" "op-data" ["dec" ["count" [":tasks" "store"]]]]
-                                                ["update"
+                                                ["->"
                                                  "store"
-                                                 ":tasks"
-                                                 ["fn" ["tasks"] ["subvec" "tasks" "0" ["dec" ["count" "tasks"]]]]]]
+                                                 ["update"
+                                                  ":tasks"
+                                                  ["fn" ["tasks"] ["subvec" "tasks" "0" ["dec" ["count" "tasks"]]]]]
+                                                 ["update" ":pointer" "dec"]]]
                                                [":else"
-                                                ["update"
+                                                ["->"
                                                  "store"
-                                                 ":tasks"
-                                                 ["fn"
-                                                  ["tasks"]
-                                                  ["into"
-                                                   ["[]"]
-                                                   ["concat"
-                                                    ["subvec" "tasks" "0" "op-data"]
-                                                    ["subvec" "tasks" ["inc" "op-data"]]]]]]]]]]
+                                                 ["update"
+                                                  ":tasks"
+                                                  ["fn"
+                                                   ["tasks"]
+                                                   ["into"
+                                                    ["[]"]
+                                                    ["concat"
+                                                     ["subvec" "tasks" "0" "op-data"]
+                                                     ["subvec" "tasks" ["inc" "op-data"]]]]]]
+                                                 ["update" ":pointer" "dec"]]]]]]
+                                            [":pointer/touch" ["assoc" "store" ":pointer" "op-data"]]
                                             "store"]],
                                 "add-before" ["defn"
                                               "add-before"
@@ -196,23 +225,25 @@
                                 "add-after" ["defn"
                                              "add-after"
                                              ["store" "idx" "op-time"]
-                                             ["update"
+                                             ["->"
                                               "store"
-                                              ":tasks"
-                                              ["fn"
-                                               ["tasks"]
-                                               ["let"
-                                                [["new-task"
-                                                  ["merge" "schema/task" ["{}" [":id" "op-time"] [":text" "|"]]]]]
-                                                ["cond"
-                                                 [["=" "idx" ["dec" ["count" "tasks"]]] ["conj" "tasks" "new-task"]]
-                                                 [":else"
-                                                  ["into"
-                                                   ["[]"]
-                                                   ["concat"
-                                                    ["subvec" "tasks" "0" ["inc" "idx"]]
-                                                    ["[]" "new-task"]
-                                                    ["subvec" "tasks" ["inc" "idx"]]]]]]]]]]},
+                                              ["update"
+                                               ":tasks"
+                                               ["fn"
+                                                ["tasks"]
+                                                ["let"
+                                                 [["new-task"
+                                                   ["merge" "schema/task" ["{}" [":id" "op-time"] [":text" "|"]]]]]
+                                                 ["cond"
+                                                  [["=" "idx" ["dec" ["count" "tasks"]]] ["conj" "tasks" "new-task"]]
+                                                  [":else"
+                                                   ["into"
+                                                    ["[]"]
+                                                    ["concat"
+                                                     ["subvec" "tasks" "0" ["inc" "idx"]]
+                                                     ["[]" "new-task"]
+                                                     ["subvec" "tasks" ["inc" "idx"]]]]]]]]]
+                                              ["update" ":pointer" "inc"]]]},
                          :procs []},
          "comp.task" {:ns ["ns"
                            "client.comp.task"
@@ -242,6 +273,10 @@
                                            "on-release"
                                            ["task-id"]
                                            ["fn" ["e" "dispatch!"] ["println" "|Release:" "task-id"]]],
+                             "on-touch" ["defn"
+                                         "on-touch"
+                                         ["idx"]
+                                         ["fn" ["e" "dispatch!"] ["dispatch!" ":pointer/touch" "idx"]]],
                              "style-done" ["def"
                                            "style-done"
                                            ["{}"
@@ -257,7 +292,6 @@
                                             ["task" "idx"]
                                             ["fn"
                                              ["state" "mutate!"]
-                                             ["println" "|Task" "task"]
                                              ["div"
                                               ["{}"
                                                [":style"
@@ -284,12 +318,16 @@
                                                ["{}"
                                                 [":style" ["merge" "ui/input" "style-text"]]
                                                 [":attrs"
-                                                 ["{}" [":value" [":text" "task"]] [":placeholder" "|Task content"]]]
+                                                 ["{}"
+                                                  [":value" [":text" "task"]]
+                                                  [":placeholder" "|Task content"]
+                                                  [":id" ["str" "|input-" "idx"]]]]
                                                 [":event"
                                                  ["{}"
                                                   [":input" ["on-input" "idx"]]
                                                   [":blur" ["on-blur" ["string/blank?" [":text" "task"]] "idx"]]
-                                                  [":keydown" ["on-keydown" "idx"]]]]]]]]]]],
+                                                  [":keydown" ["on-keydown" "idx"]]
+                                                  [":click" ["on-touch" "idx"]]]]]]]]]]],
                              "on-toggle" ["defn"
                                           "on-toggle"
                                           ["idx"]

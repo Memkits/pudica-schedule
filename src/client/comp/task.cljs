@@ -19,6 +19,8 @@
 
 (defn on-release [task-id] (fn [e dispatch!] (println "Release:" task-id)))
 
+(defn on-touch [idx] (fn [e dispatch!] (dispatch! :pointer/touch idx)))
+
 (def style-done
   {:width 32, :height 32, :background-color (hsl 120 80 60), :cursor :pointer})
 
@@ -41,7 +43,6 @@
    :task
    (fn [task idx]
      (fn [state mutate!]
-       (println "Task" task)
        (div
         {:style (merge
                  ui/row
@@ -55,7 +56,8 @@
         (comp-space 8 nil)
         (input
          {:style (merge ui/input style-text),
-          :attrs {:value (:text task), :placeholder "Task content"},
+          :attrs {:value (:text task), :placeholder "Task content", :id (str "input-" idx)},
           :event {:input (on-input idx),
                   :blur (on-blur (string/blank? (:text task)) idx),
-                  :keydown (on-keydown idx)}}))))))
+                  :keydown (on-keydown idx),
+                  :click (on-touch idx)}}))))))

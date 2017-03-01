@@ -8,7 +8,8 @@
             [client.updater.core :refer [updater]]
             [client.schema :as schema]))
 
-(defonce store-ref (atom schema/store))
+(defonce store-ref
+  (atom (assoc schema/store :tasks [(merge schema/task {:id (.now js/Date), :text ""})])))
 
 (defn dispatch! [op op-data]
   (println "Dispatch:" op op-data)
@@ -20,12 +21,22 @@
 
 (defn render-app! []
   (let [target (.querySelector js/document "#app")]
-    (render! (comp-container @store-ref) target dispatch! states-ref)))
+    (render! (comp-container @store-ref) target dispatch! states-ref)
+    (comment println "Finished rerendering!")))
 
 (def ssr-stages
   (let [ssr-element (.querySelector js/document "#ssr-stages")
         ssr-markup (.getAttribute ssr-element "content")]
     (read-string ssr-markup)))
+
+(defn adjust-focus! []
+  (js/setTimeout
+   (fn []
+     (let [pointer (:pointer @store-ref)
+           maybe-input (.getElementById js/document (str "input-" pointer))]
+       (comment println "Focus to:" pointer maybe-input)
+       (if (and (some? maybe-input) (not= maybe-input (.-activeElement js/document)))
+         (.focus maybe-input))))))
 
 (defn -main! []
   (enable-console-print!)
@@ -38,6 +49,7 @@
   (render-app!)
   (add-watch store-ref :gc (fn [] (gc-states! states-ref)))
   (add-watch store-ref :changes render-app!)
+  (add-watch store-ref :focus adjust-focus!)
   (add-watch states-ref :changes render-app!)
   (println "App started!"))
 

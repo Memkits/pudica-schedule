@@ -6,7 +6,8 @@
             [client.comp.container :refer [comp-container]]
             [cljs.reader :refer [read-string]]
             [client.updater.core :refer [updater]]
-            [client.schema :as schema]))
+            [client.schema :as schema]
+            [client.manager :refer [listen-wheel!]]))
 
 (defonce store-ref
   (atom (assoc schema/store :tasks [(merge schema/task {:id (.now js/Date), :text ""})])))
@@ -51,6 +52,7 @@
   (add-watch store-ref :changes render-app!)
   (add-watch store-ref :focus adjust-focus!)
   (add-watch states-ref :changes render-app!)
+  (listen-wheel!)
   (println "App started!"))
 
 (defn on-jsload! [] (clear-cache!) (render-app!) (println "Code updated."))

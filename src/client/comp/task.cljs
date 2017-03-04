@@ -15,10 +15,6 @@
    :padding "8px",
    :transition-duration "300ms"})
 
-(defn on-pick [task-id] (fn [e dispatch!] (println "Task id:" task-id)))
-
-(defn on-release [task-id] (fn [e dispatch!] (println "Release:" task-id)))
-
 (defn on-touch [idx] (fn [e dispatch!] (dispatch! :pointer/touch idx)))
 
 (def style-done
@@ -49,7 +45,7 @@
                  style-task
                  {:top (str (+ 8 (* idx 48)) "px")}
                  (if (:done? task) {:margin-left 32})),
-         :event {:pointerdown (on-pick (:id task)), :pointerup (on-release (:id task))}}
+         :event {}}
         (div
          {:style (merge style-done (if (:done? task) {:background-color (hsl 120 80 30)})),
           :event {:click (on-toggle idx)}})

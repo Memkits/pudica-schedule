@@ -39,7 +39,8 @@
                        ["[]" "client.comp.container" ":refer" ["[]" "comp-container"]]
                        ["[]" "cljs.reader" ":refer" ["[]" "read-string"]]
                        ["[]" "client.updater.core" ":refer" ["[]" "updater"]]
-                       ["[]" "client.schema" ":as" "schema"]]],
+                       ["[]" "client.schema" ":as" "schema"]
+                       ["[]" "client.manager" ":refer" ["[]" "listen-wheel!"]]]],
                  :defs {"dispatch!" ["defn"
                                      "dispatch!"
                                      ["op" "op-data"]
@@ -65,6 +66,7 @@
                                   ["add-watch" "store-ref" ":changes" "render-app!"]
                                   ["add-watch" "store-ref" ":focus" "adjust-focus!"]
                                   ["add-watch" "states-ref" ":changes" "render-app!"]
+                                  ["listen-wheel!"]
                                   ["println" "|App started!"]],
                         "on-jsload!" ["defn"
                                       "on-jsload!"
@@ -119,7 +121,8 @@
                                 ["[]" "respo.comp.space" ":refer" ["[]" "comp-space"]]
                                 ["[]" "respo.comp.text" ":refer" ["[]" "comp-text"]]
                                 ["[]" "client.comp.task" ":refer" ["[]" "comp-task"]]
-                                ["[]" "clojure.string" ":as" "string"]]],
+                                ["[]" "clojure.string" ":as" "string"]
+                                ["[]" "client.manager" ":refer" ["[]" "do-wheel!"]]]],
                           :defs {"comp-todolist" ["def"
                                                   "comp-todolist"
                                                   ["create-comp"
@@ -137,7 +140,8 @@
                                                           "style-list"
                                                           ["{}"
                                                            [":height"
-                                                            ["str" ["+" "8" ["*" "40" ["count" "tasks"]]] "|px"]]]]]]
+                                                            ["str" ["+" "8" ["*" "40" ["count" "tasks"]]] "|px"]]]]]
+                                                        [":event" ["{}" [":wheel" "on-scroll"]]]]
                                                        ["->>"
                                                         "tasks"
                                                         ["map-indexed"
@@ -148,7 +152,13 @@
                                  "style-container" ["def"
                                                     "style-container"
                                                     ["{}" [":min-height" "100"] [":min-width" "400"] [":padding" "16"]]],
-                                 "style-list" ["def" "style-list" ["{}" [":position" ":relative"]]]},
+                                 "style-list" ["def" "style-list" ["{}" [":position" ":relative"]]],
+                                 "on-scroll" ["defn"
+                                              "on-scroll"
+                                              ["e" "dispatch!"]
+                                              ["let"
+                                               [["event" [":original-event" "e"]]]
+                                               ["do-wheel!" [".-deltaY" "event"] "dispatch!"]]]},
                           :procs []},
          "schema" {:ns ["ns" "client.schema"],
                    :defs {"task" ["def" "task" ["{}" [":id" "nil"] [":text" "|"] [":done?" "false"]]],
@@ -171,6 +181,8 @@
                                                ["fn"
                                                 ["tasks"]
                                                 ["update" "tasks" "idx" ["fn" ["task"] ["assoc" "task" ":text" "text"]]]]]]]
+                                            [":task/up" ["move-up" "store" "op-data" "op-time"]]
+                                            [":task/down" ["move-down" "store" "op-data" "op-time"]]
                                             [":task/toggle"
                                              ["update-in" "store" ["[]" ":tasks" "op-data" ":done?"] "not"]]
                                             [":task/delete"
@@ -243,7 +255,46 @@
                                                      ["subvec" "tasks" "0" ["inc" "idx"]]
                                                      ["[]" "new-task"]
                                                      ["subvec" "tasks" ["inc" "idx"]]]]]]]]]
-                                              ["update" ":pointer" "inc"]]]},
+                                              ["update" ":pointer" "inc"]]],
+                                "move-up" ["defn"
+                                           "move-up"
+                                           ["store" "op-data" "op-time"]
+                                           ["let"
+                                            [["pointer" [":pointer" "store"]] ["head?" ["zero?" "pointer"]]]
+                                            ["if"
+                                             "head?"
+                                             "store"
+                                             ["->"
+                                              "store"
+                                              ["update"
+                                               ":tasks"
+                                               ["fn"
+                                                ["tasks"]
+                                                ["->"
+                                                 "tasks"
+                                                 ["assoc" "pointer" ["get" "tasks" ["dec" "pointer"]]]
+                                                 ["assoc" ["dec" "pointer"] ["get" "tasks" "pointer"]]]]]
+                                              ["update" ":pointer" "dec"]]]]],
+                                "move-down" ["defn"
+                                             "move-down"
+                                             ["store" "op-data" "op-time"]
+                                             ["let"
+                                              [["pointer" [":pointer" "store"]]
+                                               ["tail?" ["=" "pointer" ["dec" ["count" [":tasks" "store"]]]]]]
+                                              ["if"
+                                               "tail?"
+                                               "store"
+                                               ["->"
+                                                "store"
+                                                ["update"
+                                                 ":tasks"
+                                                 ["fn"
+                                                  ["tasks"]
+                                                  ["->"
+                                                   "tasks"
+                                                   ["assoc" "pointer" ["get" "tasks" ["inc" "pointer"]]]
+                                                   ["assoc" ["inc" "pointer"] ["get" "tasks" "pointer"]]]]]
+                                                ["update" ":pointer" "inc"]]]]]},
                          :procs []},
          "comp.task" {:ns ["ns"
                            "client.comp.task"
@@ -265,14 +316,6 @@
                                             [":background-color" ["hsl" "0" "0" "0" "0.8"]]
                                             [":padding" "|8px"]
                                             [":transition-duration" "|300ms"]]],
-                             "on-pick" ["defn"
-                                        "on-pick"
-                                        ["task-id"]
-                                        ["fn" ["e" "dispatch!"] ["println" "|Task id:" "task-id"]]],
-                             "on-release" ["defn"
-                                           "on-release"
-                                           ["task-id"]
-                                           ["fn" ["e" "dispatch!"] ["println" "|Release:" "task-id"]]],
                              "on-touch" ["defn"
                                          "on-touch"
                                          ["idx"]
@@ -300,10 +343,7 @@
                                                  "style-task"
                                                  ["{}" [":top" ["str" ["+" "8" ["*" "idx" "48"]] "|px"]]]
                                                  ["if" [":done?" "task"] ["{}" [":margin-left" "32"]]]]]
-                                               [":event"
-                                                ["{}"
-                                                 [":pointerdown" ["on-pick" [":id" "task"]]]
-                                                 [":pointerup" ["on-release" [":id" "task"]]]]]]
+                                               [":event" ["{}"]]]
                                               ["div"
                                                ["{}"
                                                 [":style"
@@ -350,4 +390,36 @@
                                                [".-shiftKey" "event"]
                                                ["dispatch!" ":task/add-before" "idx"]
                                                ["dispatch!" ":task/add-after" "idx"]]]]]]},
-                      :procs []}}}
+                      :procs []},
+         "manager" {:ns ["ns"
+                         "client.manager"
+                         [":require" ["[]" "cljs.core.async" ":refer" ["[]" "chan" "timeout" ">!" "<!" "alts!"]]]
+                         [":require-macros" ["[]" "cljs.core.async.macros" ":refer" ["[]" "go" "go-loop"]]]],
+                    :defs {"chan-wheel" ["defonce" "chan-wheel" ["chan"]],
+                           "do-wheel!" ["defn"
+                                        "do-wheel!"
+                                        ["dy" "dispatch!"]
+                                        ["go" [">!" "chan-wheel" ["[]" "dy" "dispatch!"]]]],
+                           "listen-wheel!" ["defn"
+                                            "listen-wheel!"
+                                            []
+                                            ["go-loop"
+                                             ["[]" "st" "nil" "last-dy" "nil" "last-dispatch!" "nil"]
+                                             ["if"
+                                              ["nil?" "st"]
+                                              ["let"
+                                               [[["[]" "dy" "dispatch!"] ["<!" "chan-wheel"]]]
+                                               ["recur" ["timeout" "240"] "dy" "dispatch!"]]
+                                              ["let"
+                                               [[["[]" "v" "c"] ["alts!" ["[]" "st" "chan-wheel"]]]]
+                                               ["cond"
+                                                [["=" "c" "st"]
+                                                 ["do"
+                                                  ["cond"
+                                                   [[">" "last-dy" "1"] ["last-dispatch!" ":task/up" "nil"]]
+                                                   [["<" "last-dy" "-1"] ["last-dispatch!" ":task/down" "nil"]]
+                                                   [":else" "nil"]]
+                                                  ["recur" "nil" "nil" "nil"]]]
+                                                [["=" "c" "chan-wheel"]
+                                                 ["let" [[["[]" "dy" "dispatch!"] "v"]] ["recur" "st" "dy" "dispatch!"]]]]]]]]},
+                    :procs []}}}

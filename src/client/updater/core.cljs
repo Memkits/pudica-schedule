@@ -25,6 +25,32 @@
                 (concat (subvec tasks 0 (inc idx)) [new-task] (subvec tasks (inc idx))))))))
       (update :pointer inc)))
 
+(defn move-up [store op-data op-time]
+  (let [pointer (:pointer store), head? (zero? pointer)]
+    (if head?
+      store
+      (-> store
+          (update
+           :tasks
+           (fn [tasks]
+             (-> tasks
+                 (assoc pointer (get tasks (dec pointer)))
+                 (assoc (dec pointer) (get tasks pointer)))))
+          (update :pointer dec)))))
+
+(defn move-down [store op-data op-time]
+  (let [pointer (:pointer store), tail? (= pointer (dec (count (:tasks store))))]
+    (if tail?
+      store
+      (-> store
+          (update
+           :tasks
+           (fn [tasks]
+             (-> tasks
+                 (assoc pointer (get tasks (inc pointer)))
+                 (assoc (inc pointer) (get tasks pointer)))))
+          (update :pointer inc)))))
+
 (defn updater [store op op-data op-time]
   (case op
     :task/add-before (add-before store op-data op-time)
@@ -35,6 +61,8 @@
          store
          :tasks
          (fn [tasks] (update tasks idx (fn [task] (assoc task :text text))))))
+    :task/up (move-up store op-data op-time)
+    :task/down (move-down store op-data op-time)
     :task/toggle (update-in store [:tasks op-data :done?] not)
     :task/delete
       (if (= 1 (count (:tasks store)))

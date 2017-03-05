@@ -8,10 +8,11 @@
             [client.comp.todolist :refer [comp-todolist]]))
 
 (def style-container
-  {:background-image "url(\"peach.jpg\")",
+  {:background-image "url(\"sky.jpg\")",
    :background-size :cover,
-   :background-position :center,
-   :color :white})
+   :background-position "left top",
+   :color :white,
+   :overflow :hidden})
 
 (def comp-container
   (create-comp
@@ -20,4 +21,4 @@
      (fn [state mutate!]
        (div
         {:style (merge ui/global ui/fullscreen style-container)}
-        (comp-todolist (:tasks store)))))))
+        (comp-todolist (:tasks store) (:pointer store)))))))

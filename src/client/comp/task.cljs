@@ -11,20 +11,35 @@
 
 (def style-task
   {:position :absolute,
-   :background-color (hsl 0 0 0 0.8),
-   :padding "8px",
-   :transition-duration "300ms"})
+   :padding "0 8px",
+   :transition-duration "400ms",
+   :align-items :center,
+   :transform-origin "12% 50%"})
 
 (defn on-touch [idx] (fn [e dispatch!] (dispatch! :pointer/touch idx)))
 
 (def style-done
-  {:width 32, :height 32, :background-color (hsl 120 80 60), :cursor :pointer})
+  {:width 16,
+   :height 16,
+   :background-color (hsl 200 90 80 0.8),
+   :cursor :pointer,
+   :transition-duration "300ms",
+   :border-radius "50%",
+   :box-shadow (str "0 0 4px " (hsl 0 0 0 0.3))})
 
 (defn on-toggle [idx] (fn [e dispatch!] (dispatch! :task/toggle idx)))
 
 (defn on-blur [cleared? idx] (fn [e dispatch!] (if cleared? (dispatch! :task/delete idx))))
 
-(def style-text {:width 320})
+(def style-text
+  {:width 480,
+   :background-color :transparent,
+   :color :white,
+   :font-size 16,
+   :font-family "Hind",
+   :font-weight 300,
+   :padding "0 4px",
+   :line-height "16px"})
 
 (defn on-keydown [idx]
   (fn [e dispatch!]
@@ -37,17 +52,18 @@
 (def comp-task
   (create-comp
    :task
-   (fn [task idx]
+   (fn [task idx focused?]
      (fn [state mutate!]
        (div
         {:style (merge
                  ui/row
                  style-task
                  {:top (str (+ 8 (* idx 48)) "px")}
-                 (if (:done? task) {:margin-left 32})),
+                 (if (:done? task) {:margin-left 32, :opacity 0.5})
+                 (if focused? {:transform "scale(1.1)"})),
          :event {}}
         (div
-         {:style (merge style-done (if (:done? task) {:background-color (hsl 120 80 30)})),
+         {:style (merge style-done (if (:done? task) {:transform "scale(0.8)"})),
           :event {:click (on-toggle idx)}})
         (comp-space 8 nil)
         (input

@@ -20,14 +20,15 @@
                                                         ["{}"
                                                          [":style"
                                                           ["merge" "ui/global" "ui/fullscreen" "style-container"]]]
-                                                        ["comp-todolist" [":tasks" "store"]]]]]]],
+                                                        ["comp-todolist" [":tasks" "store"] [":pointer" "store"]]]]]]],
                                   "style-container" ["def"
                                                      "style-container"
                                                      ["{}"
-                                                      [":background-image" "|url(\"peach.jpg\")"]
+                                                      [":background-image" "|url(\"sky.jpg\")"]
                                                       [":background-size" ":cover"]
-                                                      [":background-position" ":center"]
-                                                      [":color" ":white"]]]},
+                                                      [":background-position" "|left top"]
+                                                      [":color" ":white"]
+                                                      [":overflow" ":hidden"]]]},
                            :procs []},
          "main" {:ns ["ns"
                       "client.main"
@@ -128,7 +129,7 @@
                                                   ["create-comp"
                                                    ":todolist"
                                                    ["fn"
-                                                    ["tasks"]
+                                                    ["tasks" "pointer"]
                                                     ["fn"
                                                      ["state" "mutate!"]
                                                      ["div"
@@ -147,17 +148,25 @@
                                                         ["map-indexed"
                                                          ["fn"
                                                           ["idx" "task"]
-                                                          ["[]" [":id" "task"] ["comp-task" "task" "idx"]]]]
+                                                          ["[]"
+                                                           [":id" "task"]
+                                                           ["comp-task" "task" "idx" ["=" "pointer" "idx"]]]]]
                                                         ["sort-by" "first"]]]]]]]],
                                  "style-container" ["def"
                                                     "style-container"
                                                     ["{}" [":min-height" "100"] [":min-width" "400"] [":padding" "16"]]],
-                                 "style-list" ["def" "style-list" ["{}" [":position" ":relative"]]],
+                                 "style-list" ["def"
+                                               "style-list"
+                                               ["{}"
+                                                [":position" ":relative"]
+                                                [":margin-top" "160"]
+                                                [":margin-left" "240"]]],
                                  "on-scroll" ["defn"
                                               "on-scroll"
                                               ["e" "dispatch!"]
                                               ["let"
                                                [["event" [":original-event" "e"]]]
+                                               [".preventDefault" "event"]
                                                ["do-wheel!" [".-deltaY" "event"] "dispatch!"]]]},
                           :procs []},
          "schema" {:ns ["ns" "client.schema"],
@@ -313,9 +322,10 @@
                                            "style-task"
                                            ["{}"
                                             [":position" ":absolute"]
-                                            [":background-color" ["hsl" "0" "0" "0" "0.8"]]
-                                            [":padding" "|8px"]
-                                            [":transition-duration" "|300ms"]]],
+                                            [":padding" "|0 8px"]
+                                            [":transition-duration" "|400ms"]
+                                            [":align-items" ":center"]
+                                            [":transform-origin" "|12% 50%"]]],
                              "on-touch" ["defn"
                                          "on-touch"
                                          ["idx"]
@@ -323,16 +333,19 @@
                              "style-done" ["def"
                                            "style-done"
                                            ["{}"
-                                            [":width" "32"]
-                                            [":height" "32"]
-                                            [":background-color" ["hsl" "120" "80" "60"]]
-                                            [":cursor" ":pointer"]]],
+                                            [":width" "16"]
+                                            [":height" "16"]
+                                            [":background-color" ["hsl" "200" "90" "80" "0.8"]]
+                                            [":cursor" ":pointer"]
+                                            [":transition-duration" "|300ms"]
+                                            [":border-radius" "|50%"]
+                                            [":box-shadow" ["str" "|0 0 4px " ["hsl" "0" "0" "0" "0.3"]]]]],
                              "comp-task" ["def"
                                           "comp-task"
                                           ["create-comp"
                                            ":task"
                                            ["fn"
-                                            ["task" "idx"]
+                                            ["task" "idx" "focused?"]
                                             ["fn"
                                              ["state" "mutate!"]
                                              ["div"
@@ -342,16 +355,17 @@
                                                  "ui/row"
                                                  "style-task"
                                                  ["{}" [":top" ["str" ["+" "8" ["*" "idx" "48"]] "|px"]]]
-                                                 ["if" [":done?" "task"] ["{}" [":margin-left" "32"]]]]]
+                                                 ["if"
+                                                  [":done?" "task"]
+                                                  ["{}" [":margin-left" "32"] [":opacity" "0.5"]]]
+                                                 ["if" "focused?" ["{}" [":transform" "|scale(1.1)"]]]]]
                                                [":event" ["{}"]]]
                                               ["div"
                                                ["{}"
                                                 [":style"
                                                  ["merge"
                                                   "style-done"
-                                                  ["if"
-                                                   [":done?" "task"]
-                                                   ["{}" [":background-color" ["hsl" "120" "80" "30"]]]]]]
+                                                  ["if" [":done?" "task"] ["{}" [":transform" "|scale(0.8)"]]]]]
                                                 [":event" ["{}" [":click" ["on-toggle" "idx"]]]]]]
                                               ["comp-space" "8" "nil"]
                                               ["input"
@@ -376,7 +390,17 @@
                                         "on-blur"
                                         ["cleared?" "idx"]
                                         ["fn" ["e" "dispatch!"] ["if" "cleared?" ["dispatch!" ":task/delete" "idx"]]]],
-                             "style-text" ["def" "style-text" ["{}" [":width" "320"]]],
+                             "style-text" ["def"
+                                           "style-text"
+                                           ["{}"
+                                            [":width" "480"]
+                                            [":background-color" ":transparent"]
+                                            [":color" ":white"]
+                                            [":font-size" "16"]
+                                            [":font-family" "|Hind"]
+                                            [":font-weight" "300"]
+                                            [":padding" "|0 4px"]
+                                            [":line-height" "|16px"]]],
                              "on-keydown" ["defn"
                                            "on-keydown"
                                            ["idx"]
@@ -404,22 +428,27 @@
                                             "listen-wheel!"
                                             []
                                             ["go-loop"
-                                             ["[]" "st" "nil" "last-dy" "nil" "last-dispatch!" "nil"]
+                                             ["[]" "st" "nil" "last-dy" "0" "last-dispatch!" "nil"]
                                              ["if"
                                               ["nil?" "st"]
                                               ["let"
                                                [[["[]" "dy" "dispatch!"] ["<!" "chan-wheel"]]]
-                                               ["recur" ["timeout" "240"] "dy" "dispatch!"]]
+                                               ["recur" ["timeout" "400"] ["+" "last-dy" "dy"] "dispatch!"]]
                                               ["let"
-                                               [[["[]" "v" "c"] ["alts!" ["[]" "st" "chan-wheel"]]]]
+                                               [["step" "40"] [["[]" "v" "c"] ["alts!" ["[]" "st" "chan-wheel"]]]]
                                                ["cond"
-                                                [["=" "c" "st"]
-                                                 ["do"
-                                                  ["cond"
-                                                   [[">" "last-dy" "1"] ["last-dispatch!" ":task/up" "nil"]]
-                                                   [["<" "last-dy" "-1"] ["last-dispatch!" ":task/down" "nil"]]
-                                                   [":else" "nil"]]
-                                                  ["recur" "nil" "nil" "nil"]]]
+                                                [["=" "c" "st"] ["recur" "nil" "0" "last-dispatch!"]]
                                                 [["=" "c" "chan-wheel"]
-                                                 ["let" [[["[]" "dy" "dispatch!"] "v"]] ["recur" "st" "dy" "dispatch!"]]]]]]]]},
+                                                 ["let"
+                                                  [[["[]" "dy" "dispatch!"] "v"]]
+                                                  ["cond"
+                                                   [[">" "last-dy" "step"]
+                                                    ["do"
+                                                     ["last-dispatch!" ":task/up" "nil"]
+                                                     ["recur" "st" ["-" "last-dy" "step"] "dispatch!"]]]
+                                                   [["<" "last-dy" ["-" "0" "step"]]
+                                                    ["do"
+                                                     ["last-dispatch!" ":task/down" "nil"]
+                                                     ["recur" "st" ["+" "last-dy" "step"] "dispatch!"]]]
+                                                   [":else" ["recur" "st" ["+" "last-dy" "dy"] "dispatch!"]]]]]]]]]]},
                     :procs []}}}

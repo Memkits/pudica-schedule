@@ -11,15 +11,17 @@
 
 (def style-container {:min-height 100, :min-width 400, :padding 16})
 
-(def style-list {:position :relative})
+(def style-list {:position :relative, :margin-top 160, :margin-left 240})
 
 (defn on-scroll [e dispatch!]
-  (let [event (:original-event e)] (do-wheel! (.-deltaY event) dispatch!)))
+  (let [event (:original-event e)]
+    (.preventDefault event)
+    (do-wheel! (.-deltaY event) dispatch!)))
 
 (def comp-todolist
   (create-comp
    :todolist
-   (fn [tasks]
+   (fn [tasks pointer]
      (fn [state mutate!]
        (div
         {:style style-container}
@@ -27,5 +29,6 @@
          {:style (merge style-list {:height (str (+ 8 (* 40 (count tasks))) "px")}),
           :event {:wheel on-scroll}}
          (->> tasks
-              (map-indexed (fn [idx task] [(:id task) (comp-task task idx)]))
+              (map-indexed
+               (fn [idx task] [(:id task) (comp-task task idx (= pointer idx))]))
               (sort-by first))))))))

@@ -18,7 +18,7 @@
         (meta' {:attrs {:id "ssr-stages" :content (pr-str ssr-stages)}})
         (style {:attrs {:innerHTML "body {margin: 0;}"}})
         (style {:attrs {:innerHTML "body * {box-sizing: border-box;}"}})
-        (style {:attrs {:innerHTML "::-webkit-input-placeholder {color: #ccc;}"}})
+        (style {:attrs {:innerHTML "::-webkit-input-placeholder {color: hsla(0,0%,100%,0.4);}"}})
         (script {:attrs {:id "config" :type "text/edn" :innerHTML (pr-str data)}}))
       (body {}
         (div {:attrs {:id "app" :innerHTML html-content}})

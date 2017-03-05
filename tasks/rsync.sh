@@ -1,2 +1,2 @@
 
-rsync -r target/ "repo.tiye.me:repo/mvc-works/stack-workflow" --exclude main.out --delete
+rsync -r target/ "repo.tiye.me:repo/Memkits/pudica-schedule" --exclude main.out --delete

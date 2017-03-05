@@ -9,9 +9,9 @@
             [clojure.string :as string]
             [client.manager :refer [do-wheel!]]))
 
-(def style-container {:min-height 100, :min-width 400, :padding 16})
+(def style-container {:min-height 100, :min-width 400})
 
-(def style-list {:position :relative, :margin-top 160, :margin-left 240})
+(def style-list {:position :relative, :margin-top 120, :margin-left 240})
 
 (defn on-scroll [e dispatch!]
   (let [event (:original-event e)]

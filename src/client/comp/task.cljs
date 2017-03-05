@@ -14,7 +14,7 @@
    :padding "0 8px",
    :transition-duration "400ms",
    :align-items :center,
-   :transform-origin "12% 50%"})
+   :transform-origin "8% 50%"})
 
 (defn on-touch [idx] (fn [e dispatch!] (dispatch! :pointer/touch idx)))
 
@@ -43,11 +43,14 @@
 
 (defn on-keydown [idx]
   (fn [e dispatch!]
-    (if (= 13 (:key-code e))
-      (let [event (:original-event e)]
-        (if (.-shiftKey event)
-          (dispatch! :task/add-before idx)
-          (dispatch! :task/add-after idx))))))
+    (let [event (:original-event e), shift? (.-shiftKey event)]
+      (cond
+        (and shift? (= 13 (:key-code e))) (dispatch! :task/add-before idx)
+        (and (not shift?) (= 13 (:key-code e))) (dispatch! :task/add-after idx)
+        (and shift? (= 9 (:key-code e)))
+          (do (.preventDefault event) (dispatch! :pointer/before nil))
+        (and (not shift?) (= 9 (:key-code e)))
+          (do (.preventDefault event) (dispatch! :pointer/after nil))))))
 
 (def comp-task
   (create-comp
@@ -58,7 +61,7 @@
         {:style (merge
                  ui/row
                  style-task
-                 {:top (str (+ 8 (* idx 48)) "px")}
+                 {:top (str (* idx 44) "px")}
                  (if (:done? task) {:margin-left 32, :opacity 0.5})
                  (if focused? {:transform "scale(1.1)"})),
          :event {}}

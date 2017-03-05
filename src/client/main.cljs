@@ -7,16 +7,29 @@
             [cljs.reader :refer [read-string]]
             [client.updater.core :refer [updater]]
             [client.schema :as schema]
-            [client.manager :refer [listen-wheel!]]))
+            [client.manager :refer [listen-wheel!]]
+            [cljs.reader :refer [read-string]]))
 
 (defonce store-ref
-  (atom (assoc schema/store :tasks [(merge schema/task {:id (.now js/Date), :text ""})])))
+  (atom
+   (let [old-data (.getItem js/localStorage "pudica-schedule")]
+     (.log js/console "Old data:" old-data)
+     (if (some? old-data) (read-string old-data) schema/store))))
 
 (defn dispatch! [op op-data]
   (println "Dispatch:" op op-data)
   (let [new-store (updater @store-ref op op-data (.now js/Date))]
     (comment println "New store:" new-store)
     (reset! store-ref new-store)))
+
+(defn adjust-focus! []
+  (js/setTimeout
+   (fn []
+     (let [pointer (:pointer @store-ref)
+           maybe-input (.getElementById js/document (str "input-" pointer))]
+       (comment println "Focus to:" pointer maybe-input)
+       (if (and (some? maybe-input) (not= maybe-input (.-activeElement js/document)))
+         (.focus maybe-input))))))
 
 (defonce states-ref (atom {}))
 
@@ -30,22 +43,13 @@
         ssr-markup (.getAttribute ssr-element "content")]
     (read-string ssr-markup)))
 
-(defn adjust-focus! []
-  (js/setTimeout
-   (fn []
-     (let [pointer (:pointer @store-ref)
-           maybe-input (.getElementById js/document (str "input-" pointer))]
-       (comment println "Focus to:" pointer maybe-input)
-       (if (and (some? maybe-input) (not= maybe-input (.-activeElement js/document)))
-         (.focus maybe-input))))))
-
 (defn -main! []
   (enable-console-print!)
   (if (not (empty? ssr-stages))
     (let [target (.querySelector js/document "#app")]
       (falsify-stage!
        target
-       (render-element (comp-container @store-ref ssr-stages) states-ref)
+       (render-element (comp-container schema/store ssr-stages) states-ref)
        dispatch!)))
   (render-app!)
   (add-watch store-ref :gc (fn [] (gc-states! states-ref)))
@@ -55,6 +59,11 @@
   (listen-wheel!)
   (println "App started!"))
 
+(defn save-store! []
+  (let [raw (pr-str @store-ref)] (.setItem js/localStorage "pudica-schedule" raw)))
+
 (defn on-jsload! [] (clear-cache!) (render-app!) (println "Code updated."))
 
 (set! (.-onload js/window) -main!)
+
+(set! (.-onbeforeunload js/window) save-store!)

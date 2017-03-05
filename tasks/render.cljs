@@ -3,6 +3,7 @@
   (:require
     [respo.alias :refer [html head title script style meta' div link body]]
     [respo.render.html :refer [make-html make-string]]
+    [client.schema :as schema]
     [client.comp.container :refer [comp-container]]))
 
 (defn html-dsl [data html-content ssr-stages]
@@ -25,7 +26,7 @@
         (script {:attrs {:src "main.js"}})))))
 
 (defn generate-html []
-  (let [ tree (comp-container {} #{:shell})
+  (let [ tree (comp-container schema/store #{:shell})
          html-content (make-string tree)]
     (html-dsl {:build? true} html-content #{:shell})))
 

@@ -55,15 +55,16 @@
 (def comp-task
   (create-comp
    :task
-   (fn [task idx focused?]
+   (fn [task idx focused? shift]
      (fn [state mutate!]
        (div
         {:style (merge
                  ui/row
                  style-task
-                 {:top (str (* idx 44) "px")}
+                 {:top (str (- (* idx 44) shift) "px")}
                  (if (:done? task) {:margin-left 32, :opacity 0.5})
-                 (if focused? {:transform "scale(1.1)"})),
+                 (if focused? {:transform "scale(1.1)"})
+                 (if (and focused? (not (zero? shift))) {:transition-duration "0ms"})),
          :event {}}
         (div
          {:style (merge style-done (if (:done? task) {:transform "scale(0.8)"})),

@@ -7,12 +7,12 @@
                   [adzerk/boot-cljs          "1.7.228-1"   :scope "test"]
                   [adzerk/boot-reload        "0.4.13"      :scope "test"]
                   [cirru/boot-stack-server   "0.1.30"      :scope "test"]
-                  [andare                    "0.4.0"       :scope "test"]
-                  [cumulo/shallow-diff       "0.1.2"       :scope "test"]
+                  [andare                    "0.5.0"       :scope "test"]
+                  [cumulo/shallow-diff       "0.1.3"       :scope "test"]
                   [fipp                      "0.6.9"       :scope "test"]
                   [mvc-works/hsl             "0.1.2"]
-                  [respo/ui                  "0.1.6"]
-                  [respo                     "0.3.38"]])
+                  [respo/ui                  "0.1.7"]
+                  [respo                     "0.3.39"]])
 
 (require '[adzerk.boot-cljs   :refer [cljs]]
          '[adzerk.boot-reload :refer [reload]])

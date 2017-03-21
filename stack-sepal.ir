@@ -20,7 +20,10 @@
                                                         ["{}"
                                                          [":style"
                                                           ["merge" "ui/global" "ui/fullscreen" "style-container"]]]
-                                                        ["comp-todolist" [":tasks" "store"] [":pointer" "store"]]
+                                                        ["comp-todolist"
+                                                         [":tasks" "store"]
+                                                         [":pointer" "store"]
+                                                         [":shift" "store"]]
                                                         ["button"
                                                          ["{}"
                                                           [":style" ["merge" "ui/button" "style-clear"]]
@@ -151,7 +154,7 @@
                                                   ["create-comp"
                                                    ":todolist"
                                                    ["fn"
-                                                    ["tasks" "pointer"]
+                                                    ["tasks" "pointer" "shift"]
                                                     ["fn"
                                                      ["state" "mutate!"]
                                                      ["div"
@@ -172,7 +175,13 @@
                                                           ["idx" "task"]
                                                           ["[]"
                                                            [":id" "task"]
-                                                           ["comp-task" "task" "idx" ["=" "pointer" "idx"]]]]]
+                                                           ["let"
+                                                            [["pointed?" ["=" "pointer" "idx"]]]
+                                                            ["comp-task"
+                                                             "task"
+                                                             "idx"
+                                                             "pointed?"
+                                                             ["if" "pointed?" "shift" "0"]]]]]]
                                                         ["sort-by" "first"]]]]]]]],
                                  "style-container" ["def"
                                                     "style-container"
@@ -197,7 +206,8 @@
                                    "store"
                                    ["{}"
                                     [":tasks" ["[]" ["merge" "task" ["{}" [":id" "0"] [":text" "|"]]]]]
-                                    [":pointer" "0"]]]},
+                                    [":pointer" "0"]
+                                    [":shift" "0"]]]},
                    :procs []},
          "updater.core" {:ns ["ns" "client.updater.core" [":require" ["[]" "client.schema" ":as" "schema"]]],
                          :defs {"updater" ["defn"
@@ -233,6 +243,7 @@
                                               ["=" [":pointer" "store"] ["dec" ["count" [":tasks" "store"]]]]
                                               "store"
                                               ["update" "store" ":pointer" "inc"]]]
+                                            [":shift/set" ["assoc" "store" ":shift" "op-data"]]
                                             "store"]],
                                 "add-before" ["defn"
                                               "add-before"
@@ -385,7 +396,7 @@
                                           ["create-comp"
                                            ":task"
                                            ["fn"
-                                            ["task" "idx" "focused?"]
+                                            ["task" "idx" "focused?" "shift"]
                                             ["fn"
                                              ["state" "mutate!"]
                                              ["div"
@@ -394,11 +405,14 @@
                                                 ["merge"
                                                  "ui/row"
                                                  "style-task"
-                                                 ["{}" [":top" ["str" ["*" "idx" "44"] "|px"]]]
+                                                 ["{}" [":top" ["str" ["-" ["*" "idx" "44"] "shift"] "|px"]]]
                                                  ["if"
                                                   [":done?" "task"]
                                                   ["{}" [":margin-left" "32"] [":opacity" "0.5"]]]
-                                                 ["if" "focused?" ["{}" [":transform" "|scale(1.1)"]]]]]
+                                                 ["if" "focused?" ["{}" [":transform" "|scale(1.1)"]]]
+                                                 ["if"
+                                                  ["and" "focused?" ["not" ["zero?" "shift"]]]
+                                                  ["{}" [":transition-duration" "|0ms"]]]]]
                                                [":event" ["{}"]]]
                                               ["div"
                                                ["{}"
@@ -471,27 +485,36 @@
                                             "listen-wheel!"
                                             []
                                             ["go-loop"
-                                             ["[]" "st" "nil" "last-dy" "0" "last-dispatch!" "nil"]
+                                             ["[]" "countdown" "nil" "shift-y" "0" "cached-dispatch!" "nil"]
                                              ["if"
-                                              ["nil?" "st"]
+                                              ["some?" "countdown"]
+                                              ["let"
+                                               [[["[]" "v" "c"] ["alts!" ["[]" "chan-wheel" "countdown"]]]
+                                                ["new-countdown" ["timeout" "400"]]]
+                                               ["if"
+                                                ["=" "c" "countdown"]
+                                                ["do" ["cached-dispatch!" ":shift/set" "0"] ["recur" "nil" "0" "nil"]]
+                                                ["let"
+                                                 [[["[]" "dy" "dispatch!"] "v"] ["shifted" ["+" "shift-y" "dy"]]]
+                                                 ["cond"
+                                                  [[">" "shifted" "config-step"]
+                                                   ["let"
+                                                    [["new-shifted" ["-" "shifted" "config-step"]]]
+                                                    ["dispatch!" ":task/up" "nil"]
+                                                    ["dispatch!" ":shift/set" "shifted"]
+                                                    ["recur" "new-countdown" "new-shifted" "dispatch!"]]]
+                                                  [["<" "shifted" ["-" "0" "config-step"]]
+                                                   ["let"
+                                                    [["new-shifted" ["+" "shifted" "config-step"]]]
+                                                    ["dispatch!" ":task/down" "nil"]
+                                                    ["dispatch!" ":shift/set" "shifted"]
+                                                    ["recur" "new-countdown" "new-shifted" "dispatch!"]]]
+                                                  [":else"
+                                                   ["do"
+                                                    ["dispatch!" ":shift/set" "shifted"]
+                                                    ["recur" "new-countdown" "shifted" "dispatch!"]]]]]]]
                                               ["let"
                                                [[["[]" "dy" "dispatch!"] ["<!" "chan-wheel"]]]
-                                               ["recur" ["timeout" "400"] ["+" "last-dy" "dy"] "dispatch!"]]
-                                              ["let"
-                                               [["step" "40"] [["[]" "v" "c"] ["alts!" ["[]" "st" "chan-wheel"]]]]
-                                               ["cond"
-                                                [["=" "c" "st"] ["recur" "nil" "0" "last-dispatch!"]]
-                                                [["=" "c" "chan-wheel"]
-                                                 ["let"
-                                                  [[["[]" "dy" "dispatch!"] "v"]]
-                                                  ["cond"
-                                                   [[">" "last-dy" "step"]
-                                                    ["do"
-                                                     ["last-dispatch!" ":task/up" "nil"]
-                                                     ["recur" "st" ["-" "last-dy" "step"] "dispatch!"]]]
-                                                   [["<" "last-dy" ["-" "0" "step"]]
-                                                    ["do"
-                                                     ["last-dispatch!" ":task/down" "nil"]
-                                                     ["recur" "st" ["+" "last-dy" "step"] "dispatch!"]]]
-                                                   [":else" ["recur" "st" ["+" "last-dy" "dy"] "dispatch!"]]]]]]]]]]},
+                                               ["recur" ["timeout" "400"] "dy" "dispatch!"]]]]],
+                           "config-step" ["def" "config-step" "44"]},
                     :procs []}}}

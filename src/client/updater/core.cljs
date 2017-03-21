@@ -87,4 +87,5 @@
     :pointer/before (if (zero? (:pointer store)) store (update store :pointer dec))
     :pointer/after
       (if (= (:pointer store) (dec (count (:tasks store)))) store (update store :pointer inc))
+    :shift/set (assoc store :shift op-data)
     store))

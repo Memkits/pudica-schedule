@@ -30,7 +30,7 @@
      (fn [state mutate!]
        (div
         {:style (merge ui/global ui/fullscreen style-container)}
-        (comp-todolist (:tasks store) (:pointer store))
+        (comp-todolist (:tasks store) (:pointer store) (:shift store))
         (button
          {:style (merge ui/button style-clear),
           :attrs {:inner-text "Clear"},

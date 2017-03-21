@@ -21,7 +21,7 @@
 (def comp-todolist
   (create-comp
    :todolist
-   (fn [tasks pointer]
+   (fn [tasks pointer shift]
      (fn [state mutate!]
        (div
         {:style style-container}
@@ -30,5 +30,8 @@
           :event {:wheel on-scroll}}
          (->> tasks
               (map-indexed
-               (fn [idx task] [(:id task) (comp-task task idx (= pointer idx))]))
+               (fn [idx task]
+                 [(:id task)
+                  (let [pointed? (= pointer idx)]
+                    (comp-task task idx pointed? (if pointed? shift 0)))]))
               (sort-by first))))))))

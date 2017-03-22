@@ -36,7 +36,8 @@
              (-> tasks
                  (assoc pointer (get tasks (dec pointer)))
                  (assoc (dec pointer) (get tasks pointer)))))
-          (update :pointer dec)))))
+          (update :pointer dec)
+          (assoc :shift op-data)))))
 
 (defn move-down [store op-data op-time]
   (let [pointer (:pointer store), tail? (= pointer (dec (count (:tasks store))))]
@@ -49,7 +50,8 @@
              (-> tasks
                  (assoc pointer (get tasks (inc pointer)))
                  (assoc (inc pointer) (get tasks pointer)))))
-          (update :pointer inc)))))
+          (update :pointer inc)
+          (assoc :shift op-data)))))
 
 (defn delete-task [store op-data op-time]
   (if (= 1 (count (:tasks store)))

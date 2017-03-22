@@ -59,15 +59,16 @@
                        ["[]" "client.updater.core" ":refer" ["[]" "updater"]]
                        ["[]" "client.schema" ":as" "schema"]
                        ["[]" "client.manager" ":refer" ["[]" "listen-wheel!"]]
+                       ["[]" "client.store" ":refer" ["[]" "ref-store"]]
                        ["[]" "cljs.reader" ":refer" ["[]" "read-string"]]]],
                  :defs {"dispatch!" ["defn"
                                      "dispatch!"
                                      ["op" "op-data"]
                                      ["println" "|Dispatch:" "op" "op-data"]
                                      ["let"
-                                      [["new-store" ["updater" "@store-ref" "op" "op-data" [".now" "js/Date"]]]]
+                                      [["new-store" ["updater" "@ref-store" "op" "op-data" [".now" "js/Date"]]]]
                                       ["--" "println" "|New store:" "new-store"]
-                                      ["reset!" "store-ref" "new-store"]]],
+                                      ["reset!" "ref-store" "new-store"]]],
                         "-main!" ["defn"
                                   "-main!"
                                   []
@@ -81,9 +82,9 @@
                                      ["render-element" ["comp-container" "schema/store" "ssr-stages"] "states-ref"]
                                      "dispatch!"]]]
                                   ["render-app!"]
-                                  ["add-watch" "store-ref" ":gc" ["fn" [] ["gc-states!" "states-ref"]]]
-                                  ["add-watch" "store-ref" ":changes" "render-app!"]
-                                  ["add-watch" "store-ref" ":focus" "adjust-focus!"]
+                                  ["add-watch" "ref-store" ":gc" ["fn" [] ["gc-states!" "states-ref"]]]
+                                  ["add-watch" "ref-store" ":changes" "render-app!"]
+                                  ["add-watch" "ref-store" ":focus" "adjust-focus!"]
                                   ["add-watch" "states-ref" ":changes" "render-app!"]
                                   ["listen-wheel!"]
                                   ["println" "|App started!"]],
@@ -94,7 +95,7 @@
                                           ["fn"
                                            []
                                            ["let"
-                                            [["pointer" [":pointer" "@store-ref"]]
+                                            [["pointer" [":pointer" "@ref-store"]]
                                              ["maybe-input"
                                               [".getElementById" "js/document" ["str" "|input-" "pointer"]]]]
                                             ["--" "println" "|Focus to:" "pointer" "maybe-input"]
@@ -108,20 +109,13 @@
                                        []
                                        ["let"
                                         [["target" [".querySelector" "js/document" "|#app"]]]
-                                        ["render!" ["comp-container" "@store-ref"] "target" "dispatch!" "states-ref"]
+                                        ["render!" ["comp-container" "@ref-store"] "target" "dispatch!" "states-ref"]
                                         ["--" "println" "|Finished rerendering!"]]],
-                        "store-ref" ["defonce"
-                                     "store-ref"
-                                     ["atom"
-                                      ["let"
-                                       [["old-data" [".getItem" "js/localStorage" "|pudica-schedule"]]]
-                                       [".log" "js/console" "|Old data:" "old-data"]
-                                       ["if" ["some?" "old-data"] ["read-string" "old-data"] "schema/store"]]]],
                         "save-store!" ["defn"
                                        "save-store!"
                                        []
                                        ["let"
-                                        [["raw" ["pr-str" "@store-ref"]]]
+                                        [["raw" ["pr-str" "@ref-store"]]]
                                         [".setItem" "js/localStorage" "|pudica-schedule" "raw"]]],
                         "states-ref" ["defonce" "states-ref" ["atom" ["{}"]]],
                         "on-jsload!" ["defn"
@@ -305,7 +299,8 @@
                                                  "tasks"
                                                  ["assoc" "pointer" ["get" "tasks" ["dec" "pointer"]]]
                                                  ["assoc" ["dec" "pointer"] ["get" "tasks" "pointer"]]]]]
-                                              ["update" ":pointer" "dec"]]]]],
+                                              ["update" ":pointer" "dec"]
+                                              ["assoc" ":shift" "op-data"]]]]],
                                 "move-down" ["defn"
                                              "move-down"
                                              ["store" "op-data" "op-time"]
@@ -325,7 +320,8 @@
                                                    "tasks"
                                                    ["assoc" "pointer" ["get" "tasks" ["inc" "pointer"]]]
                                                    ["assoc" ["inc" "pointer"] ["get" "tasks" "pointer"]]]]]
-                                                ["update" ":pointer" "inc"]]]]],
+                                                ["update" ":pointer" "inc"]
+                                                ["assoc" ":shift" "op-data"]]]]],
                                 "delete-task" ["defn"
                                                "delete-task"
                                                ["store" "op-data" "op-time"]
@@ -474,7 +470,9 @@
                       :procs []},
          "manager" {:ns ["ns"
                          "client.manager"
-                         [":require" ["[]" "cljs.core.async" ":refer" ["[]" "chan" "timeout" ">!" "<!" "alts!"]]]
+                         [":require"
+                          ["[]" "cljs.core.async" ":refer" ["[]" "chan" "timeout" ">!" "<!" "alts!"]]
+                          ["[]" "client.store" ":refer" ["[]" "ref-store"]]]
                          [":require-macros" ["[]" "cljs.core.async.macros" ":refer" ["[]" "go" "go-loop"]]]],
                     :defs {"chan-wheel" ["defonce" "chan-wheel" ["chan"]],
                            "do-wheel!" ["defn"
@@ -498,17 +496,23 @@
                                                  [[["[]" "dy" "dispatch!"] "v"] ["shifted" ["+" "shift-y" "dy"]]]
                                                  ["cond"
                                                   [[">" "shifted" "config-step"]
-                                                   ["let"
-                                                    [["new-shifted" ["-" "shifted" "config-step"]]]
-                                                    ["dispatch!" ":task/up" "nil"]
-                                                    ["dispatch!" ":shift/set" "shifted"]
-                                                    ["recur" "new-countdown" "new-shifted" "dispatch!"]]]
+                                                   ["if"
+                                                    ["not" ["zero?" [":pointer" "@ref-store"]]]
+                                                    ["let"
+                                                     [["new-shifted" ["-" "shifted" "config-step"]]]
+                                                     ["dispatch!" ":task/up" "new-shifted"]
+                                                     ["recur" "new-countdown" "new-shifted" "dispatch!"]]
+                                                    ["recur" "new-countdown" "shifted" "dispatch!"]]]
                                                   [["<" "shifted" ["-" "0" "config-step"]]
-                                                   ["let"
-                                                    [["new-shifted" ["+" "shifted" "config-step"]]]
-                                                    ["dispatch!" ":task/down" "nil"]
-                                                    ["dispatch!" ":shift/set" "shifted"]
-                                                    ["recur" "new-countdown" "new-shifted" "dispatch!"]]]
+                                                   ["if"
+                                                    ["<"
+                                                     [":pointer" "@ref-store"]
+                                                     ["dec" ["count" [":tasks" "@ref-store"]]]]
+                                                    ["let"
+                                                     [["new-shifted" ["+" "shifted" "config-step"]]]
+                                                     ["dispatch!" ":task/down" "new-shifted"]
+                                                     ["recur" "new-countdown" "new-shifted" "dispatch!"]]
+                                                    ["recur" "new-countdown" "shifted" "dispatch!"]]]
                                                   [":else"
                                                    ["do"
                                                     ["dispatch!" ":shift/set" "shifted"]
@@ -517,4 +521,17 @@
                                                [[["[]" "dy" "dispatch!"] ["<!" "chan-wheel"]]]
                                                ["recur" ["timeout" "400"] "dy" "dispatch!"]]]]],
                            "config-step" ["def" "config-step" "44"]},
-                    :procs []}}}
+                    :procs []},
+         "store" {:ns ["ns"
+                       "client.store"
+                       [":require"
+                        ["[]" "cljs.reader" ":refer" ["[]" "read-string"]]
+                        ["[]" "client.schema" ":as" "schema"]]],
+                  :defs {"ref-store" ["defonce"
+                                      "ref-store"
+                                      ["atom"
+                                       ["let"
+                                        [["old-data" [".getItem" "js/localStorage" "|pudica-schedule"]]]
+                                        [".log" "js/console" "|Old data:" "old-data"]
+                                        ["if" ["some?" "old-data"] ["read-string" "old-data"] "schema/store"]]]]},
+                  :procs []}}}

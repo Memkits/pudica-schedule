@@ -1,6 +1,7 @@
 
 (ns client.manager
-  (:require [cljs.core.async :refer [chan timeout >! <! alts!]])
+  (:require [cljs.core.async :refer [chan timeout >! <! alts!]]
+            [client.store :refer [ref-store]])
   (:require-macros [cljs.core.async.macros :refer [go go-loop]]))
 
 (defonce chan-wheel (chan))
@@ -19,15 +20,17 @@
          (let [[dy dispatch!] v, shifted (+ shift-y dy)]
            (cond
              (> shifted config-step)
-               (let [new-shifted (- shifted config-step)]
-                 (dispatch! :task/up nil)
-                 (dispatch! :shift/set shifted)
-                 (recur new-countdown new-shifted dispatch!))
+               (if (not (zero? (:pointer @ref-store)))
+                 (let [new-shifted (- shifted config-step)]
+                   (dispatch! :task/up new-shifted)
+                   (recur new-countdown new-shifted dispatch!))
+                 (recur new-countdown shifted dispatch!))
              (< shifted (- 0 config-step))
-               (let [new-shifted (+ shifted config-step)]
-                 (dispatch! :task/down nil)
-                 (dispatch! :shift/set shifted)
-                 (recur new-countdown new-shifted dispatch!))
+               (if (< (:pointer @ref-store) (dec (count (:tasks @ref-store))))
+                 (let [new-shifted (+ shifted config-step)]
+                   (dispatch! :task/down new-shifted)
+                   (recur new-countdown new-shifted dispatch!))
+                 (recur new-countdown shifted dispatch!))
              :else
                (do (dispatch! :shift/set shifted) (recur new-countdown shifted dispatch!))))))
      (let [[dy dispatch!] (<! chan-wheel)] (recur (timeout 400) dy dispatch!)))))

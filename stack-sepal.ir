@@ -430,7 +430,7 @@
                                                  ["{}"
                                                   [":input" ["on-input" "idx"]]
                                                   [":blur" ["on-blur" ["string/blank?" [":text" "task"]] "idx"]]
-                                                  [":keydown" ["on-keydown" "idx"]]
+                                                  [":keydown" ["on-keydown" [":text" "task"] "idx"]]
                                                   [":click" ["on-touch" "idx"]]]]]]]]]]],
                              "on-toggle" ["defn"
                                           "on-toggle"
@@ -453,16 +453,20 @@
                                             [":line-height" "|16px"]]],
                              "on-keydown" ["defn"
                                            "on-keydown"
-                                           ["idx"]
+                                           ["text" "idx"]
                                            ["fn"
                                             ["e" "dispatch!"]
                                             ["let"
                                              [["event" [":original-event" "e"]] ["shift?" [".-shiftKey" "event"]]]
                                              ["cond"
                                               [["and" "shift?" ["=" "13" [":key-code" "e"]]]
-                                               ["dispatch!" ":task/add-before" "idx"]]
+                                               ["if"
+                                                ["not" ["string/blank?" "text"]]
+                                                ["dispatch!" ":task/add-before" "idx"]]]
                                               [["and" ["not" "shift?"] ["=" "13" [":key-code" "e"]]]
-                                               ["dispatch!" ":task/add-after" "idx"]]
+                                               ["if"
+                                                ["not" ["string/blank?" "text"]]
+                                                ["dispatch!" ":task/add-after" "idx"]]]
                                               [["and" "shift?" ["=" "9" [":key-code" "e"]]]
                                                ["do" [".preventDefault" "event"] ["dispatch!" ":pointer/before" "nil"]]]
                                               [["and" ["not" "shift?"] ["=" "9" [":key-code" "e"]]]

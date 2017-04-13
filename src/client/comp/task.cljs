@@ -41,12 +41,14 @@
    :padding "0 4px",
    :line-height "16px"})
 
-(defn on-keydown [idx]
+(defn on-keydown [text idx]
   (fn [e dispatch!]
     (let [event (:original-event e), shift? (.-shiftKey event)]
       (cond
-        (and shift? (= 13 (:key-code e))) (dispatch! :task/add-before idx)
-        (and (not shift?) (= 13 (:key-code e))) (dispatch! :task/add-after idx)
+        (and shift? (= 13 (:key-code e)))
+          (if (not (string/blank? text)) (dispatch! :task/add-before idx))
+        (and (not shift?) (= 13 (:key-code e)))
+          (if (not (string/blank? text)) (dispatch! :task/add-after idx))
         (and shift? (= 9 (:key-code e)))
           (do (.preventDefault event) (dispatch! :pointer/before nil))
         (and (not shift?) (= 9 (:key-code e)))
@@ -75,5 +77,5 @@
           :attrs {:value (:text task), :placeholder "Task content", :id (str "input-" idx)},
           :event {:input (on-input idx),
                   :blur (on-blur (string/blank? (:text task)) idx),
-                  :keydown (on-keydown idx),
+                  :keydown (on-keydown (:text task) idx),
                   :click (on-touch idx)}}))))))

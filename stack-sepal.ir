@@ -15,7 +15,7 @@
                                                      ["fn"
                                                       ["store"]
                                                       ["fn"
-                                                       ["state" "mutate!"]
+                                                       ["cursor"]
                                                        ["div"
                                                         ["{}"
                                                          [":style"
@@ -50,10 +50,7 @@
          "main" {:ns ["ns"
                       "client.main"
                       [":require"
-                       ["[]"
-                        "respo.core"
-                        ":refer"
-                        ["[]" "render!" "clear-cache!" "falsify-stage!" "render-element" "gc-states!"]]
+                       ["[]" "respo.core" ":refer" ["[]" "render!" "clear-cache!" "falsify-stage!" "render-element"]]
                        ["[]" "client.comp.container" ":refer" ["[]" "comp-container"]]
                        ["[]" "cljs.reader" ":refer" ["[]" "read-string"]]
                        ["[]" "client.updater.core" ":refer" ["[]" "updater"]]
@@ -79,13 +76,11 @@
                                     [["target" [".querySelector" "js/document" "|#app"]]]
                                     ["falsify-stage!"
                                      "target"
-                                     ["render-element" ["comp-container" "schema/store" "ssr-stages"] "states-ref"]
+                                     ["render-element" ["comp-container" "schema/store" "ssr-stages"]]
                                      "dispatch!"]]]
                                   ["render-app!"]
-                                  ["add-watch" "ref-store" ":gc" ["fn" [] ["gc-states!" "states-ref"]]]
                                   ["add-watch" "ref-store" ":changes" "render-app!"]
                                   ["add-watch" "ref-store" ":focus" "adjust-focus!"]
-                                  ["add-watch" "states-ref" ":changes" "render-app!"]
                                   ["listen-wheel!"]
                                   ["println" "|App started!"]],
                         "adjust-focus!" ["defn"
@@ -109,7 +104,7 @@
                                        []
                                        ["let"
                                         [["target" [".querySelector" "js/document" "|#app"]]]
-                                        ["render!" ["comp-container" "@ref-store"] "target" "dispatch!" "states-ref"]
+                                        ["render!" ["comp-container" "@ref-store"] "target" "dispatch!"]
                                         ["--" "println" "|Finished rerendering!"]]],
                         "save-store!" ["defn"
                                        "save-store!"
@@ -117,7 +112,6 @@
                                        ["let"
                                         [["raw" ["pr-str" "@ref-store"]]]
                                         [".setItem" "js/localStorage" "|pudica-schedule" "raw"]]],
-                        "states-ref" ["defonce" "states-ref" ["atom" ["{}"]]],
                         "on-jsload!" ["defn"
                                       "on-jsload!"
                                       []
@@ -150,7 +144,7 @@
                                                    ["fn"
                                                     ["tasks" "pointer" "shift"]
                                                     ["fn"
-                                                     ["state" "mutate!"]
+                                                     ["cursor"]
                                                      ["div"
                                                       ["{}" [":style" "style-container"]]
                                                       ["div"
@@ -201,14 +195,20 @@
                                    ["{}"
                                     [":tasks" ["[]" ["merge" "task" ["{}" [":id" "0"] [":text" "|"]]]]]
                                     [":pointer" "0"]
-                                    [":shift" "0"]]]},
+                                    [":shift" "0"]
+                                    [":states" ["{}"]]]]},
                    :procs []},
-         "updater.core" {:ns ["ns" "client.updater.core" [":require" ["[]" "client.schema" ":as" "schema"]]],
+         "updater.core" {:ns ["ns"
+                              "client.updater.core"
+                              [":require"
+                               ["[]" "client.schema" ":as" "schema"]
+                               ["[]" "respo.cursor" ":refer" ["[]" "mutate"]]]],
                          :defs {"updater" ["defn"
                                            "updater"
                                            ["store" "op" "op-data" "op-time"]
                                            ["case"
                                             "op"
+                                            [":states" ["update" "store" ":states" ["mutate" "op-data"]]]
                                             [":task/add-before" ["add-before" "store" "op-data" "op-time"]]
                                             [":task/add-after" ["add-after" "store" "op-data" "op-time"]]
                                             [":task/edit"
@@ -394,7 +394,7 @@
                                            ["fn"
                                             ["task" "idx" "focused?" "shift"]
                                             ["fn"
-                                             ["state" "mutate!"]
+                                             ["cursor"]
                                              ["div"
                                               ["{}"
                                                [":style"

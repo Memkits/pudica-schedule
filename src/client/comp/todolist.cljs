@@ -22,7 +22,7 @@
   (create-comp
    :todolist
    (fn [tasks pointer shift]
-     (fn [state mutate!]
+     (fn [cursor]
        (div
         {:style style-container}
         (div

@@ -58,7 +58,7 @@
   (create-comp
    :task
    (fn [task idx focused? shift]
-     (fn [state mutate!]
+     (fn [cursor]
        (div
         {:style (merge
                  ui/row

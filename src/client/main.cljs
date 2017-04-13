@@ -1,8 +1,6 @@
 
 (ns client.main
-  (:require [respo.core
-             :refer
-             [render! clear-cache! falsify-stage! render-element gc-states!]]
+  (:require [respo.core :refer [render! clear-cache! falsify-stage! render-element]]
             [client.comp.container :refer [comp-container]]
             [cljs.reader :refer [read-string]]
             [client.updater.core :refer [updater]]
@@ -26,11 +24,9 @@
        (if (and (some? maybe-input) (not= maybe-input (.-activeElement js/document)))
          (.focus maybe-input))))))
 
-(defonce states-ref (atom {}))
-
 (defn render-app! []
   (let [target (.querySelector js/document "#app")]
-    (render! (comp-container @ref-store) target dispatch! states-ref)
+    (render! (comp-container @ref-store) target dispatch!)
     (comment println "Finished rerendering!")))
 
 (def ssr-stages
@@ -44,13 +40,11 @@
     (let [target (.querySelector js/document "#app")]
       (falsify-stage!
        target
-       (render-element (comp-container schema/store ssr-stages) states-ref)
+       (render-element (comp-container schema/store ssr-stages))
        dispatch!)))
   (render-app!)
-  (add-watch ref-store :gc (fn [] (gc-states! states-ref)))
   (add-watch ref-store :changes render-app!)
   (add-watch ref-store :focus adjust-focus!)
-  (add-watch states-ref :changes render-app!)
   (listen-wheel!)
   (println "App started!"))
 

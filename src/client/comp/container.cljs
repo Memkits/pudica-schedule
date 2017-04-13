@@ -27,7 +27,7 @@
   (create-comp
    :container
    (fn [store]
-     (fn [state mutate!]
+     (fn [cursor]
        (div
         {:style (merge ui/global ui/fullscreen style-container)}
         (comp-todolist (:tasks store) (:pointer store) (:shift store))

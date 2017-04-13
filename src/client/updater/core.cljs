@@ -1,5 +1,6 @@
 
-(ns client.updater.core (:require [client.schema :as schema]))
+(ns client.updater.core
+  (:require [client.schema :as schema] [respo.cursor :refer [mutate]]))
 
 (defn add-before [store idx op-time]
   (update
@@ -72,6 +73,7 @@
 
 (defn updater [store op op-data op-time]
   (case op
+    :states (update store :states (mutate op-data))
     :task/add-before (add-before store op-data op-time)
     :task/add-after (add-after store op-data op-time)
     :task/edit

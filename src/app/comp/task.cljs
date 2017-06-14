@@ -1,8 +1,9 @@
 
 (ns app.comp.task
+  (:require-macros (respo.macros :refer (defcomp)))
   (:require [hsl.core :refer [hsl]]
             [respo-ui.style :as ui]
-            [respo.alias :refer [create-comp div span input]]
+            [respo.alias :refer [div span input]]
             [respo.comp.space :refer [comp-space]]
             [respo.comp.text :refer [comp-text]]
             [clojure.string :as string]))
@@ -54,28 +55,28 @@
         (and (not shift?) (= 9 (:key-code e)))
           (do (.preventDefault event) (dispatch! :pointer/after nil))))))
 
-(def comp-task
-  (create-comp
-   :task
-   (fn [task idx focused? shift]
-     (fn [cursor]
-       (div
-        {:style (merge
-                 ui/row
-                 style-task
-                 {:top (str (- (* idx 44) shift) "px")}
-                 (if (:done? task) {:margin-left 32, :opacity 0.5})
-                 (if focused? {:transform "scale(1.1)"})
-                 (if (and focused? (not (zero? shift))) {:transition-duration "0ms"})),
-         :event {}}
-        (div
-         {:style (merge style-done (if (:done? task) {:transform "scale(0.8)"})),
-          :event {:click (on-toggle idx)}})
-        (comp-space 8 nil)
-        (input
-         {:style (merge ui/input style-text),
-          :attrs {:value (:text task), :placeholder "Task content", :id (str "input-" idx)},
-          :event {:input (on-input idx),
-                  :blur (on-blur (string/blank? (:text task)) idx),
-                  :keydown (on-keydown (:text task) idx),
-                  :click (on-touch idx)}}))))))
+(defcomp
+ comp-task
+ (task idx focused? shift)
+ (div
+  {:style (merge
+           ui/row
+           style-task
+           {:top (str (- (* idx 44) shift) "px")}
+           (if (:done? task) {:margin-left 32, :opacity 0.5})
+           (if focused? {:transform "scale(1.1)"})
+           (if (and focused? (not (zero? shift))) {:transition-duration "0ms"})),
+   :event {}}
+  (div
+   {:style (merge style-done (if (:done? task) {:transform "scale(0.8)"})),
+    :event {:click (on-toggle idx)}})
+  (comp-space 8 nil)
+  (input
+   {:value (:text task),
+    :placeholder "Task content",
+    :id (str "input-" idx),
+    :style (merge ui/input style-text),
+    :event {:input (on-input idx),
+            :blur (on-blur (string/blank? (:text task)) idx),
+            :keydown (on-keydown (:text task) idx),
+            :click (on-touch idx)}})))

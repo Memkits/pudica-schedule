@@ -1,8 +1,9 @@
 
 (ns app.comp.todolist
+  (:require-macros (respo.macros :refer (defcomp)))
   (:require [hsl.core :refer [hsl]]
             [respo-ui.style :as ui]
-            [respo.alias :refer [create-comp div span input button]]
+            [respo.alias :refer [div span input button]]
             [respo.comp.space :refer [comp-space]]
             [respo.comp.text :refer [comp-text]]
             [app.comp.task :refer [comp-task]]
@@ -18,20 +19,18 @@
     (.preventDefault event)
     (do-wheel! (.-deltaY event) dispatch!)))
 
-(def comp-todolist
-  (create-comp
-   :todolist
-   (fn [tasks pointer shift]
-     (fn [cursor]
-       (div
-        {:style style-container}
-        (div
-         {:style (merge style-list {:height (str (+ 8 (* 40 (count tasks))) "px")}),
-          :event {:wheel on-scroll}}
-         (->> tasks
-              (map-indexed
-               (fn [idx task]
-                 [(:id task)
-                  (let [pointed? (= pointer idx)]
-                    (comp-task task idx pointed? (if pointed? shift 0)))]))
-              (sort-by first))))))))
+(defcomp
+ comp-todolist
+ (tasks pointer shift)
+ (div
+  {:style style-container}
+  (div
+   {:style (merge style-list {:height (str (+ 8 (* 40 (count tasks))) "px")}),
+    :event {:wheel on-scroll}}
+   (->> tasks
+        (map-indexed
+         (fn [idx task]
+           [(:id task)
+            (let [pointed? (= pointer idx)]
+              (comp-task task idx pointed? (if pointed? shift 0)))]))
+        (sort-by first)))))

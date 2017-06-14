@@ -1,10 +1,11 @@
 {:package "app",
  :files {"comp.task" {:ns ["ns"
                            "app.comp.task"
+                           [":require-macros" ["respo.macros" ":refer" ["defcomp"]]]
                            [":require"
                             ["[]" "hsl.core" ":refer" ["[]" "hsl"]]
                             ["[]" "respo-ui.style" ":as" "ui"]
-                            ["[]" "respo.alias" ":refer" ["[]" "create-comp" "div" "span" "input"]]
+                            ["[]" "respo.alias" ":refer" ["[]" "div" "span" "input"]]
                             ["[]" "respo.comp.space" ":refer" ["[]" "comp-space"]]
                             ["[]" "respo.comp.text" ":refer" ["[]" "comp-text"]]
                             ["[]" "clojure.string" ":as" "string"]]],
@@ -34,51 +35,42 @@
                                             [":transition-duration" "|300ms"]
                                             [":border-radius" "|50%"]
                                             [":box-shadow" ["str" "|0 0 4px " ["hsl" "0" "0" "0" "0.3"]]]]],
-                             "comp-task" ["def"
+                             "comp-task" ["defcomp"
                                           "comp-task"
-                                          ["create-comp"
-                                           ":task"
-                                           ["fn"
-                                            ["task" "idx" "focused?" "shift"]
-                                            ["fn"
-                                             ["cursor"]
-                                             ["div"
+                                          ["task" "idx" "focused?" "shift"]
+                                          ["div"
+                                           ["{}"
+                                            [":style"
+                                             ["merge"
+                                              "ui/row"
+                                              "style-task"
+                                              ["{}" [":top" ["str" ["-" ["*" "idx" "44"] "shift"] "|px"]]]
+                                              ["if" [":done?" "task"] ["{}" [":margin-left" "32"] [":opacity" "0.5"]]]
+                                              ["if" "focused?" ["{}" [":transform" "|scale(1.1)"]]]
+                                              ["if"
+                                               ["and" "focused?" ["not" ["zero?" "shift"]]]
+                                               ["{}" [":transition-duration" "|0ms"]]]]]
+                                            [":event" ["{}"]]]
+                                           ["div"
+                                            ["{}"
+                                             [":style"
+                                              ["merge"
+                                               "style-done"
+                                               ["if" [":done?" "task"] ["{}" [":transform" "|scale(0.8)"]]]]]
+                                             [":event" ["{}" [":click" ["on-toggle" "idx"]]]]]]
+                                           ["comp-space" "8" "nil"]
+                                           ["input"
+                                            ["{}"
+                                             [":value" [":text" "task"]]
+                                             [":placeholder" "|Task content"]
+                                             [":id" ["str" "|input-" "idx"]]
+                                             [":style" ["merge" "ui/input" "style-text"]]
+                                             [":event"
                                               ["{}"
-                                               [":style"
-                                                ["merge"
-                                                 "ui/row"
-                                                 "style-task"
-                                                 ["{}" [":top" ["str" ["-" ["*" "idx" "44"] "shift"] "|px"]]]
-                                                 ["if"
-                                                  [":done?" "task"]
-                                                  ["{}" [":margin-left" "32"] [":opacity" "0.5"]]]
-                                                 ["if" "focused?" ["{}" [":transform" "|scale(1.1)"]]]
-                                                 ["if"
-                                                  ["and" "focused?" ["not" ["zero?" "shift"]]]
-                                                  ["{}" [":transition-duration" "|0ms"]]]]]
-                                               [":event" ["{}"]]]
-                                              ["div"
-                                               ["{}"
-                                                [":style"
-                                                 ["merge"
-                                                  "style-done"
-                                                  ["if" [":done?" "task"] ["{}" [":transform" "|scale(0.8)"]]]]]
-                                                [":event" ["{}" [":click" ["on-toggle" "idx"]]]]]]
-                                              ["comp-space" "8" "nil"]
-                                              ["input"
-                                               ["{}"
-                                                [":style" ["merge" "ui/input" "style-text"]]
-                                                [":attrs"
-                                                 ["{}"
-                                                  [":value" [":text" "task"]]
-                                                  [":placeholder" "|Task content"]
-                                                  [":id" ["str" "|input-" "idx"]]]]
-                                                [":event"
-                                                 ["{}"
-                                                  [":input" ["on-input" "idx"]]
-                                                  [":blur" ["on-blur" ["string/blank?" [":text" "task"]] "idx"]]
-                                                  [":keydown" ["on-keydown" [":text" "task"] "idx"]]
-                                                  [":click" ["on-touch" "idx"]]]]]]]]]]],
+                                               [":input" ["on-input" "idx"]]
+                                               [":blur" ["on-blur" ["string/blank?" [":text" "task"]] "idx"]]
+                                               [":keydown" ["on-keydown" [":text" "task"] "idx"]]
+                                               [":click" ["on-touch" "idx"]]]]]]]],
                              "on-toggle" ["defn"
                                           "on-toggle"
                                           ["idx"]
@@ -131,34 +123,29 @@
                    :procs []},
          "comp.container" {:ns ["ns"
                                 "app.comp.container"
+                                [":require-macros" ["respo.macros" ":refer" ["defcomp"]]]
                                 [":require"
                                  ["[]" "hsl.core" ":refer" ["[]" "hsl"]]
                                  ["[]" "respo-ui.style" ":as" "ui"]
-                                 ["[]" "respo.alias" ":refer" ["[]" "create-comp" "div" "span" "button"]]
+                                 ["[]" "respo.alias" ":refer" ["[]" "div" "span" "button"]]
                                  ["[]" "respo.comp.space" ":refer" ["[]" "comp-space"]]
                                  ["[]" "respo.comp.text" ":refer" ["[]" "comp-text"]]
                                  ["[]" "app.comp.todolist" ":refer" ["[]" "comp-todolist"]]]],
-                           :defs {"comp-container" ["def"
+                           :defs {"comp-container" ["defcomp"
                                                     "comp-container"
-                                                    ["create-comp"
-                                                     ":container"
-                                                     ["fn"
-                                                      ["store"]
-                                                      ["fn"
-                                                       ["cursor"]
-                                                       ["div"
-                                                        ["{}"
-                                                         [":style"
-                                                          ["merge" "ui/global" "ui/fullscreen" "style-container"]]]
-                                                        ["comp-todolist"
-                                                         [":tasks" "store"]
-                                                         [":pointer" "store"]
-                                                         [":shift" "store"]]
-                                                        ["button"
-                                                         ["{}"
-                                                          [":style" ["merge" "ui/button" "style-clear"]]
-                                                          [":attrs" ["{}" [":inner-text" "|Clear"]]]
-                                                          [":event" ["{}" [":click" "on-clear"]]]]]]]]]],
+                                                    ["store"]
+                                                    ["div"
+                                                     ["{}"
+                                                      [":style" ["merge" "ui/global" "ui/fullscreen" "style-container"]]]
+                                                     ["comp-todolist"
+                                                      [":tasks" "store"]
+                                                      [":pointer" "store"]
+                                                      [":shift" "store"]]
+                                                     ["button"
+                                                      ["{}"
+                                                       [":inner-text" "|Clear"]
+                                                       [":style" ["merge" "ui/button" "style-clear"]]
+                                                       [":event" ["{}" [":click" "on-clear"]]]]]]],
                                   "style-container" ["def"
                                                      "style-container"
                                                      ["{}"
@@ -177,49 +164,44 @@
                            :procs []},
          "comp.todolist" {:ns ["ns"
                                "app.comp.todolist"
+                               [":require-macros" ["respo.macros" ":refer" ["defcomp"]]]
                                [":require"
                                 ["[]" "hsl.core" ":refer" ["[]" "hsl"]]
                                 ["[]" "respo-ui.style" ":as" "ui"]
-                                ["[]" "respo.alias" ":refer" ["[]" "create-comp" "div" "span" "input" "button"]]
+                                ["[]" "respo.alias" ":refer" ["[]" "div" "span" "input" "button"]]
                                 ["[]" "respo.comp.space" ":refer" ["[]" "comp-space"]]
                                 ["[]" "respo.comp.text" ":refer" ["[]" "comp-text"]]
                                 ["[]" "app.comp.task" ":refer" ["[]" "comp-task"]]
                                 ["[]" "clojure.string" ":as" "string"]
                                 ["[]" "app.manager" ":refer" ["[]" "do-wheel!"]]]],
-                          :defs {"comp-todolist" ["def"
+                          :defs {"comp-todolist" ["defcomp"
                                                   "comp-todolist"
-                                                  ["create-comp"
-                                                   ":todolist"
-                                                   ["fn"
-                                                    ["tasks" "pointer" "shift"]
-                                                    ["fn"
-                                                     ["cursor"]
-                                                     ["div"
-                                                      ["{}" [":style" "style-container"]]
-                                                      ["div"
+                                                  ["tasks" "pointer" "shift"]
+                                                  ["div"
+                                                   ["{}" [":style" "style-container"]]
+                                                   ["div"
+                                                    ["{}"
+                                                     [":style"
+                                                      ["merge"
+                                                       "style-list"
                                                        ["{}"
-                                                        [":style"
-                                                         ["merge"
-                                                          "style-list"
-                                                          ["{}"
-                                                           [":height"
-                                                            ["str" ["+" "8" ["*" "40" ["count" "tasks"]]] "|px"]]]]]
-                                                        [":event" ["{}" [":wheel" "on-scroll"]]]]
-                                                       ["->>"
-                                                        "tasks"
-                                                        ["map-indexed"
-                                                         ["fn"
-                                                          ["idx" "task"]
-                                                          ["[]"
-                                                           [":id" "task"]
-                                                           ["let"
-                                                            [["pointed?" ["=" "pointer" "idx"]]]
-                                                            ["comp-task"
-                                                             "task"
-                                                             "idx"
-                                                             "pointed?"
-                                                             ["if" "pointed?" "shift" "0"]]]]]]
-                                                        ["sort-by" "first"]]]]]]]],
+                                                        [":height" ["str" ["+" "8" ["*" "40" ["count" "tasks"]]] "|px"]]]]]
+                                                     [":event" ["{}" [":wheel" "on-scroll"]]]]
+                                                    ["->>"
+                                                     "tasks"
+                                                     ["map-indexed"
+                                                      ["fn"
+                                                       ["idx" "task"]
+                                                       ["[]"
+                                                        [":id" "task"]
+                                                        ["let"
+                                                         [["pointed?" ["=" "pointer" "idx"]]]
+                                                         ["comp-task"
+                                                          "task"
+                                                          "idx"
+                                                          "pointed?"
+                                                          ["if" "pointed?" "shift" "0"]]]]]]
+                                                     ["sort-by" "first"]]]]],
                                  "style-container" ["def"
                                                     "style-container"
                                                     ["{}" [":min-height" "100"] [":min-width" "400"]]],

@@ -1,8 +1,9 @@
 
 (ns app.comp.container
+  (:require-macros (respo.macros :refer (defcomp)))
   (:require [hsl.core :refer [hsl]]
             [respo-ui.style :as ui]
-            [respo.alias :refer [create-comp div span button]]
+            [respo.alias :refer [div span button]]
             [respo.comp.space :refer [comp-space]]
             [respo.comp.text :refer [comp-text]]
             [app.comp.todolist :refer [comp-todolist]]))
@@ -18,15 +19,11 @@
 
 (defn on-clear [e dispatch!] (dispatch! :task/clear nil))
 
-(def comp-container
-  (create-comp
-   :container
-   (fn [store]
-     (fn [cursor]
-       (div
-        {:style (merge ui/global ui/fullscreen style-container)}
-        (comp-todolist (:tasks store) (:pointer store) (:shift store))
-        (button
-         {:style (merge ui/button style-clear),
-          :attrs {:inner-text "Clear"},
-          :event {:click on-clear}}))))))
+(defcomp
+ comp-container
+ (store)
+ (div
+  {:style (merge ui/global ui/fullscreen style-container)}
+  (comp-todolist (:tasks store) (:pointer store) (:shift store))
+  (button
+   {:inner-text "Clear", :style (merge ui/button style-clear), :event {:click on-clear}})))

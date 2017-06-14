@@ -39,6 +39,6 @@ module.exports =
     new webpack.optimize.CommonsChunkPlugin
       name: 'vendor',
       filename: 'vendor.[chunkhash:8].js'
-    # new UglifyJSPlugin sourceMap: true
+    new UglifyJSPlugin sourceMap: true
     new ManifestPlugin
   ]

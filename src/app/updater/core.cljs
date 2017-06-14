@@ -1,6 +1,5 @@
 
-(ns client.updater.core
-  (:require [client.schema :as schema] [respo.cursor :refer [mutate]]))
+(ns app.updater.core (:require [app.schema :as schema] [respo.cursor :refer [mutate]]))
 
 (defn add-before [store idx op-time]
   (update

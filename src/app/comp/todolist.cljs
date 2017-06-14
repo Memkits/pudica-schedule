@@ -1,13 +1,13 @@
 
-(ns client.comp.todolist
+(ns app.comp.todolist
   (:require [hsl.core :refer [hsl]]
             [respo-ui.style :as ui]
             [respo.alias :refer [create-comp div span input button]]
             [respo.comp.space :refer [comp-space]]
             [respo.comp.text :refer [comp-text]]
-            [client.comp.task :refer [comp-task]]
+            [app.comp.task :refer [comp-task]]
             [clojure.string :as string]
-            [client.manager :refer [do-wheel!]]))
+            [app.manager :refer [do-wheel!]]))
 
 (def style-container {:min-height 100, :min-width 400})
 

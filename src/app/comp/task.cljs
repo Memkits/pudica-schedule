@@ -1,5 +1,5 @@
 
-(ns client.comp.task
+(ns app.comp.task
   (:require [hsl.core :refer [hsl]]
             [respo-ui.style :as ui]
             [respo.alias :refer [create-comp div span input]]

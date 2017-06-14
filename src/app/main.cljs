@@ -1,19 +1,20 @@
 
-(ns client.main
+(ns app.main
   (:require [respo.core :refer [render! clear-cache! falsify-stage! render-element]]
-            [client.comp.container :refer [comp-container]]
+            [app.comp.container :refer [comp-container]]
             [cljs.reader :refer [read-string]]
-            [client.updater.core :refer [updater]]
-            [client.schema :as schema]
-            [client.manager :refer [listen-wheel!]]
-            [client.store :refer [ref-store]]
-            [cljs.reader :refer [read-string]]))
+            [app.updater.core :refer [updater]]
+            [app.schema :as schema]
+            [app.manager :refer [listen-wheel!]]
+            [app.store :refer [ref-store]]))
 
 (defn dispatch! [op op-data]
-  (println "Dispatch:" op op-data)
+  (comment println "Dispatch:" op op-data)
   (let [new-store (updater @ref-store op op-data (.now js/Date))]
     (comment println "New store:" new-store)
     (reset! ref-store new-store)))
+
+(def server-rendered? (some? (.querySelector js/document "meta#server-rendered")))
 
 (defn adjust-focus! []
   (js/setTimeout
@@ -24,34 +25,24 @@
        (if (and (some? maybe-input) (not= maybe-input (.-activeElement js/document)))
          (.focus maybe-input))))))
 
-(defn render-app! []
-  (let [target (.querySelector js/document "#app")]
-    (render! (comp-container @ref-store) target dispatch!)
-    (comment println "Finished rerendering!")))
+(def mount-target (.querySelector js/document "#app"))
 
-(def ssr-stages
-  (let [ssr-element (.querySelector js/document "#ssr-stages")
-        ssr-markup (.getAttribute ssr-element "content")]
-    (read-string ssr-markup)))
+(defn render-app! [] (render! (comp-container @ref-store) mount-target dispatch!))
 
 (defn -main! []
-  (enable-console-print!)
-  (if (not (empty? ssr-stages))
-    (let [target (.querySelector js/document "#app")]
-      (falsify-stage!
-       target
-       (render-element (comp-container schema/store ssr-stages))
-       dispatch!)))
+  (comment enable-console-print!)
+  (if server-rendered?
+    (falsify-stage! mount-target (render-element (comp-container schema/store)) dispatch!))
   (render-app!)
   (add-watch ref-store :changes render-app!)
   (add-watch ref-store :focus adjust-focus!)
   (listen-wheel!)
   (println "App started!"))
 
+(defn reload! [] (clear-cache!) (render-app!) (println "Code updated."))
+
 (defn save-store! []
   (let [raw (pr-str @ref-store)] (.setItem js/localStorage "pudica-schedule" raw)))
-
-(defn on-jsload! [] (clear-cache!) (render-app!) (println "Code updated."))
 
 (set! (.-onload js/window) -main!)
 

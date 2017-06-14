@@ -1,5 +1,5 @@
 
-(ns client.schema )
+(ns app.schema )
 
 (def task {:id nil, :text "", :done? false})
 

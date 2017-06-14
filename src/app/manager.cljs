@@ -1,7 +1,7 @@
 
-(ns client.manager
+(ns app.manager
   (:require [cljs.core.async :refer [chan timeout >! <! alts!]]
-            [client.store :refer [ref-store]])
+            [app.store :refer [ref-store]])
   (:require-macros [cljs.core.async.macros :refer [go go-loop]]))
 
 (defonce chan-wheel (chan))

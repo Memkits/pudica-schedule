@@ -1,18 +1,13 @@
 
-(ns client.comp.container
+(ns app.comp.container
   (:require [hsl.core :refer [hsl]]
             [respo-ui.style :as ui]
             [respo.alias :refer [create-comp div span button]]
             [respo.comp.space :refer [comp-space]]
             [respo.comp.text :refer [comp-text]]
-            [client.comp.todolist :refer [comp-todolist]]))
+            [app.comp.todolist :refer [comp-todolist]]))
 
-(def style-container
-  {:background-image "url(\"sky.jpg\")",
-   :background-size :cover,
-   :background-position "left top",
-   :color :white,
-   :overflow :hidden})
+(def style-container {:background-position "left top", :color :white, :overflow :hidden})
 
 (def style-clear
   {:position :fixed,

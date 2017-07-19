@@ -1,11 +1,10 @@
 
 (ns app.comp.container
-  (:require-macros (respo.macros :refer (defcomp)))
+  (:require-macros [respo.macros :refer [defcomp <> div span button]])
   (:require [hsl.core :refer [hsl]]
             [respo-ui.style :as ui]
-            [respo.alias :refer [div span button]]
-            [respo.comp.space :refer [comp-space]]
-            [respo.comp.text :refer [comp-text]]
+            [respo.core :refer [create-comp]]
+            [respo.comp.space :refer [=<]]
             [app.comp.todolist :refer [comp-todolist]]))
 
 (def style-container {:background-position "left top", :color :white, :overflow :hidden})

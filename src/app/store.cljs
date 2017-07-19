@@ -3,7 +3,7 @@
 
 (defonce ref-store
   (atom
-   (let [old-data (if (exists? js/localStorage)
-                    (.getItem js/localStorage "pudica-schedule"))]
+   (let [old-data (if (exists? js/window.localStorage)
+                    (.getItem js/window.localStorage "pudica-schedule"))]
      (println "Old store:" old-data)
      (if (some? old-data) (read-string old-data) schema/store))))

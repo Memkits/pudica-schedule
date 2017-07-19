@@ -15,7 +15,7 @@ Features:
 
 ### Develop
 
-https://github.com/mvc-works/stack-workflow
+https://github.com/mvc-works/coworkflow
 
 ### License
 

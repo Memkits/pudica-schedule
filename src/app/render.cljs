@@ -1,54 +1,37 @@
 
 (ns app.render
-  (:require [respo.alias :refer [html head title script style meta' div link body]]
-            [respo.render.html :refer [make-html make-string]]
+  (:require [respo.render.html :refer [make-string]]
+            [shell-page.core :refer [make-page spit slurp]]
             [app.comp.container :refer [comp-container]]
-            ["fs" :refer [readFileSync writeFileSync]]
-            (app.store :refer (ref-store))))
-
-(defn spit [file-name content]
-  (writeFileSync file-name content)
-  (println "Wrote to:" file-name))
+            [app.schema :as schema]))
 
 (def icon-url "http://logo.mvc-works.org/mvc.png")
 
-(defn html-dsl [resources html-content]
-  (make-html
-   (html
-    {}
-    (head
-     {}
-     (title {:innerHTML "Pudica Schedule"})
-     (link {:rel "icon", :type "image/png", :href icon-url})
-     (link {:rel "manifest", :href "manifest.json"})
-     (meta' {:charset "utf8"})
-     (meta' {:name "viewport", :content "width=device-width, initial-scale=1"})
-     (if (:build? resources) (meta' {:id "server-rendered", :type "text/edn"}))
-     (if (contains? resources :css)
-       (link {:rel "stylesheet", :type "text/css", :href (:css resources)})))
-    (body
-     {}
-     (div {:id "app", :innerHTML html-content})
-     (if (:build? resources) (script {:src (:vendor resources)}))
-     (script {:src (:main resources)})))))
+(def base-info {:title "Pudica", :icon icon-url, :ssr nil, :inner-html nil})
 
-(defn generate-empty-html [] (html-dsl {:build? false, :main "/main.js"} ""))
+(defn prod-page []
+  (let [html-content (make-string (comp-container schema/store))
+        manifest (.parse js/JSON (slurp "dist/assets-manifest.json"))
+        cljs-manifest (.parse js/JSON (slurp "dist/manifest.json"))]
+    (make-page
+     html-content
+     (merge
+      base-info
+      {:styles [(aget manifest "main.css")],
+       :scripts [(aget manifest "main.js")
+                 (-> cljs-manifest (aget 0) (aget "js-name"))
+                 (-> cljs-manifest (aget 1) (aget "js-name"))]}))))
 
-(defn slurp [x] (readFileSync x "utf8"))
-
-(defn generate-html []
-  (let [tree (comp-container @ref-store)
-        html-content (make-string tree)
-        resources (let [manifest (js/JSON.parse (slurp "dist/manifest.json"))]
-                    {:build? true,
-                     :css (aget manifest "main.css"),
-                     :main (aget manifest "main.js"),
-                     :vendor (aget manifest "vendor.js")})]
-    (html-dsl resources html-content)))
+(defn dev-page []
+  (make-page
+   ""
+   (merge
+    base-info
+    {:styles [], :scripts ["/main.js" "/browser/lib.js" "/browser/main.js"]})))
 
 (defn main! []
-  (spit
-   "dist/index.html"
-   (if (= js/process.env.env "dev") (generate-empty-html) (generate-html))))
+  (if (= js/process.env.env "dev")
+    (spit "target/index.html" (dev-page))
+    (spit "dist/index.html" (prod-page))))
 
 (main!)

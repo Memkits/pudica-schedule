@@ -1,11 +1,10 @@
 
 (ns app.comp.todolist
-  (:require-macros (respo.macros :refer (defcomp)))
+  (:require-macros [respo.macros :refer [defcomp div button]])
   (:require [hsl.core :refer [hsl]]
             [respo-ui.style :as ui]
-            [respo.alias :refer [div span input button]]
+            [respo.core :refer [create-comp]]
             [respo.comp.space :refer [comp-space]]
-            [respo.comp.text :refer [comp-text]]
             [app.comp.task :refer [comp-task]]
             [clojure.string :as string]
             [app.manager :refer [do-wheel!]]))

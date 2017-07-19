@@ -1,6 +1,6 @@
 
 (ns app.main
-  (:require [respo.core :refer [render! clear-cache! falsify-stage! render-element]]
+  (:require [respo.core :refer [render! clear-cache! realize-ssr!]]
             [app.comp.container :refer [comp-container]]
             [cljs.reader :refer [read-string]]
             [app.updater.core :refer [updater]]
@@ -14,8 +14,6 @@
     (comment println "New store:" new-store)
     (reset! ref-store new-store)))
 
-(def server-rendered? (some? (.querySelector js/document "meta#server-rendered")))
-
 (defn adjust-focus! []
   (js/setTimeout
    (fn []
@@ -25,24 +23,24 @@
        (if (and (some? maybe-input) (not= maybe-input (.-activeElement js/document)))
          (.focus maybe-input))))))
 
-(def mount-target (.querySelector js/document "#app"))
+(def mount-target (.querySelector js/document ".app"))
 
-(defn render-app! [] (render! (comp-container @ref-store) mount-target dispatch!))
+(defn render-app! [renderer] (renderer mount-target (comp-container @ref-store) dispatch!))
+
+(def ssr? (some? (.querySelector js/document "meta#server-rendered")))
 
 (defn -main! []
-  (comment enable-console-print!)
-  (if server-rendered?
-    (falsify-stage! mount-target (render-element (comp-container schema/store)) dispatch!))
-  (render-app!)
-  (add-watch ref-store :changes render-app!)
+  (if ssr? (render-app! realize-ssr!))
+  (render-app! render!)
+  (add-watch ref-store :changes (fn [] (render-app! render!)))
   (add-watch ref-store :focus adjust-focus!)
   (listen-wheel!)
   (println "App started!"))
 
-(defn reload! [] (clear-cache!) (render-app!) (println "Code updated."))
+(defn reload! [] (clear-cache!) (render-app! render!) (println "Code updated."))
 
 (defn save-store! []
-  (let [raw (pr-str @ref-store)] (.setItem js/localStorage "pudica-schedule" raw)))
+  (let [raw (pr-str @ref-store)] (.setItem js/window.localStorage "pudica-schedule" raw)))
 
 (set! (.-onload js/window) -main!)
 

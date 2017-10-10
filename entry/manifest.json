@@ -3,8 +3,8 @@
   "name": "Workflow",
   "icons": [
     {
-      "src": "http://logo.mvc-works.org/mvc.png",
-      "sizes": "460x460"
+      "src": "http://repo-cdn.b0.upaiyun.com/logo/mvc-works.png",
+      "sizes": "320x320"
     }
   ],
   "start_url": "index.html",

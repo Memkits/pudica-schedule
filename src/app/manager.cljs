@@ -1,7 +1,6 @@
 
 (ns app.manager
-  (:require [cljs.core.async :refer [chan timeout >! <! alts!]]
-            [app.store :refer [ref-store]])
+  (:require [cljs.core.async :refer [chan timeout >! <! alts!]] [app.store :refer [*store]])
   (:require-macros [cljs.core.async.macros :refer [go go-loop]]))
 
 (defonce chan-wheel (chan))
@@ -20,13 +19,13 @@
          (let [[dy dispatch!] v, shifted (+ shift-y dy)]
            (cond
              (> shifted config-step)
-               (if (not (zero? (:pointer @ref-store)))
+               (if (not (zero? (:pointer @*store)))
                  (let [new-shifted (- shifted config-step)]
                    (dispatch! :task/up new-shifted)
                    (recur new-countdown new-shifted dispatch!))
                  (recur new-countdown shifted dispatch!))
              (< shifted (- 0 config-step))
-               (if (< (:pointer @ref-store) (dec (count (:tasks @ref-store))))
+               (if (< (:pointer @*store) (dec (count (:tasks @*store))))
                  (let [new-shifted (+ shifted config-step)]
                    (dispatch! :task/down new-shifted)
                    (recur new-countdown new-shifted dispatch!))

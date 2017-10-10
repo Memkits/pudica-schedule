@@ -1,4 +1,4 @@
 
-dist
-target
-node_modules
+/target/
+/dist
+/node_modules

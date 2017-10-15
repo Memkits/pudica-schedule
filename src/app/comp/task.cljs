@@ -12,7 +12,7 @@
 (def style-task
   {:position :absolute,
    :padding "0 8px",
-   :transition-duration "400ms",
+   :transition-duration "300ms",
    :align-items :center,
    :transform-origin "8% 50%"})
 
@@ -32,7 +32,7 @@
 (def style-text
   {:width 480,
    :background-color :transparent,
-   :color :white,
+   :color (hsl 0 0 20),
    :font-size 16,
    :font-family "Hind",
    :font-weight 300,
@@ -61,11 +61,10 @@
            ui/row
            style-task
            {:top (str (- (* idx 44) shift) "px")}
-           (if (:done? task) {:margin-left 32, :opacity 0.5})
-           (if focused? {:transform "scale(1.1)"})
+           (if (:done? task) {:opacity 0.3})
            (if (and focused? (not (zero? shift))) {:transition-duration "0ms"}))}
   (div
-   {:style (merge style-done (if (:done? task) {:transform "scale(0.8)"})),
+   {:style (merge style-done (if (:done? task) {:transform "scale(0.6)"})),
     :on {:click (on-toggle idx)}})
   (=< 8 nil)
   (input

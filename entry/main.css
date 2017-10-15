@@ -1,9 +1,9 @@
 
 body {
   margin: 0;
-  /*background-image: url(http://www.lotusgreens.in/images/banner1.jpg);*/
-  /*background-size: cover;*/
-  background-color: #266;
+  /*background-image: url(./autumn.jpg);*/
+  background-size: cover;
+  background-color: #eee;
 }
 
 body * {
@@ -11,5 +11,5 @@ body * {
 }
 
 ::-webkit-input-placeholder {
-  color: hsla(0,0%,100%,0.4);
+  color: hsla(0,0%,0%,0.3);
 }

@@ -9,7 +9,7 @@
             [clojure.string :as string]
             [app.manager :refer [do-wheel!]]))
 
-(def style-container {:min-height 100, :min-width 400})
+(def style-container {:min-height 100, :min-width 400, :position :relative})
 
 (def style-list {:position :relative, :margin-top 120, :margin-left 240})
 
@@ -26,10 +26,20 @@
   (div
    {:style (merge style-list {:height (str (+ 8 (* 40 (count tasks))) "px")}),
     :on {:wheel on-scroll}}
-   (->> tasks
-        (map-indexed
-         (fn [idx task]
-           [(:id task)
-            (let [pointed? (= pointer idx)]
-              (comp-task task idx pointed? (if pointed? shift 0)))]))
-        (sort-by first)))))
+   (div
+    {}
+    (->> tasks
+         (map-indexed
+          (fn [idx task]
+            [(:id task)
+             (let [pointed? (= pointer idx)]
+               (comp-task task idx pointed? (if pointed? shift 0)))]))
+         (sort-by first)))
+   (div
+    {:style {:top (str (+ 2 (* 44 pointer)) "px"),
+             :left -20,
+             :width 4,
+             :height 30,
+             :background-color :red,
+             :position :absolute,
+             :transition "600ms"}}))))

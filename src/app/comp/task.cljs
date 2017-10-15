@@ -4,7 +4,7 @@
   (:require [hsl.core :refer [hsl]]
             [respo-ui.style :as ui]
             [respo.core :refer [create-comp]]
-            [respo.comp.space :refer [comp-space]]
+            [respo.comp.space :refer [=<]]
             [clojure.string :as string]))
 
 (defn on-input [idx] (fn [e dispatch!] (dispatch! :task/edit [idx (:value e)])))
@@ -64,18 +64,17 @@
            {:top (str (- (* idx 44) shift) "px")}
            (if (:done? task) {:margin-left 32, :opacity 0.5})
            (if focused? {:transform "scale(1.1)"})
-           (if (and focused? (not (zero? shift))) {:transition-duration "0ms"})),
-   :event {}}
+           (if (and focused? (not (zero? shift))) {:transition-duration "0ms"}))}
   (div
    {:style (merge style-done (if (:done? task) {:transform "scale(0.8)"})),
-    :event {:click (on-toggle idx)}})
-  (comp-space 8 nil)
+    :on {:click (on-toggle idx)}})
+  (=< 8 nil)
   (input
    {:value (:text task),
     :placeholder "Task content",
     :id (str "input-" idx),
     :style (merge ui/input style-text),
-    :event {:input (on-input idx),
-            :blur (on-blur (string/blank? (:text task)) idx),
-            :keydown (on-keydown (:text task) idx),
-            :click (on-touch idx)}})))
+    :on {:input (on-input idx),
+         :blur (on-blur (string/blank? (:text task)) idx),
+         :keydown (on-keydown (:text task) idx),
+         :click (on-touch idx)}})))

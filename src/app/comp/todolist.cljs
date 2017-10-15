@@ -4,7 +4,7 @@
   (:require [hsl.core :refer [hsl]]
             [respo-ui.style :as ui]
             [respo.core :refer [create-comp]]
-            [respo.comp.space :refer [comp-space]]
+            [respo.comp.space :refer [=<]]
             [app.comp.task :refer [comp-task]]
             [clojure.string :as string]
             [app.manager :refer [do-wheel!]]))
@@ -25,7 +25,7 @@
   {:style style-container}
   (div
    {:style (merge style-list {:height (str (+ 8 (* 40 (count tasks))) "px")}),
-    :event {:wheel on-scroll}}
+    :on {:wheel on-scroll}}
    (->> tasks
         (map-indexed
          (fn [idx task]

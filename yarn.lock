@@ -3041,9 +3041,9 @@ shadow-cljs-jar@^0.10.0:
   version "0.10.0"
   resolved "https://registry.yarnpkg.com/shadow-cljs-jar/-/shadow-cljs-jar-0.10.0.tgz#9895e6e5ccfde1c7b673737b1dfd9149194b644f"
 
-shadow-cljs@^2.0.9:
-  version "2.0.9"
-  resolved "https://registry.yarnpkg.com/shadow-cljs/-/shadow-cljs-2.0.9.tgz#b657666e4d5e463bae7324715979218a6cfe0438"
+shadow-cljs@^2.0.17:
+  version "2.0.17"
+  resolved "https://registry.yarnpkg.com/shadow-cljs/-/shadow-cljs-2.0.17.tgz#12bdf89a335c0d6ce1628c55778d9fec1ec1045e"
   dependencies:
     mkdirp "^0.5.1"
     node-libs-browser "^2.0.0"
@@ -3564,9 +3564,9 @@ webpack-sources@^1.0.1:
     source-list-map "^2.0.0"
     source-map "~0.5.3"
 
-webpack@^3.6.0:
-  version "3.6.0"
-  resolved "https://registry.yarnpkg.com/webpack/-/webpack-3.6.0.tgz#a89a929fbee205d35a4fa2cc487be9cbec8898bc"
+webpack@^3.7.1:
+  version "3.7.1"
+  resolved "https://registry.yarnpkg.com/webpack/-/webpack-3.7.1.tgz#6046b5c415ff7df7a0dc54c5b6b86098e8b952da"
   dependencies:
     acorn "^5.0.0"
     acorn-dynamic-import "^2.0.0"

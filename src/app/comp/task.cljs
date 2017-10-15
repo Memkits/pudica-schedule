@@ -29,8 +29,6 @@
 
 (defn on-toggle [idx] (fn [e dispatch!] (dispatch! :task/toggle idx)))
 
-(defn on-blur [cleared? idx] (fn [e dispatch!] (if cleared? (dispatch! :task/delete idx))))
-
 (def style-text
   {:width 480,
    :background-color :transparent,
@@ -43,15 +41,16 @@
 
 (defn on-keydown [text idx]
   (fn [e dispatch!]
-    (let [event (:original-event e), shift? (.-shiftKey event)]
+    (let [event (:event e), shift? (.-shiftKey event)]
       (cond
-        (and shift? (= 13 (:key-code e)))
+        (and shift? (= 13 (:keycode e)))
           (if (not (string/blank? text)) (dispatch! :task/add-before idx))
-        (and (not shift?) (= 13 (:key-code e)))
+        (and (string/blank? text) (= 8 (:keycode e))) (dispatch! :task/delete idx)
+        (and (not shift?) (= 13 (:keycode e)))
           (if (not (string/blank? text)) (dispatch! :task/add-after idx))
-        (and shift? (= 9 (:key-code e)))
+        (and shift? (= 9 (:keycode e)))
           (do (.preventDefault event) (dispatch! :pointer/before nil))
-        (and (not shift?) (= 9 (:key-code e)))
+        (and (not shift?) (= 9 (:keycode e)))
           (do (.preventDefault event) (dispatch! :pointer/after nil))))))
 
 (defcomp
@@ -75,6 +74,5 @@
     :id (str "input-" idx),
     :style (merge ui/input style-text),
     :on {:input (on-input idx),
-         :blur (on-blur (string/blank? (:text task)) idx),
          :keydown (on-keydown (:text task) idx),
          :click (on-touch idx)}})))

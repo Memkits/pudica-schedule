@@ -5,6 +5,7 @@
                 [mvc-works/verbosely    "0.1.0-rc2"]
                 [respo/ui               "0.2.0"]
                 [respo/reel             "0.2.0-alpha3"]
+                [mvc-works/keycode      "0.1.3"]
                 [respo                  "0.6.4"]]
  :builds {:browser {:target :browser
                     :output-dir "target/browser"

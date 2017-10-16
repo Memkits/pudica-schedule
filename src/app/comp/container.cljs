@@ -14,7 +14,7 @@
    :bottom 0,
    :left 0,
    :background-color :transparent,
-   :color (hsl 0 0 100 0.2)})
+   :color (hsl 0 0 10 0.2)})
 
 (defn on-clear [e dispatch!] (dispatch! :task/clear nil))
 

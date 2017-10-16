@@ -5,7 +5,8 @@
             [respo-ui.style :as ui]
             [respo.core :refer [create-comp]]
             [respo.comp.space :refer [=<]]
-            [clojure.string :as string]))
+            [clojure.string :as string]
+            [keycode.core :as keycode]))
 
 (defn on-input [idx] (fn [e dispatch!] (dispatch! :task/edit [idx (:value e)])))
 
@@ -21,11 +22,10 @@
 (def style-done
   {:width 16,
    :height 16,
-   :background-color (hsl 200 90 80 0.8),
+   :background-color (hsl 200 90 70 0.8),
    :cursor :pointer,
    :transition-duration "300ms",
-   :border-radius "50%",
-   :box-shadow (str "0 0 4px " (hsl 0 0 0 0.3))})
+   :border-radius "50%"})
 
 (defn on-toggle [idx] (fn [e dispatch!] (dispatch! :task/toggle idx)))
 
@@ -41,16 +41,22 @@
 
 (defn on-keydown [text idx]
   (fn [e dispatch!]
-    (let [event (:event e), shift? (.-shiftKey event)]
+    (let [event (:event e)
+          shift? (.-shiftKey event)
+          meta? (.-metaKey event)
+          code (:keycode e)]
       (cond
-        (and shift? (= 13 (:keycode e)))
+        (and shift? (= keycode/return code))
           (if (not (string/blank? text)) (dispatch! :task/add-before idx))
-        (and (string/blank? text) (= 8 (:keycode e))) (dispatch! :task/delete idx)
-        (and (not shift?) (= 13 (:keycode e)))
+        (and (string/blank? text) (and (or shift? meta?) (= keycode/back-space code)))
+          (dispatch! :task/delete idx)
+        (and (not shift?) (= keycode/return code))
           (if (not (string/blank? text)) (dispatch! :task/add-after idx))
-        (and shift? (= 9 (:keycode e)))
+        (and (= keycode/up code)) (do (dispatch! :pointer/before) (.preventDefault event))
+        (and (= keycode/down code)) (do (dispatch! :pointer/after) (.preventDefault event))
+        (and shift? (= keycode/tab code))
           (do (.preventDefault event) (dispatch! :pointer/before nil))
-        (and (not shift?) (= 9 (:keycode e)))
+        (and (not shift?) (= keycode/tab code))
           (do (.preventDefault event) (dispatch! :pointer/after nil))))))
 
 (defcomp
@@ -64,7 +70,7 @@
            (if (:done? task) {:opacity 0.3})
            (if (and focused? (not (zero? shift))) {:transition-duration "0ms"}))}
   (div
-   {:style (merge style-done (if (:done? task) {:transform "scale(0.6)"})),
+   {:style (merge style-done (if (:done? task) {:transform "scale(0.7)"})),
     :on {:click (on-toggle idx)}})
   (=< 8 nil)
   (input

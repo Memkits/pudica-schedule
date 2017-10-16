@@ -5,9 +5,11 @@
             [app.comp.container :refer [comp-container]]
             [app.schema :as schema]))
 
-(def icon-url "http://logo.mvc-works.org/mvc.png")
-
-(def base-info {:title "Pudica", :icon icon-url, :ssr nil, :inner-html nil})
+(def base-info
+  {:title "Pudica",
+   :icon "http://cdn.tiye.me/favored-fonts/main.css/logo/mvc.png",
+   :ssr nil,
+   :inner-html nil})
 
 (def preview? (= "preview" js/process.env.prod))
 
@@ -15,13 +17,13 @@
   (let [html-content (make-string (comp-container schema/store))
         webpack-info (.parse js/JSON (slurp "dist/webpack-manifest.json"))
         cljs-info (.parse js/JSON (slurp "dist/cljs-manifest.json"))
-        cdn (if preview? "" "http://repo-cdn.b0.upaiyun.com/pudica-schedule/")
+        cdn (if preview? "" "http://cdn.tiye.me/pudica-schedule/")
         prefix-cdn (fn [x] (str cdn x))]
     (make-page
      html-content
      (merge
       base-info
-      {:styles ["http://repo-cdn.b0.upaiyun.com/favored-fonts/main.css"
+      {:styles ["http://cdn.tiye.me/favored-fonts/main.css"
                 (prefix-cdn (aget webpack-info "main.css"))],
        :scripts (map
                  prefix-cdn

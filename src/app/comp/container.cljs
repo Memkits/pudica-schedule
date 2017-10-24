@@ -25,4 +25,8 @@
   {:style (merge ui/global ui/fullscreen style-container)}
   (comp-todolist (:tasks store) (:pointer store) (:shift store))
   (button
-   {:inner-text "Clear", :style (merge ui/button style-clear), :on {:click on-clear}})))
+   {:inner-text "Clear", :style (merge ui/button style-clear), :on {:click on-clear}})
+  (button
+   {:inner-text "Shorten",
+    :style (merge ui/button style-clear {:left 60}),
+    :on {:click (fn [e d! m!] (d! :task/shorten nil))}})))

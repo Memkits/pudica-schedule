@@ -70,6 +70,15 @@
                (into [] (concat (subvec tasks 0 op-data) (subvec tasks (inc op-data))))))
             (update :pointer dec)))))
 
+(defn shorten-tasks [store]
+  (-> store
+      (update
+       :tasks
+       (fn [tasks]
+         (let [next-tasks (filterv (fn [task] (not (:done? task))) tasks)]
+           (if (empty? next-tasks) (:tasks schema/store) next-tasks))))
+      (assoc :pointer 0)))
+
 (defn updater [store op op-data op-time]
   (case op
     :states (update store :states (mutate op-data))
@@ -85,6 +94,7 @@
     :task/down (move-down store op-data op-time)
     :task/toggle (-> store (update-in [:tasks op-data :done?] not) (assoc :pointer op-data))
     :task/clear schema/store
+    :task/shorten (shorten-tasks store)
     :task/delete (delete-task store op-data op-time)
     :pointer/touch (assoc store :pointer op-data)
     :pointer/before (if (zero? (:pointer store)) store (update store :pointer dec))

@@ -6,10 +6,7 @@
             [app.schema :as schema]))
 
 (def base-info
-  {:title "Pudica",
-   :icon "http://cdn.tiye.me/favored-fonts/main.css/logo/mvc.png",
-   :ssr nil,
-   :inner-html nil})
+  {:title "Pudica", :icon "http://cdn.tiye.me/logo/memkits.png", :ssr nil, :inner-html nil})
 
 (def preview? (= "preview" js/process.env.prod))
 

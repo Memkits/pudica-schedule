@@ -1,9 +1,8 @@
 
 (ns app.comp.task
-  (:require-macros [respo.macros :refer [defcomp div span input]])
   (:require [hsl.core :refer [hsl]]
             [respo-ui.style :as ui]
-            [respo.core :refer [create-comp]]
+            [respo.macros :refer [defcomp div span input]]
             [respo.comp.space :refer [=<]]
             [clojure.string :as string]
             [keycode.core :as keycode]))

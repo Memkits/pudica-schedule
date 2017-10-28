@@ -92,7 +92,15 @@
          (fn [tasks] (update tasks idx (fn [task] (assoc task :text text))))))
     :task/up (move-up store op-data op-time)
     :task/down (move-down store op-data op-time)
-    :task/toggle (-> store (update-in [:tasks op-data :done?] not) (assoc :pointer op-data))
+    :task/toggle
+      (let [task (get-in store [:tasks op-data])]
+        (-> store
+            (update-in [:tasks op-data :done?] not)
+            (assoc
+             :pointer
+             (if (:done? task)
+               op-data
+               (if (< op-data (dec (count (:tasks store)))) (inc op-data ) op-data)))))
     :task/clear schema/store
     :task/shorten (shorten-tasks store)
     :task/delete (delete-task store op-data op-time)

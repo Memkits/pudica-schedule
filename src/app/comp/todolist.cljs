@@ -1,9 +1,8 @@
 
 (ns app.comp.todolist
-  (:require-macros [respo.macros :refer [defcomp div button]])
   (:require [hsl.core :refer [hsl]]
             [respo-ui.style :as ui]
-            [respo.core :refer [create-comp]]
+            [respo.macros :refer [defcomp div button list->]]
             [respo.comp.space :refer [=<]]
             [app.comp.task :refer [comp-task]]
             [clojure.string :as string]
@@ -26,7 +25,8 @@
   (div
    {:style (merge style-list {:height (str (+ 8 (* 40 (count tasks))) "px")}),
     :on {:wheel on-scroll}}
-   (div
+   (list->
+    :div
     {}
     (->> tasks
          (map-indexed

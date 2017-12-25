@@ -25,7 +25,8 @@
 
 (def mount-target (.querySelector js/document ".app"))
 
-(defn render-app! [renderer] (renderer mount-target (comp-container @*store) dispatch!))
+(defn render-app! [renderer]
+  (renderer mount-target (comp-container @*store) #(dispatch! %1 %2)))
 
 (defn reload! [] (clear-cache!) (render-app! render!) (println "Code updated."))
 

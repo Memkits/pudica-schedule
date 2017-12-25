@@ -21,7 +21,7 @@
 (def style-done
   {:width 16,
    :height 16,
-   :background-color (hsl 200 90 70 0.8),
+   :background-color (hsl 240 90 88),
    :cursor :pointer,
    :transition-duration "300ms",
    :border-radius "50%"})
@@ -70,13 +70,13 @@
            (if (and focused? (not (zero? shift))) {:transition-duration "0ms"}))}
   (div
    {:style (merge style-done (if (:done? task) {:transform "scale(0.7)"})),
-    :on {:click (on-toggle idx)}})
+    :on-click (on-toggle idx)})
   (=< 8 nil)
   (input
    {:value (:text task),
     :placeholder "Task content",
     :id (str "input-" idx),
     :style (merge ui/input style-text),
-    :on {:input (on-input idx),
-         :keydown (on-keydown (:text task) idx),
-         :click (on-touch idx)}})))
+    :on-input (on-input idx),
+    :on-keydown (on-keydown (:text task) idx),
+    :on-click (on-touch idx)})))

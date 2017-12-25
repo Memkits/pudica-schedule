@@ -11,15 +11,12 @@
     "watch": "shadow-cljs watch browser",
     "compile-ssr": "shadow-cljs compile ssr",
     "html-dev": "env=dev node target/ssr.js && cp entry/manifest.json target/",
-    "html": "node target/ssr.js",
-    "hmr": "webpack-dev-server --config webpack.dev.coffee --hot-only",
-    "webpack": "webpack --config webpack.release.coffee --hide-modules --progress",
-    "dev": "yarn compile-ssr && yarn html-dev && yarn dev-manifest && yarn hmr",
+    "html": "node target/ssr.js && cp entry/manifest.json dist/",
+    "index.html": "yarn compile-ssr && yarn html-dev",
     "del": "rm -rf dist/*",
     "serve": "http-server dist",
-    "dev-manifest": "cp entry/manifest.json target/",
-    "manifest": "cp entry/manifest.json dist/",
-    "build": "yarn del && yarn release && yarn webpack && yarn compile-ssr && yarn html && yarn manifest"
+    "build": "yarn del && yarn release && yarn compile-ssr && yarn html",
+    "build2": "shadow-cljs clj-run build.release/-main"
   },
   "repository": {
     "type": "git",
@@ -28,18 +25,7 @@
   "author": "jiyinyiyong",
   "license": "MIT",
   "devDependencies": {
-    "coffeescript": "^2.0.2",
-    "css-loader": "^0.28.7",
-    "extract-text-webpack-plugin": "^3.0.1",
-    "file-loader": "^1.1.5",
-    "shadow-cljs": "^2.0.29",
-    "source-map-loader": "^0.2.2",
-    "style-loader": "^0.19.0",
-    "uglifyjs-webpack-plugin": "^1.0.1",
-    "url-loader": "^0.6.2",
-    "webpack": "^3.8.1",
-    "webpack-dev-server": "^2.9.3",
-    "webpack-manifest-plugin": "^1.3.2"
+    "shadow-cljs": "^2.0.123"
   },
   "dependencies": {}
 }

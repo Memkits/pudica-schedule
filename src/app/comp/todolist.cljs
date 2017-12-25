@@ -24,7 +24,7 @@
   {:style style-container}
   (div
    {:style (merge style-list {:height (str (+ 8 (* 40 (count tasks))) "px")}),
-    :on {:wheel on-scroll}}
+    :on-wheel on-scroll}
    (list->
     :div
     {}
@@ -38,8 +38,8 @@
    (div
     {:style {:top (str (+ 2 (* 44 pointer)) "px"),
              :left -20,
-             :width 4,
+             :width 6,
              :height 30,
-             :background-color :red,
+             :background-color (hsl 0 90 80),
              :position :absolute,
              :transition "600ms"}}))))

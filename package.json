@@ -1,7 +1,7 @@
 {
   "name": "pudica-schedule",
   "version": "0.1.0",
-  "description": "Stack Workflow",
+  "description": "A Todolist",
   "main": "index.js",
   "scripts": {
     "cdn": "rsync -avr --progress dist/* tiye.me:cdn/pudica-schedule",
@@ -25,7 +25,10 @@
   "author": "jiyinyiyong",
   "license": "MIT",
   "devDependencies": {
-    "shadow-cljs": "^2.0.123"
+    "http-server": "^0.11.1",
+    "shadow-cljs": "^2.1.4"
   },
-  "dependencies": {}
+  "dependencies": {
+    "shortid": "^2.2.8"
+  }
 }

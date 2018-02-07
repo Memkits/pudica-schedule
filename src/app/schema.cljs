@@ -1,6 +1,9 @@
 
-(ns app.schema )
+(ns app.schema (:require [bisection-key.core :refer [mid-id]]))
 
-(def task {:id nil, :text "", :done? false})
+(def task {:id nil, :text "", :done? false, :sort-id nil})
 
-(def store {:tasks [(merge task {:id 0, :text ""})], :pointer 0, :shift 0, :states {}})
+(def store
+  {:tasks {"root" (merge task {:id "root", :text "", :sort-id mid-id})},
+   :pointer 0,
+   :states {}})

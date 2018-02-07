@@ -16,17 +16,21 @@
    :background-color :transparent,
    :color (hsl 0 0 10 0.2)})
 
-(def style-container {:background-position "left top", :color :white, :overflow :hidden})
-
 (defcomp
  comp-container
  (store)
  (div
-  {:style (merge ui/global ui/fullscreen style-container)}
+  {:style (merge
+           ui/global
+           ui/fullscreen
+           {:background-position "left top",
+            :color :white,
+            :overflow :auto,
+            :padding "160px 200px"})}
   (comp-todolist (:tasks store) (:pointer store))
   (button {:inner-text "Clear", :style (merge ui/button style-clear), :on-click on-clear})
   (button
    {:inner-text "Shorten",
     :style (merge ui/button style-clear {:left 60}),
     :on-click (fn [e d! m!] (d! :task/shorten nil))})
-  (comp-inspect "tasks" (:tasks store) nil)))
+  (comment comp-inspect "tasks" (:tasks store) nil)))

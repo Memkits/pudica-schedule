@@ -5,7 +5,6 @@
             [bisection-key.core :refer [bisect max-id min-id]]))
 
 (defn add-after [store task-id op-id]
-  (println "task " (:tasks store) (get-in store [:tasks task-id]))
   (let [base-task (get-in store [:tasks task-id])
         base-sort-id (:sort-id base-task)
         all-sort-ids (->> (:tasks store) (vals) (map :sort-id) (sort))
@@ -44,16 +43,21 @@
                        base-sort-id)
                       (bisect
                        base-sort-id
-                       (or (first (filter (fn [x] (> x base-sort-id)) all-sort-ids)) max-id)))]
-    (println new-sort-id from-task)
-    (assoc-in store [:tasks from-id :sort-id] new-sort-id)))
+                       (or (first (filter (fn [x] (> x base-sort-id)) all-sort-ids)) max-id)))
+        new-pointer (.indexOf
+                     (sort
+                      (conj (disj (set all-sort-ids) (:sort-id from-task)) new-sort-id))
+                     new-sort-id)]
+    (-> store (assoc-in [:tasks from-id :sort-id] new-sort-id) (assoc :pointer new-pointer))))
 
 (defn shorten-tasks [store]
   (-> store
       (update
        :tasks
        (fn [tasks]
-         (let [next-tasks (filterv (fn [task] (not (:done? task))) tasks)]
+         (let [next-tasks (->> tasks
+                               (filter (fn [[task-id task]] (not (:done? task))))
+                               (into {}))]
            (if (empty? next-tasks) (:tasks schema/store) next-tasks))))
       (assoc :pointer 0)))
 
@@ -63,15 +67,7 @@
     :task/add-before (add-before store op-data op-id)
     :task/add-after (add-after store op-data op-id)
     :task/edit (let [[task-id text] op-data] (assoc-in store [:tasks task-id :text] text))
-    :task/toggle
-      (let [task (get-in store [:tasks op-data])]
-        (-> store
-            (update-in [:tasks op-data :done?] not)
-            (assoc
-             :pointer
-             (if (:done? task)
-               op-data
-               (if (< op-data (dec (count (:tasks store)))) (inc op-data ) op-data)))))
+    :task/toggle (update-in store [:tasks op-data :done?] not)
     :task/clear schema/store
     :task/shorten (shorten-tasks store)
     :task/delete (delete-task store op-data)

@@ -59,7 +59,7 @@
   {:style (merge
            ui/row
            style-task
-           {:top (str (* idx 44) "px"), :background-color (hsl 0 80 90)}
+           {:top (str (* idx 44) "px")}
            (if (:done? task) {:opacity 0.3})
            (if (and focused?) {:transition-duration "0ms"})),
    :draggable true,
@@ -75,7 +75,7 @@
          (do (d! :task/move [dragging-id (:id task) before?])))))}
   (div
    {:style (merge style-done (if (:done? task) {:transform "scale(0.7)"})),
-    :on-click (action-> :task/toggle idx)})
+    :on-click (action-> :task/toggle (:id task))})
   (=< 8 nil)
   (input
    {:value (:text task),
@@ -84,5 +84,4 @@
     :style (merge ui/input style-text),
     :on-input (action-> :task/edit [(:id task) (:value %e)]),
     :on-keydown (on-keydown (:id task) (:text task) idx),
-    :on-click (action-> :pointer/touch idx)})
-  (<> (pr-str task))))
+    :on-click (action-> :pointer/touch idx)})))

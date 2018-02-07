@@ -7,17 +7,13 @@
             [app.comp.task :refer [comp-task]]
             [clojure.string :as string]))
 
-(def style-container {:min-height 100, :min-width 400, :position :relative})
-
-(def style-list {:position :relative, :margin-top 120, :margin-left 240})
-
 (defcomp
  comp-todolist
  (tasks pointer)
  (div
-  {:style style-container}
+  {:style {:position :relative, :height (* 40 (count tasks))}}
   (div
-   {:style (merge style-list {:height (str (+ 8 (* 40 (count tasks))) "px")})}
+   {:style {:position :relative, :height (str (+ 8 (* 40 (count tasks))) "px")}}
    (list->
     :div
     {}

@@ -18,7 +18,7 @@
          (.focus maybe-input))))))
 
 (defn dispatch! [op op-data]
-  (println "Dispatch:" op op-data)
+  (comment println "Dispatch:" op op-data)
   (let [new-store (updater @*store op op-data (.generate shortid) (.now js/Date))]
     (comment println "New store:" new-store)
     (reset! *store new-store)))
@@ -26,7 +26,7 @@
 (def mount-target (.querySelector js/document ".app"))
 
 (defn render-app! [renderer]
-  (println "render app:" @*store)
+  (comment println "render app:" @*store)
   (renderer mount-target (comp-container @*store) #(dispatch! %1 %2)))
 
 (def ssr? (some? (.querySelector js/document "meta#server-rendered")))

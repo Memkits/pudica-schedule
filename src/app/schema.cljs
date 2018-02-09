@@ -6,4 +6,5 @@
 (def store
   {:tasks {"root" (merge task {:id "root", :text "", :sort-id mid-id})},
    :pointer 0,
+   :dragging-id nil,
    :states {}})

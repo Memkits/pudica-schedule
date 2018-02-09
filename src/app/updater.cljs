@@ -84,4 +84,5 @@
     :pointer/before (if (zero? (:pointer store)) store (update store :pointer dec))
     :pointer/after
       (if (= (:pointer store) (dec (count (:tasks store)))) store (update store :pointer inc))
+    :mark/dragging (assoc store :dragging-id op-data)
     store))

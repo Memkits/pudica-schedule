@@ -9,7 +9,7 @@
 
 (defcomp
  comp-todolist
- (tasks pointer)
+ (tasks pointer dragging-id)
  (div
   {:style {:position :relative, :height (* 40 (count tasks))}}
   (div
@@ -21,13 +21,15 @@
          (sort-by (fn [[task-id task]] (:sort-id task)))
          (map-indexed
           (fn [idx [task-id task]]
-            [task-id (let [pointed? (= pointer idx)] (comp-task task idx pointed?))]))
+            [task-id
+             (let [pointed? (= pointer idx)]
+               (comp-task task idx pointed? (= dragging-id task-id)))]))
          (sort-by first)))
    (div
-    {:style {:top (str (+ 2 (* 44 pointer)) "px"),
+    {:style {:top (str (+ 8 (* 48 pointer)) "px"),
              :left -20,
              :width 6,
-             :height 30,
+             :height 32,
              :background-color (hsl 0 90 80),
              :position :absolute,
              :transition "600ms"}}))))

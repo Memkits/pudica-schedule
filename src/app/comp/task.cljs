@@ -38,33 +38,38 @@
   {:position :absolute,
    :padding "0 8px",
    :transition-duration "300ms",
+   :transition-property "top",
    :align-items :center,
-   :transform-origin "8% 50%",
-   :background-color (hsl 120 50 30 0.04)})
+   :transform-origin "8% 50%"})
 
 (def style-text
-  {:width 480,
+  {:width 600,
    :background-color :transparent,
    :color (hsl 0 0 20),
    :font-size 16,
    :font-family "Hind",
    :font-weight 300,
    :padding "0 4px",
-   :line-height "16px"})
+   :line-height "48px",
+   :height 48})
 
 (defcomp
  comp-task
- (task idx focused?)
+ (task idx focused? dragging?)
  (div
   {:style (merge
            ui/row
            style-task
-           {:top (str (* idx 44) "px")}
+           {:top (str (* idx 48) "px")}
            (if (:done? task) {:opacity 0.3})
-           (if (and focused?) {:transition-duration "0ms"})),
+           (if (and focused?) {:transition-duration "0ms"})
+           (if dragging? {:opacity 0.3})),
    :draggable true,
    :on-dragstart (fn [e d! m!]
-     (let [event (:event e)] (-> event .-dataTransfer (.setData "text" (:id task))))),
+     (let [event (:event e)]
+       (-> event .-dataTransfer (.setData "text" (:id task)))
+       (d! :mark/dragging (:id task)))),
+   :on-dragend (action-> :mark/dragging nil),
    :on-dragover (fn [e d! m!] (-> e :event (.preventDefault))),
    :on-drop (fn [e d! m!]
      (let [event (:event e)
@@ -84,4 +89,5 @@
     :style (merge ui/input style-text),
     :on-input (action-> :task/edit [(:id task) (:value %e)]),
     :on-keydown (on-keydown (:id task) (:text task) idx),
-    :on-click (action-> :pointer/touch idx)})))
+    :on-click (action-> :pointer/touch idx)})
+  (<> (:sort-id task) {:color (hsl 0 0 80)})))

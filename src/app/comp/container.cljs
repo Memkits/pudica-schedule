@@ -27,7 +27,7 @@
             :color :white,
             :overflow :auto,
             :padding "160px 200px"})}
-  (comp-todolist (:tasks store) (:pointer store))
+  (comp-todolist (:tasks store) (:pointer store) (:dragging-id store))
   (button {:inner-text "Clear", :style (merge ui/button style-clear), :on-click on-clear})
   (button
    {:inner-text "Shorten",

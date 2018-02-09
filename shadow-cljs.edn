@@ -6,7 +6,7 @@
                 [mvc-works/shell-page   "0.1.6"]
                 [respo                  "0.8.15"]
                 [respo/ui               "0.3.2"]
-                [respo/reel             "0.2.4"]
+                [respo/reel             "0.3.1"]
                 [cirru/bisection-key    "0.1.4"]]
  :builds {:browser {:target :browser
                     :output-dir "target/"

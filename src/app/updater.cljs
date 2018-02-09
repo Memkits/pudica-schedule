@@ -39,11 +39,19 @@
         all-sort-ids (->> (:tasks store) (vals) (map :sort-id))
         new-sort-id (if before?
                       (bisect
-                       (or (last (filter (fn [x] (< x base-sort-id)) all-sort-ids)) min-id)
+                       (or (->> all-sort-ids
+                                (filter (fn [x] (< x base-sort-id)))
+                                (sort)
+                                (last))
+                           min-id)
                        base-sort-id)
                       (bisect
                        base-sort-id
-                       (or (first (filter (fn [x] (> x base-sort-id)) all-sort-ids)) max-id)))
+                       (or (->> all-sort-ids
+                                (filter (fn [x] (> x base-sort-id)))
+                                (sort)
+                                (first))
+                           max-id)))
         new-pointer (.indexOf
                      (sort
                       (conj (disj (set all-sort-ids) (:sort-id from-task)) new-sort-id))

@@ -30,17 +30,17 @@
 (def style-done
   {:width 16,
    :height 16,
-   :background-color (hsl 240 90 88),
+   :background-color (hsl 240 90 88 0.3),
    :cursor :pointer,
-   :transition-duration "300ms",
-   :border-radius "50%"})
+   :transition-duration "300ms"})
 
 (def style-task
   {:position :absolute,
    :padding "0 8px",
    :transition-duration "300ms",
    :align-items :center,
-   :transform-origin "8% 50%"})
+   :transform-origin "8% 50%",
+   :background-color (hsl 120 50 30 0.04)})
 
 (def style-text
   {:width 480,

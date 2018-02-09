@@ -4,7 +4,7 @@ Pudica Schedule
 
 > Built in ClojureScript, Respo, Cirru
 
-Demo: http://repo.memkits.org/pudica-schedule/
+Demo: http://pudica.memkits.org/
 
 Features:
 

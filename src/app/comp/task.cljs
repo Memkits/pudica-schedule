@@ -55,15 +55,14 @@
 
 (defcomp
  comp-task
- (task idx focused? dragging?)
+ (task idx focused? dragging-id)
  (div
   {:style (merge
            ui/row
            style-task
            {:top (str (* idx 48) "px")}
            (if (:done? task) {:opacity 0.3})
-           (if (and focused?) {:transition-duration "0ms"})
-           (if dragging? {:opacity 0.3})),
+           (if (= dragging-id (:id task)) {:opacity 0.3})),
    :draggable true,
    :on-dragstart (fn [e d! m!]
      (let [event (:event e)]
@@ -71,13 +70,8 @@
        (d! :mark/dragging (:id task)))),
    :on-dragend (action-> :mark/dragging nil),
    :on-dragover (fn [e d! m!] (-> e :event (.preventDefault))),
-   :on-drop (fn [e d! m!]
-     (let [event (:event e)
-           y (-> event .-offsetY)
-           before? (<= y 16)
-           dragging-id (-> event .-dataTransfer (.getData "text"))]
-       (if (not= dragging-id (:id task))
-         (do (d! :task/move [dragging-id (:id task) before?])))))}
+   :on-dragenter (fn [e d! m!]
+     (if (not= dragging-id (:id task)) (do (d! :task/swap [dragging-id (:id task)]))))}
   (div
    {:style (merge style-done (if (:done? task) {:transform "scale(0.7)"})),
     :on-click (action-> :task/toggle (:id task))})

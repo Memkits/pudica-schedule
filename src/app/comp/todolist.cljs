@@ -22,8 +22,7 @@
          (map-indexed
           (fn [idx [task-id task]]
             [task-id
-             (let [pointed? (= pointer idx)]
-               (comp-task task idx pointed? (= dragging-id task-id)))]))
+             (let [pointed? (= pointer idx)] (comp-task task idx pointed? dragging-id))]))
          (sort-by first)))
    (div
     {:style {:top (str (+ 8 (* 48 pointer)) "px"),

@@ -69,6 +69,16 @@
            (if (empty? next-tasks) (:tasks schema/store) next-tasks))))
       (assoc :pointer 0)))
 
+(defn swap-tasks [store op-data]
+  (let [[from-id to-id] op-data]
+    (update
+     store
+     :tasks
+     (fn [tasks]
+       (-> tasks
+           (assoc-in [from-id :sort-id] (get-in tasks [to-id :sort-id]))
+           (assoc-in [to-id :sort-id] (get-in tasks [from-id :sort-id])))))))
+
 (defn updater [store op op-data op-id op-time]
   (case op
     :states (update store :states (mutate op-data))
@@ -80,6 +90,7 @@
     :task/shorten (shorten-tasks store)
     :task/delete (delete-task store op-data)
     :task/move (move-task store op-data)
+    :task/swap (swap-tasks store op-data)
     :pointer/touch (assoc store :pointer op-data)
     :pointer/before (if (zero? (:pointer store)) store (update store :pointer dec))
     :pointer/after

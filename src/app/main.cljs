@@ -18,7 +18,7 @@
          (.focus maybe-input))))))
 
 (defn dispatch! [op op-data]
-  (comment println "Dispatch:" op op-data)
+  (comment println "Dispatch:" op (pr-str op-data))
   (let [new-store (updater @*store op op-data (.generate shortid) (.now js/Date))]
     (comment println "New store:" new-store)
     (reset! *store new-store)))

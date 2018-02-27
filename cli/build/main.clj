@@ -3,9 +3,6 @@
   (:require [shadow.cljs.devtools.api :as shadow]
             [clojure.java.shell :refer [sh]]))
 
-(def configs {:orgization "Memkits"
-              :name "pudica-schedule"})
-
 (defn sh! [command]
   (println command)
   (println (sh "bash" "-c" command)))
@@ -31,10 +28,3 @@
   (shadow/compile :ssr)
   (sh! "env=dev node target/ssr.js")
   (sh! "cp entry/manifest.json target/"))
-
-(defn upload []
-  (sh! (str "rsync -avr --progress dist/* tiye.me:cdn/" (:name configs)))
-  (sh!
-    (str "rsync -avr --progress dist/{index.html,manifest.json} tiye.me:repo/"
-      (:orgization configs) "/"
-      (:name configs) "/")))

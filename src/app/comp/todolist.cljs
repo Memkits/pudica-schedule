@@ -9,7 +9,7 @@
 
 (defcomp
  comp-todolist
- (tasks pointer dragging-id)
+ (tasks pointer dragging-id dropping-id)
  (div
   {:style {:position :relative, :height (* 40 (count tasks))}}
   (div
@@ -22,7 +22,8 @@
          (map-indexed
           (fn [idx [task-id task]]
             [task-id
-             (let [pointed? (= pointer idx)] (comp-task task idx pointed? dragging-id))]))
+             (let [pointed? (= pointer idx)]
+               (comp-task task idx pointed? dragging-id dropping-id))]))
          (sort-by first)))
    (div
     {:style {:top (str (+ 8 (* 48 pointer)) "px"),

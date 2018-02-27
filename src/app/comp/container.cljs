@@ -7,6 +7,11 @@
             [app.comp.todolist :refer [comp-todolist]]
             [respo.comp.inspect :refer [comp-inspect]]))
 
+(def chunk-transparent
+  (span
+   {:class-name "transparent",
+    :style {:width 1, :height 1, :background-color "red", :display :inline-block}}))
+
 (defn on-clear [e dispatch!] (dispatch! :task/clear nil))
 
 (def style-clear
@@ -27,10 +32,11 @@
             :color :white,
             :overflow :auto,
             :padding "160px 200px"})}
-  (comp-todolist (:tasks store) (:pointer store) (:dragging-id store))
+  (comp-todolist (:tasks store) (:pointer store) (:dragging-id store) (:dropping-id store))
   (button {:inner-text "Clear", :style (merge ui/button style-clear), :on-click on-clear})
   (button
    {:inner-text "Shorten",
     :style (merge ui/button style-clear {:left 60}),
     :on-click (fn [e d! m!] (d! :task/shorten nil))})
-  (comment comp-inspect "tasks" (:tasks store) nil)))
+  chunk-transparent
+  (comment comp-inspect "Store" store nil)))

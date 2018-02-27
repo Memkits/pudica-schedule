@@ -31,8 +31,9 @@
           (update :pointer (fn [pointer] (if (zero? idx) 0 (dec pointer))))))))
 
 (defn move-task [store op-data]
-  (let [[from-id to-id before?] op-data
+  (let [[from-id to-id] op-data
         tasks (:tasks store)
+        before? (> (get-in tasks [from-id :sort-id]) (get-in tasks [to-id :sort-id]))
         from-task (get tasks from-id)
         to-task (get tasks to-id)
         base-sort-id (:sort-id to-task)
@@ -70,14 +71,15 @@
       (assoc :pointer 0)))
 
 (defn swap-tasks [store op-data]
-  (let [[from-id to-id] op-data]
-    (update
-     store
-     :tasks
-     (fn [tasks]
-       (-> tasks
-           (assoc-in [from-id :sort-id] (get-in tasks [to-id :sort-id]))
-           (assoc-in [to-id :sort-id] (get-in tasks [from-id :sort-id])))))))
+  (let [[from-id to-id new-pointer] op-data]
+    (-> store
+        (assoc :pointer new-pointer)
+        (update
+         :tasks
+         (fn [tasks]
+           (-> tasks
+               (assoc-in [from-id :sort-id] (get-in tasks [to-id :sort-id]))
+               (assoc-in [to-id :sort-id] (get-in tasks [from-id :sort-id]))))))))
 
 (defn updater [store op op-data op-id op-time]
   (case op
@@ -96,4 +98,5 @@
     :pointer/after
       (if (= (:pointer store) (dec (count (:tasks store)))) store (update store :pointer inc))
     :mark/dragging (assoc store :dragging-id op-data)
+    :mark/dropping (assoc store :dropping-id op-data)
     store))

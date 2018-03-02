@@ -3138,7 +3138,7 @@
           :type :expr, :id "HyV2q9c10H-", :by "root", :at 1500455761047
           :data {
            "T" {:type :leaf, :text ":icon", :id "ryrhc5q1AHW", :by "root", :at 1500455762486}
-           "j" {:type :leaf, :text "|http://cdn.tiye.me/logo/memkits.png", :id "H1U25qckAH-", :by "root", :at 1509178447821}
+           "j" {:type :leaf, :text "|http://cdn.tiye.me/logo/pudica.png", :id "H1U25qckAH-", :by "root", :at 1519970611562}
           }
          }
          "v" {

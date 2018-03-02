@@ -8,7 +8,7 @@
 
 (def base-info
   {:title "Pudica",
-   :icon "http://cdn.tiye.me/logo/memkits.png",
+   :icon "http://cdn.tiye.me/logo/pudica.png",
    :ssr nil,
    :inline-html nil,
    :inline-styles [(slurp "./entry/main.css")]})

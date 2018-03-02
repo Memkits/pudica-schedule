@@ -6,6 +6,8 @@ Pudica Schedule
 
 Demo: http://pudica.memkits.org/
 
+![](http://cdn.tiye.me/logo/pudica.png)
+
 Features:
 
 * Enter to add task

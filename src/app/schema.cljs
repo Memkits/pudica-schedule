@@ -1,6 +1,8 @@
 
 (ns app.schema (:require [bisection-key.core :refer [mid-id]]))
 
+(def dev? js/goog.DEBUG)
+
 (def task {:id nil, :text "", :done? false, :sort-id nil})
 
 (def store
@@ -8,4 +10,5 @@
    :pointer 0,
    :dragging-id nil,
    :dropping-id nil,
-   :states {}})
+   :states {},
+   :archives {}})

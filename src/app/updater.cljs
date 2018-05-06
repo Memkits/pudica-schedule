@@ -30,6 +30,19 @@
           (update :tasks (fn [tasks] (dissoc tasks task-id)))
           (update :pointer (fn [pointer] (if (zero? idx) 0 (dec pointer))))))))
 
+(defn ease-tasks [store]
+  (let [done-tasks (->> (:tasks store) (filter (fn [[task-id task]] (:done? task))) (into {}))]
+    (-> store
+        (update
+         :tasks
+         (fn [tasks]
+           (let [next-tasks (->> tasks
+                                 (filter (fn [[task-id task]] (not (:done? task))))
+                                 (into {}))]
+             (if (empty? next-tasks) (:tasks schema/store) next-tasks))))
+        (update :archives (fn [archives] (merge archives done-tasks)))
+        (assoc :pointer 0))))
+
 (defn move-task [store op-data]
   (let [[from-id to-id] op-data
         tasks (:tasks store)
@@ -59,17 +72,6 @@
                      new-sort-id)]
     (-> store (assoc-in [:tasks from-id :sort-id] new-sort-id) (assoc :pointer new-pointer))))
 
-(defn shorten-tasks [store]
-  (-> store
-      (update
-       :tasks
-       (fn [tasks]
-         (let [next-tasks (->> tasks
-                               (filter (fn [[task-id task]] (not (:done? task))))
-                               (into {}))]
-           (if (empty? next-tasks) (:tasks schema/store) next-tasks))))
-      (assoc :pointer 0)))
-
 (defn swap-tasks [store op-data]
   (let [[from-id to-id new-pointer] op-data]
     (-> store
@@ -88,8 +90,7 @@
     :task/add-after (add-after store op-data op-id)
     :task/edit (let [[task-id text] op-data] (assoc-in store [:tasks task-id :text] text))
     :task/toggle (update-in store [:tasks op-data :done?] not)
-    :task/clear schema/store
-    :task/shorten (shorten-tasks store)
+    :task/ease (ease-tasks store)
     :task/delete (delete-task store op-data)
     :task/move (move-task store op-data)
     :task/swap (swap-tasks store op-data)

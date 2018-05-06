@@ -6,4 +6,4 @@
    (let [old-data (if (and (exists? js/window) (exists? js/window.localStorage))
                     (.getItem js/window.localStorage "pudica-schedule"))]
      (println "Old store:" old-data)
-     (if (some? old-data) (read-string old-data) schema/store))))
+     (merge schema/store (when (some? old-data) (read-string old-data))))))

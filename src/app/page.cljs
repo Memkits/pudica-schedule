@@ -1,5 +1,5 @@
 
-(ns app.render
+(ns app.page
   (:require [respo.render.html :refer [make-string]]
             [shell-page.core :refer [make-page spit slurp]]
             [app.comp.container :refer [comp-container]]
@@ -16,7 +16,7 @@
 (defn dev-page []
   (make-page
    ""
-   (merge base-info {:styles ["http://localhost:8100/main.css"], :scripts ["/main.js"]})))
+   (merge base-info {:styles ["http://localhost:8100/main.css"], :scripts ["/client.js"]})))
 
 (def preview? (= "preview" js/process.env.prod))
 

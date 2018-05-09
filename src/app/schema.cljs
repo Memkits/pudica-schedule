@@ -3,7 +3,14 @@
 
 (def dev? js/goog.DEBUG)
 
-(def task {:id nil, :text "", :done? false, :sort-id nil})
+(def task
+  {:id nil,
+   :text "",
+   :done? false,
+   :sort-id nil,
+   :created-time nil,
+   :done-time nil,
+   :archived-time nil})
 
 (def store
   {:tasks {"root" (merge task {:id "root", :text "", :sort-id mid-id})},

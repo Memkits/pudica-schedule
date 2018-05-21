@@ -109,7 +109,7 @@
        (fn [task]
          (if (:done? task)
            (assoc task :done? false)
-           (-> task (assoc :done? true) (assoc :done-time? op-time)))))
+           (-> task (assoc :done? true) (assoc :done-time op-time)))))
     :task/ease (ease-tasks store op-id op-time)
     :task/delete (delete-task store op-data)
     :task/move (move-task store op-data)

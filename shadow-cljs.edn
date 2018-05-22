@@ -5,7 +5,7 @@
                 [mvc-works/verbosely    "0.1.2"]
                 [mvc-works/shell-page   "0.1.7"]
                 [respo                  "0.8.16"]
-                [respo/ui               "0.3.4"]
+                [respo/ui               "0.3.6"]
                 [respo/reel             "0.3.2"]
                 [cirru/bisection-key    "0.1.5"]]
  :builds {:client {:target :browser

@@ -56,7 +56,8 @@
    :padding "0 4px",
    :line-height "48px",
    :height 48,
-   :min-width 48})
+   :min-width 48,
+   :border :none})
 
 (defcomp
  comp-task

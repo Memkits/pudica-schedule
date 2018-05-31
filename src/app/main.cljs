@@ -29,6 +29,9 @@
   (comment println "render app:" @*store)
   (renderer mount-target (comp-container @*store) #(dispatch! %1 %2)))
 
+(defn save-store! []
+  (let [raw (pr-str @*store)] (.setItem js/window.localStorage (:storage schema/configs) raw)))
+
 (def ssr? (some? (.querySelector js/document "meta#server-rendered")))
 
 (defn main! []
@@ -36,13 +39,9 @@
   (render-app! render!)
   (add-watch *store :changes (fn [] (render-app! render!)))
   (add-watch *store :focus adjust-focus!)
+  (set! (.-onbeforeunload js/window) save-store!)
   (println "App started!"))
 
 (defn reload! [] (clear-cache!) (render-app! render!) (println "Code updated."))
 
-(defn save-store! []
-  (let [raw (pr-str @*store)] (.setItem js/window.localStorage "pudica-schedule" raw)))
-
 (set! (.-onload js/window) main!)
-
-(set! (.-onbeforeunload js/window) save-store!)

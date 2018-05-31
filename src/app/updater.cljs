@@ -35,27 +35,6 @@
           (update :tasks (fn [tasks] (dissoc tasks task-id)))
           (update :pointer (fn [pointer] (if (zero? idx) 0 (dec pointer))))))))
 
-(defn ease-tasks [store op-id op-time]
-  (let [done-tasks (->> (:tasks store)
-                        (filter
-                         (fn [[task-id task]]
-                           (and (:done? task) (not (string/blank? (:text task))))))
-                        (map
-                         (fn [[task-id task]] [task-id (assoc task :archived-time op-time)]))
-                        (into {}))]
-    (-> store
-        (update
-         :tasks
-         (fn [tasks]
-           (let [next-tasks (->> tasks
-                                 (filter (fn [[task-id task]] (not (:done? task))))
-                                 (into {}))]
-             (if (empty? next-tasks)
-               (assoc {} op-id (merge schema/task {:id op-id, :created-time op-time}))
-               next-tasks))))
-        (update :archives (fn [archives] (merge archives done-tasks)))
-        (assoc :pointer 0))))
-
 (defn move-task [store op-data]
   (let [[from-id to-id] op-data
         tasks (:tasks store)
@@ -85,6 +64,27 @@
                      new-sort-id)]
     (-> store (assoc-in [:tasks from-id :sort-id] new-sort-id) (assoc :pointer new-pointer))))
 
+(defn relax-tasks [store op-id op-time]
+  (let [done-tasks (->> (:tasks store)
+                        (filter
+                         (fn [[task-id task]]
+                           (and (:done? task) (not (string/blank? (:text task))))))
+                        (map
+                         (fn [[task-id task]] [task-id (assoc task :archived-time op-time)]))
+                        (into {}))]
+    (-> store
+        (update
+         :tasks
+         (fn [tasks]
+           (let [next-tasks (->> tasks
+                                 (filter (fn [[task-id task]] (not (:done? task))))
+                                 (into {}))]
+             (if (empty? next-tasks)
+               (assoc {} op-id (merge schema/task {:id op-id, :created-time op-time}))
+               next-tasks))))
+        (update :archives (fn [archives] (merge archives done-tasks)))
+        (assoc :pointer 0))))
+
 (defn swap-tasks [store op-data]
   (let [[from-id to-id new-pointer] op-data]
     (-> store
@@ -110,7 +110,7 @@
          (if (:done? task)
            (assoc task :done? false)
            (-> task (assoc :done? true) (assoc :done-time op-time)))))
-    :task/ease (ease-tasks store op-id op-time)
+    :task/relax (relax-tasks store op-id op-time)
     :task/delete (delete-task store op-data)
     :task/move (move-task store op-data)
     :task/swap (swap-tasks store op-data)

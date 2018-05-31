@@ -30,14 +30,17 @@
   (comp-todolist (:tasks store) (:pointer store) (:dragging-id store) (:dropping-id store))
   (div
    {:style {:position :fixed, :bottom 0, :left 16}}
-   (a {:inner-text "Ease", :style (merge style/link), :on-click (action-> :task/ease nil)})
+   (a
+    {:inner-text "Relax", :style (merge style/link), :on-click (action-> :task/relax nil)})
    (=< 8 nil)
    (a
     {:inner-text "Review",
      :style (merge style/link),
      :on-click (fn [e d! m!]
        (let [w (.open js/window)]
-         (.. w -document (write (str "<pre>" (pr-str store) "</pre>")))))}))
+         (.. w
+             -document
+             (write (str "<pre style=\"white-space: pre-line\">" (pr-str store) "</pre>")))))}))
   (comp-transparent)
   (when dev? (comp-inspect "Store" store nil))))
 

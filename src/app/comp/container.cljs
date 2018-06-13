@@ -7,7 +7,8 @@
             [app.comp.todolist :refer [comp-todolist]]
             [respo.comp.inspect :refer [comp-inspect]]
             [app.schema :refer [dev?]]
-            [app.style :as style]))
+            [app.style :as style]
+            [app.config :as config]))
 
 (defcomp
  comp-transparent
@@ -37,10 +38,12 @@
     {:inner-text "Review",
      :style (merge style/link),
      :on-click (fn [e d! m!]
-       (let [w (.open js/window)]
-         (.. w
-             -document
-             (write (str "<pre style=\"white-space: pre-line\">" (pr-str store) "</pre>")))))}))
+       (let [w (.open
+                js/window
+                (if config/dev?
+                  "http://localhost:7001"
+                  "http://repo.memkits.org/pudica-schedule-viewer/"))]
+         (js/setTimeout (fn [] (.postMessage w (pr-str store) "*")) 800)))}))
   (comp-transparent)
   (when dev? (comp-inspect "Store" store nil))))
 

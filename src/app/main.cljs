@@ -40,6 +40,7 @@
   (add-watch *store :changes (fn [] (render-app! render!)))
   (add-watch *store :focus adjust-focus!)
   (set! (.-onbeforeunload js/window) save-store!)
+  (js/setInterval save-store! (* 1000 60))
   (println "App started!"))
 
 (defn reload! [] (clear-cache!) (render-app! render!) (println "Code updated."))

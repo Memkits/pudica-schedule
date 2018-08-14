@@ -2992,6 +2992,21 @@
          "r" {:type :leaf, :text "save-store!", :id "ByJ8VccqJCSb", :by "root", :at 1500452996813}
         }
        }
+       "ys" {
+        :type :expr, :by "root", :at 1533920261255, :id "TZ68vFjEKC"
+        :data {
+         "T" {:type :leaf, :by "root", :at 1533920263822, :text "js/setInterval", :id "TZ68vFjEKCleaf"}
+         "j" {:type :leaf, :by "root", :at 1533920264250, :text "save-store!", :id "0BoznDKMim"}
+         "r" {
+          :type :expr, :by "root", :at 1533920265103, :id "wtPUBeZoF"
+          :data {
+           "T" {:type :leaf, :by "root", :at 1533920266426, :text "*", :id "Cg-LOk7Dcq"}
+           "j" {:type :leaf, :by "root", :at 1533920269053, :text "1000", :id "mx-voZA9I"}
+           "r" {:type :leaf, :by "root", :at 1533920269590, :text "60", :id "KdztultaV2"}
+          }
+         }
+        }
+       }
        "yv" {
         :type :expr, :id "rkx5VcccyCrZ", :by nil, :at 1500452996813
         :data {

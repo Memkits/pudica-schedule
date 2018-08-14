@@ -4,7 +4,7 @@
                 [mvc-works/keycode      "0.1.3"]
                 [mvc-works/verbosely    "0.1.2"]
                 [mvc-works/shell-page   "0.1.7"]
-                [respo                  "0.8.16"]
+                [respo                  "0.8.20"]
                 [respo/ui               "0.3.6"]
                 [respo/reel             "0.3.2"]
                 [cirru/bisection-key    "0.1.5"]]
@@ -14,7 +14,8 @@
                    :modules {:client {:entries [app.main]}}
                    :devtools {:after-load app.main/reload!
                               :http-root "target"
-                              :http-port 7000}
+                              :http-port 7000
+                              :loader-mode :eval}
                    :compiler-options {:infer-externs :auto}
                    :release {:output-dir "dist/"
                              :module-hash-names 8

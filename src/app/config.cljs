@@ -1,4 +1,25 @@
 
 (ns app.config )
 
-(def dev? (if (exists? js/window) (do ^boolean js/goog.DEBUG) true))
+(def cdn?
+  (cond
+    (exists? js/window) false
+    (exists? js/process) (= "true" js/process.env.cdn)
+    :else false))
+
+(def dev?
+  (let [debug? (do ^boolean js/goog.DEBUG)]
+    (cond
+      (exists? js/window) debug?
+      (exists? js/process) (not= "true" js/process.env.release)
+      :else true)))
+
+(def site
+  {:dev-ui "http://localhost:8100/main.css",
+   :release-ui "http://cdn.tiye.me/favored-fonts/main.css",
+   :cdn-url "http://cdn.tiye.me/pudica-schedule/",
+   :cdn-folder "tiye.me:cdn/pudica-schedule",
+   :title "Pudica",
+   :icon "http://cdn.tiye.me/logo/pudica.png",
+   :storage-key "pudica-schedule",
+   :upload-folder "tiye.me:repo/mvc-works/calcit-workflow/"})

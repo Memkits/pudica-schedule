@@ -2,7 +2,7 @@
 (ns app.comp.task
   (:require [hsl.core :refer [hsl]]
             [respo-ui.core :as ui]
-            [respo.macros :refer [action-> defcomp div span input <>]]
+            [respo.core :refer [action-> defcomp div span input <>]]
             [respo.comp.space :refer [=<]]
             [clojure.string :as string]
             [keycode.core :as keycode]
@@ -98,4 +98,5 @@
             (let [text-width (get-width (:text task) "Hind" 16)] {:width (+ 16 text-width)})),
     :on-input (action-> :task/edit [(:id task) (:value %e)]),
     :on-keydown (on-keydown (:id task) (:text task) idx),
-    :on-click (action-> :pointer/touch idx)})))
+    :on-click (action-> :pointer/touch idx)})
+  (<> (:sort-id task) {:color (hsl 0 0 0 0.1)})))

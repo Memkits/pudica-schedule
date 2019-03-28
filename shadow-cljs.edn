@@ -1,21 +1,28 @@
 
 {:source-paths ["src" "cli"]
+ :cache-blockers #{cumulo-util.build}
  :dependencies [[mvc-works/hsl          "0.1.2"]
                 [mvc-works/keycode      "0.1.3"]
-                [mvc-works/verbosely    "0.1.2"]
-                [mvc-works/shell-page   "0.1.7"]
-                [respo                  "0.8.20"]
-                [respo/ui               "0.3.6"]
-                [respo/reel             "0.3.2"]
-                [cirru/bisection-key    "0.1.5"]]
+                [mvc-works/shell-page   "0.1.10"]
+                [respo                  "0.10.9"]
+                [respo/ui               "0.3.10"]
+                [respo/reel             "0.3.4"]
+                [respo/feather          "0.1.1"]
+                [respo/alerts           "0.3.11"]
+                [cirru/bisection-key    "0.1.5"]
+                [cumulo/util            "0.1.6"]
+                [org.clojure/core.incubator "0.1.4"]]
+ :repositories {"central" {:url "https://maven.aliyun.com/nexus/content/groups/public/"}
+                "clojars" {:url "https://mirrors.ustc.edu.cn/clojars/"}
+                "maven-central" {:url "https://repo1.maven.org/maven2/"}
+                "clojars-default" {:url "https://clojars.org/repo"}}
+ :open-file-command ["subl" ["%s:%s:%s" :file :line :column]]
+ :dev-http {7000 "target/"}
  :builds {:client {:target :browser
                    :output-dir "target/"
                    :asset-path "./"
-                   :modules {:client {:entries [app.main]}}
-                   :devtools {:after-load app.main/reload!
-                              :http-root "target"
-                              :http-port 7000
-                              :loader-mode :eval}
+                   :modules {:client {:init-fn app.main/main!}}
+                   :devtools {:after-load app.main/reload!}
                    :compiler-options {:infer-externs :auto}
                    :release {:output-dir "dist/"
                              :module-hash-names 8
@@ -23,4 +30,8 @@
           :page {:target :node-script
                 :output-to "target/page.js"
                 :main app.page/main!
-                :devtools {:after-load app.page/main!}}}}
+                :devtools {:after-load app.page/main!}}
+          :upload {:target :node-script
+                   :output-to "target/upload.js"
+                   :main app.upload/main!
+                   :devtools {:after-load app.upload/main!}}}}

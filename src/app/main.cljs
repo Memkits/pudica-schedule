@@ -2,47 +2,57 @@
 (ns app.main
   (:require [respo.core :refer [render! clear-cache! realize-ssr!]]
             [app.comp.container :refer [comp-container]]
-            [cljs.reader :refer [read-string]]
             [app.updater :refer [updater]]
             [app.schema :as schema]
-            [app.store :refer [*store]]
-            ["shortid" :as shortid]))
+            [reel.util :refer [listen-devtools!]]
+            [reel.core :refer [reel-updater refresh-reel]]
+            [reel.schema :as reel-schema]
+            [cljs.reader :refer [read-string]]
+            [app.config :as config]
+            [cumulo-util.core :refer [repeat!]]))
+
+(defonce *reel
+  (atom (-> reel-schema/reel (assoc :base schema/store) (assoc :store schema/store))))
 
 (defn adjust-focus! []
   (js/setTimeout
    (fn []
-     (let [pointer (:pointer @*store)
+     (let [pointer (:pointer (:store @*reel))
            maybe-input (.getElementById js/document (str "input-" pointer))]
        (comment println "Focus to:" pointer maybe-input)
        (if (and (some? maybe-input) (not= maybe-input (.-activeElement js/document)))
          (.focus maybe-input))))))
 
 (defn dispatch! [op op-data]
-  (comment println "Dispatch:" op (pr-str op-data))
-  (let [new-store (updater @*store op op-data (.generate shortid) (.now js/Date))]
-    (comment println "New store:" new-store)
-    (reset! *store new-store)))
+  (when config/dev? (println "Dispatch:" op))
+  (reset! *reel (reel-updater updater @*reel op op-data)))
 
 (def mount-target (.querySelector js/document ".app"))
 
+(defn persist-storage! []
+  (.setItem js/localStorage (:storage-key config/site) (pr-str (:store @*reel))))
+
 (defn render-app! [renderer]
-  (comment println "render app:" @*store)
-  (renderer mount-target (comp-container @*store) #(dispatch! %1 %2)))
+  (renderer mount-target (comp-container @*reel) #(dispatch! %1 %2)))
 
-(defn save-store! []
-  (let [raw (pr-str @*store)] (.setItem js/window.localStorage (:storage schema/configs) raw)))
-
-(def ssr? (some? (.querySelector js/document "meta#server-rendered")))
+(def ssr? (some? (js/document.querySelector "meta.respo-ssr")))
 
 (defn main! []
+  (println "Running mode:" (if config/dev? "dev" "release"))
   (if ssr? (render-app! realize-ssr!))
   (render-app! render!)
-  (add-watch *store :changes (fn [] (render-app! render!)))
-  (add-watch *store :focus adjust-focus!)
-  (set! (.-onbeforeunload js/window) save-store!)
-  (js/setInterval save-store! (* 1000 60))
-  (println "App started!"))
+  (add-watch *reel :changes (fn [] (render-app! render!)))
+  (add-watch *reel :focus adjust-focus!)
+  (listen-devtools! "a" dispatch!)
+  (.addEventListener js/window "beforeunload" persist-storage!)
+  (repeat! 60 persist-storage!)
+  (let [raw (.getItem js/localStorage (:storage-key config/site))]
+    (when (some? raw) (dispatch! :hydrate-storage (read-string raw))))
+  (println "App started."))
 
-(defn reload! [] (clear-cache!) (render-app! render!) (println "Code updated."))
+(defn reload! []
+  (clear-cache!)
+  (reset! *reel (refresh-reel @*reel schema/store updater))
+  (println "Code updated."))
 
-(set! (.-onload js/window) main!)
+(defn snippets [] (println config/cdn?))

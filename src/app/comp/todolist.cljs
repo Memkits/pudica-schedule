@@ -2,7 +2,7 @@
 (ns app.comp.todolist
   (:require [hsl.core :refer [hsl]]
             [respo-ui.core :as ui]
-            [respo.macros :refer [defcomp div button list->]]
+            [respo.core :refer [defcomp div button list->]]
             [respo.comp.space :refer [=<]]
             [app.comp.task :refer [comp-task]]
             [clojure.string :as string]))

@@ -120,4 +120,5 @@
       (if (= (:pointer store) (dec (count (:tasks store)))) store (update store :pointer inc))
     :mark/dragging (assoc store :dragging-id op-data)
     :mark/dropping (assoc store :dropping-id op-data)
+    :hydrate-storage op-data
     store))

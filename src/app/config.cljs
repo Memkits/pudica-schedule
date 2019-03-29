@@ -22,4 +22,4 @@
    :title "Pudica",
    :icon "http://cdn.tiye.me/logo/pudica.png",
    :storage-key "pudica-schedule",
-   :upload-folder "tiye.me:repo/mvc-works/calcit-workflow/"})
+   :upload-folder "tiye.me:repo/Memkits/pudica-schedule/"})

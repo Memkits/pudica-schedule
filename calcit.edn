@@ -1,6 +1,7 @@
 {
  :users {
   "root" {:id "root", :name "root", :nickname "root", :password "d41d8cd98f00b204e9800998ecf8427e", :avatar nil, :theme :star-trail}
+  "vxtIWBytM" {:name "chen", :id "vxtIWBytM", :nickname "chen", :avatar nil, :password "d41d8cd98f00b204e9800998ecf8427e", :theme :star-trail}
  }
  :ir {
   :package "app"
@@ -101,21 +102,6 @@
            :data {
             "T" {:type :leaf, :by "root", :at 1518019007153, :text "[]", :id "HyMPp-sOIz"}
             "j" {:type :leaf, :by "root", :at 1518019010155, :text "comp-inspect", :id "S1IDTbiO8f"}
-           }
-          }
-         }
-        }
-        "yr" {
-         :type :expr, :by "root", :at 1525625847185, :id "BJ1b43h6z"
-         :data {
-          "T" {:type :leaf, :by "root", :at 1525625847503, :text "[]", :id "BJ1b43h6zleaf"}
-          "j" {:type :leaf, :by "root", :at 1525625851695, :text "app.schema", :id "B1eb4n36z"}
-          "r" {:type :leaf, :by "root", :at 1525625852348, :text ":refer", :id "rybN-4nn6z"}
-          "v" {
-           :type :expr, :by "root", :at 1525625852572, :id "HJBWNh2Tz"
-           :data {
-            "T" {:type :leaf, :by "root", :at 1525625852762, :text "[]", :id "HJONb4h36G"}
-            "j" {:type :leaf, :by "root", :at 1525625853490, :text "dev?", :id "ByfBWVn2Tz"}
            }
           }
          }
@@ -494,7 +480,7 @@
             :type :expr, :by "root", :at 1525625865516, :id "HkfbfNnnaz"
             :data {
              "D" {:type :leaf, :by "root", :at 1525625866351, :text "when", :id "BJMfN2haz"}
-             "L" {:type :leaf, :by "root", :at 1525625867602, :text "dev?", :id "Sy7f4hnaf"}
+             "L" {:type :leaf, :by "vxtIWBytM", :at 1555383314455, :text "config/dev?", :id "Sy7f4hnaf"}
              "T" {
               :type :expr, :by "root", :at 1518018965645, :id "S10q-iuLM"
               :data {
@@ -4122,14 +4108,6 @@
      }
     }
     :defs {
-     "dev?" {
-      :type :expr, :by "root", :at 1525625806582, :id "HJlPA7hhpf"
-      :data {
-       "T" {:type :leaf, :by "root", :at 1525625820093, :text "def", :id "H1bD0m336M"}
-       "j" {:type :leaf, :by "root", :at 1525625806582, :text "dev?", :id "HkMDCX22aG"}
-       "r" {:type :leaf, :by "root", :at 1525625826937, :text "js/goog.DEBUG", :id "HkBJ4hn6f"}
-      }
-     }
      "store" {
       :type :expr, :id "rydPz95510rZ", :by nil, :at 1500452996813
       :data {

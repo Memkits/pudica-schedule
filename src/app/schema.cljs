@@ -1,8 +1,6 @@
 
 (ns app.schema (:require [bisection-key.core :refer [mid-id]]))
 
-(def dev? js/goog.DEBUG)
-
 (def task
   {:id nil,
    :text "",

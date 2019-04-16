@@ -6,7 +6,6 @@
             [respo.comp.space :refer [=<]]
             [app.comp.todolist :refer [comp-todolist]]
             [respo.comp.inspect :refer [comp-inspect]]
-            [app.schema :refer [dev?]]
             [app.style :as style]
             [app.config :as config]))
 
@@ -50,6 +49,6 @@
                     "http://repo.memkits.org/pudica-schedule-viewer/"))]
            (js/setTimeout (fn [] (.postMessage w (pr-str store) "*")) 800)))}))
     (comp-transparent)
-    (when dev? (comp-inspect "Store" store nil)))))
+    (when config/dev? (comp-inspect "Store" store nil)))))
 
 (defn on-clear [e dispatch!] (dispatch! :task/clear nil))

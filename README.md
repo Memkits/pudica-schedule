@@ -4,9 +4,9 @@ Pudica Schedule
 
 > Built in ClojureScript, Respo, Cirru
 
-Demo: http://pudica.memkits.org/
+Demo: http://r.tiye.me/Memkits/pudica-schedule/
 
-![](http://cdn.tiye.me/logo/pudica.png)
+![](https://cdn.tiye.me/logo/pudica.png)
 
 Features:
 
@@ -17,7 +17,7 @@ Features:
 
 ### Develop
 
-https://github.com/mvc-works/calcit-workflow
+https://github.com/calcit-lang/respo-calcit-workflow
 
 ### License
 

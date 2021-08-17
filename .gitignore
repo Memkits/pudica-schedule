@@ -1,7 +1,7 @@
 
-/target/
-/dist
-/node_modules
-.cpcache/
-.shadow-cljs/
-.nrepl-port
+.compact-inc.cirru
+.calcit-error.cirru
+
+js-out/
+node_modules/
+dist/

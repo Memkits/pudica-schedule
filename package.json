@@ -3,8 +3,7 @@
   "version": "0.1.0",
   "description": "A Todolist",
   "main": "index.js",
-  "scripts": {
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git@github.com:Memkits/pudica-schedule.git"
@@ -13,10 +12,10 @@
   "license": "MIT",
   "devDependencies": {
     "bottom-tip": "^0.1.2",
-    "vite": "^2.4.4"
+    "vite": "^2.5.6"
   },
   "dependencies": {
-    "@calcit/procs": "^0.4.16",
-    "shortid": "^2.2.14"
+    "@calcit/procs": "^0.4.31",
+    "shortid": "^2.2.16"
   }
 }

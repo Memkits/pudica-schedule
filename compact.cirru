@@ -182,7 +182,7 @@
       :ns $ quote
         ns app.updater $ :require ([] app.schema :as schema)
           [] respo.cursor :refer $ [] update-states
-          [] bisection-key.core :refer $ [] bisect max-id min-id
+          [] bisection-key.core :refer $ [] bisect max-id min-id mid-id
       :defs $ {}
         |relax-tasks $ quote
           defn relax-tasks (store op-id op-time)
@@ -201,7 +201,7 @@
                           not $ :done? (last pair)
                     if (empty? next-tasks)
                       assoc ({}) op-id $ merge schema/task
-                        {} (:id op-id) (:created-time op-time)
+                        {} (:id op-id) (:created-time op-time) (:sort-id mid-id)
                       , next-tasks
                 update :archives $ fn (archives) (merge archives done-tasks)
                 assoc :pointer 0
@@ -226,7 +226,7 @@
                   sort &compare
                 sort-id-after $ first
                   filter all-sort-ids $ fn (x) (> x base-sort-id)
-                new-sort-id $ bisect base-sort-id (or sort-id-after max-id)
+                new-sort-id $ bisect (or base-sort-id mid-id) (or sort-id-after max-id)
                 new-task $ merge schema/task
                   {} (:id op-id) (:sort-id new-sort-id) (:created-time op-time)
               -> store

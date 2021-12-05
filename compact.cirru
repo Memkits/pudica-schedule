@@ -3,6 +3,7 @@
   :configs $ {} (:init-fn |app.main/main!) (:reload-fn |app.main/reload!)
     :modules $ [] |respo.calcit/ |lilac/ |memof/ |respo-ui.calcit/ |respo-markdown.calcit/ |reel.calcit/ |bisection-key/
     :version |0.0.1
+  :entries $ {}
   :files $ {}
     |app.comp.task $ {}
       :ns $ quote
@@ -13,6 +14,7 @@
           [] respo.comp.space :refer $ [] =<
           [] clojure.string :as string
           [] app.util.dom :refer $ [] get-width
+          app.config :refer $ demo?
       :defs $ {}
         |comp-task $ quote
           defcomp comp-task (task idx focused? dragging-id dropping-id)
@@ -69,7 +71,12 @@
                 :on-keydown $ on-keydown (:id task) (:text task) idx
                 :on-click $ fn (e d!) (d! :pointer/touch idx)
               <> (:sort-id task)
-                {} $ :color (hsl 0 0 0 0.1)
+                merge
+                  {} $ :color (hsl 0 0 0 0.1)
+                  if demo? $ {}
+                    :color $ hsl 0 0 0 0.4
+                    :font-size 16
+                    :font-family ui/font-code
         |on-keydown $ quote
           defn on-keydown (task-id text idx)
             fn (e dispatch!)
@@ -469,3 +476,5 @@
           def dev? $ = "\"dev" (get-env "\"mode")
         |site $ quote
           def site $ {} (:dev-ui "\"http://localhost:8100/main.css") (:release-ui "\"http://cdn.tiye.me/favored-fonts/main.css") (:cdn-url "\"http://cdn.tiye.me/pudica-schedule/") (:cdn-folder "\"tiye.me:cdn/pudica-schedule") (:title "\"Pudica") (:icon "\"http://cdn.tiye.me/logo/pudica.png") (:storage-key "\"pudica-schedule") (:upload-folder "\"tiye.me:repo/Memkits/pudica-schedule/")
+        |demo? $ quote
+          def demo? $ = "\"true" (get-env "\"demo")

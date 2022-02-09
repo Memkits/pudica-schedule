@@ -22,16 +22,17 @@
               {}
                 :style $ merge ui/row style-task
                   {}
-                    :top $ str (* idx 48) |px
+                    :top $ str (* idx 49) |px
                     :cursor :move
                   if (:done? task)
-                    {} $ :opacity 0.4
+                    {} $ :opacity 0.5
                   if
                     = dropping-id $ :id task
-                    {} $ :opacity 0.7
+                    {} (:opacity 0.5) (:transform "\"translate(2px,4px)") (:z-index 900)
+                      :outline $ str "\"2px solid " (hsl 0 0 86)
                   if
                     = dragging-id $ :id task
-                    {} (:z-index 999) (:opacity 0.4)
+                    {} (:z-index 999) (:opacity 0.1) (:transform "\"translate(-2px,-4px)")
                 :draggable true
                 :on-dragstart $ fn (e d!)
                   let
@@ -72,7 +73,7 @@
                 :on-click $ fn (e d!) (d! :pointer/touch idx)
               <> (:sort-id task)
                 merge
-                  {} $ :color (hsl 0 0 0 0.1)
+                  {} $ :color (hsl 0 0 40 0.1)
                   if demo? $ {}
                     :color $ hsl 0 0 0 0.4
                     :font-size 16
@@ -105,15 +106,18 @@
                   (and (not shift?) (= 9 code))
                     do (.preventDefault event) (dispatch! :pointer/after nil)
         |style-done $ quote
-          def style-done $ {} (:width 16) (:height 16)
+          def style-done $ {} (:width 20) (:height 20)
             :background-color $ hsl 240 90 88 0.3
             :cursor :pointer
             :transition-duration |300ms
+            :border-radius "\"50%"
         |style-task $ quote
-          def style-task $ {} (:position :absolute) (:padding "|0 16px") (:transition-duration |300ms) (:transition-property |top) (:align-items :center) (:transform-origin "|8% 50%")
-            :background-color $ hsl 0 0 94
-            :min-width 600
+          def style-task $ {} (:position :absolute) (:padding "|0 16px") (:transition-duration |300ms) (:transition-property |top,transform,outline) (:align-items :center) (:transform-origin "|8% 50%")
+            :background-color $ hsl 0 0 100
+            :min-width 720
             :cursor :move
+            :border-radius "\"6px"
+            :box-shadow $ str "\"0 0 2px " (hsl 0 0 80 0.1)
         |style-text $ quote
           def style-text $ {} (:width 600) (:background-color :transparent)
             :color $ hsl 0 0 20
@@ -158,7 +162,7 @@
                       let
                           w $ js/window.open (if config/dev? "\"http://localhost:7001" "\"http://r.tiye.me/Memkits/pudica-schedule-viewer/")
                         js/setTimeout
-                          fn () $ .postMessage w (pr-str store) "\"*"
+                          fn () $ .!postMessage w (pr-str store) "\"*"
                           , 800
                 comp-transparent
                 when config/dev? $ comp-inspect "\"Store" store nil
@@ -368,14 +372,15 @@
                 div $ {}
                   :style $ {}
                     :top $ str
-                      + 8 $ * 48 pointer
+                      + 2 $ * 49 pointer
                       , |px
                     :left -20
-                    :width 6
-                    :height 32
-                    :background-color $ hsl 0 90 80
+                    :width 8
+                    :height 40
+                    :background-color $ hsl 30 90 80
                     :position :absolute
                     :transition |600ms
+                    :border-radius "\"4px"
     |app.style $ {}
       :ns $ quote
         ns app.style $ :require ([] respo-ui.core :as ui)

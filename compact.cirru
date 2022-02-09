@@ -22,16 +22,17 @@
               {}
                 :style $ merge ui/row style-task
                   {}
-                    :top $ str (* idx 48) |px
+                    :top $ str (* idx 49) |px
                     :cursor :move
                   if (:done? task)
-                    {} $ :opacity 0.3
+                    {} $ :opacity 0.5
                   if
                     = dropping-id $ :id task
-                    {} $ :opacity 0.7
+                    {} (:opacity 0.5) (:transform "\"translate(2px,4px)") (:z-index 900)
+                      :outline $ str "\"2px solid " (hsl 0 0 86)
                   if
                     = dragging-id $ :id task
-                    {} (:z-index 999) (:opacity 0.9)
+                    {} (:z-index 999) (:opacity 0.1) (:transform "\"translate(-2px,-4px)")
                 :draggable true
                 :on-dragstart $ fn (e d!)
                   let
@@ -72,7 +73,7 @@
                 :on-click $ fn (e d!) (d! :pointer/touch idx)
               <> (:sort-id task)
                 merge
-                  {} $ :color (hsl 0 0 0 0.1)
+                  {} $ :color (hsl 0 0 40 0.1)
                   if demo? $ {}
                     :color $ hsl 0 0 0 0.4
                     :font-size 16
@@ -111,11 +112,12 @@
             :transition-duration |300ms
             :border-radius "\"50%"
         |style-task $ quote
-          def style-task $ {} (:position :absolute) (:padding "|0 16px") (:transition-duration |300ms) (:transition-property |top) (:align-items :center) (:transform-origin "|8% 50%")
-            :background-color $ hsl 0 0 95
+          def style-task $ {} (:position :absolute) (:padding "|0 16px") (:transition-duration |300ms) (:transition-property |top,transform,outline) (:align-items :center) (:transform-origin "|8% 50%")
+            :background-color $ hsl 0 0 100
             :min-width 720
             :cursor :move
             :border-radius "\"6px"
+            :box-shadow $ str "\"0 0 2px " (hsl 0 0 80 0.1)
         |style-text $ quote
           def style-text $ {} (:width 600) (:background-color :transparent)
             :color $ hsl 0 0 20
@@ -370,12 +372,12 @@
                 div $ {}
                   :style $ {}
                     :top $ str
-                      + 8 $ * 48 pointer
+                      + 2 $ * 49 pointer
                       , |px
                     :left -20
                     :width 8
-                    :height 32
-                    :background-color $ hsl 0 90 80
+                    :height 40
+                    :background-color $ hsl 30 90 80
                     :position :absolute
                     :transition |600ms
                     :border-radius "\"4px"

@@ -25,13 +25,13 @@
                     :top $ str (* idx 48) |px
                     :cursor :move
                   if (:done? task)
-                    {} $ :opacity 0.4
+                    {} $ :opacity 0.3
                   if
                     = dropping-id $ :id task
                     {} $ :opacity 0.7
                   if
                     = dragging-id $ :id task
-                    {} (:z-index 999) (:opacity 0.4)
+                    {} (:z-index 999) (:opacity 0.9)
                 :draggable true
                 :on-dragstart $ fn (e d!)
                   let
@@ -105,15 +105,17 @@
                   (and (not shift?) (= 9 code))
                     do (.preventDefault event) (dispatch! :pointer/after nil)
         |style-done $ quote
-          def style-done $ {} (:width 16) (:height 16)
+          def style-done $ {} (:width 20) (:height 20)
             :background-color $ hsl 240 90 88 0.3
             :cursor :pointer
             :transition-duration |300ms
+            :border-radius "\"50%"
         |style-task $ quote
           def style-task $ {} (:position :absolute) (:padding "|0 16px") (:transition-duration |300ms) (:transition-property |top) (:align-items :center) (:transform-origin "|8% 50%")
-            :background-color $ hsl 0 0 94
-            :min-width 600
+            :background-color $ hsl 0 0 95
+            :min-width 720
             :cursor :move
+            :border-radius "\"6px"
         |style-text $ quote
           def style-text $ {} (:width 600) (:background-color :transparent)
             :color $ hsl 0 0 20
@@ -158,7 +160,7 @@
                       let
                           w $ js/window.open (if config/dev? "\"http://localhost:7001" "\"http://r.tiye.me/Memkits/pudica-schedule-viewer/")
                         js/setTimeout
-                          fn () $ .postMessage w (pr-str store) "\"*"
+                          fn () $ .!postMessage w (pr-str store) "\"*"
                           , 800
                 comp-transparent
                 when config/dev? $ comp-inspect "\"Store" store nil
@@ -371,11 +373,12 @@
                       + 8 $ * 48 pointer
                       , |px
                     :left -20
-                    :width 6
+                    :width 8
                     :height 32
                     :background-color $ hsl 0 90 80
                     :position :absolute
                     :transition |600ms
+                    :border-radius "\"4px"
     |app.style $ {}
       :ns $ quote
         ns app.style $ :require ([] respo-ui.core :as ui)

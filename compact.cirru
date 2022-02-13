@@ -8,76 +8,77 @@
     |app.comp.task $ {}
       :ns $ quote
         ns app.comp.task $ :require
-          [] respo-ui.core :refer $ [] hsl
-          [] respo-ui.core :as ui
-          [] respo.core :refer $ [] defcomp div span input <>
-          [] respo.comp.space :refer $ [] =<
-          [] clojure.string :as string
-          [] app.util.dom :refer $ [] get-width
+          respo-ui.core :refer $ hsl
+          respo-ui.core :as ui
+          respo.core :refer $ defcomp div span input <> defeffect
+          respo.comp.space :refer $ =<
+          clojure.string :as string
+          app.util.dom :refer $ get-width
           app.config :refer $ demo?
       :defs $ {}
         |comp-task $ quote
           defcomp comp-task (task idx focused? dragging-id dropping-id)
-            div
-              {}
-                :style $ merge ui/row style-task
-                  {}
-                    :top $ str (* idx 49) |px
-                    :cursor :move
-                  if (:done? task)
-                    {} $ :opacity 0.5
-                  if
-                    = dropping-id $ :id task
-                    {} (:opacity 0.5) (:transform "\"translate(2px,4px)") (:z-index 900)
-                      :outline $ str "\"2px solid " (hsl 0 0 86)
-                  if
-                    = dragging-id $ :id task
-                    {} (:z-index 999) (:opacity 0.1) (:transform "\"translate(-2px,-4px)")
-                :draggable true
-                :on-dragstart $ fn (e d!)
-                  let
-                      event $ :event e
-                    -> event .-dataTransfer $ .!setData |text (:id task)
-                    -> event .-dataTransfer $ .!setDragImage (js/document.querySelector |.transparent) 0 0
-                    d! :mark/dragging $ :id task
-                :on-dragend $ fn (e d!) (d! :mark/dragging nil) (d! :mark/dropping nil)
-                :on-dragenter $ fn (e d!)
-                  d! :mark/dropping $ :id task
-                :on-dragover $ fn (e d!)
-                  -> e :event $ .!preventDefault
-                :on-drop $ fn (e d!)
-                  let
-                      event $ :event e
+            [] (effect-in)
+              div
+                {}
+                  :style $ merge ui/row style-task
+                    {}
+                      :top $ str (* idx 49) |px
+                      :cursor :move
+                    if (:done? task)
+                      {} $ :opacity 0.5
                     if
-                      not= dragging-id $ :id task
-                      do $ d! :task/move
-                        [] dragging-id $ :id task
-              div $ {}
-                :style $ merge style-done
-                  if (:done? task)
-                    {} $ :transform "|scale(0.7)"
-                :on-click $ fn (e d!)
-                  d! :task/toggle $ :id task
-              =< 8 nil
-              input $ {}
-                :value $ :text task
-                :placeholder |task...
-                :id $ str |input- idx
-                :style $ merge ui/input style-text
-                  let
-                      text-width $ get-width (:text task) |Hind 16
-                    {} $ :width (+ 16 text-width)
-                :on-input $ fn (e d!)
-                  d! :task/edit $ [] (:id task) (:value e)
-                :on-keydown $ on-keydown (:id task) (:text task) idx
-                :on-click $ fn (e d!) (d! :pointer/touch idx)
-              <> (:sort-id task)
-                merge
-                  {} $ :color (hsl 0 0 40 0.1)
-                  if demo? $ {}
-                    :color $ hsl 0 0 0 0.4
-                    :font-size 16
-                    :font-family ui/font-code
+                      = dropping-id $ :id task
+                      {} (:opacity 0.5) (:transform "\"translate(2px,4px)") (:z-index 900)
+                        :outline $ str "\"2px solid " (hsl 0 0 86)
+                    if
+                      = dragging-id $ :id task
+                      {} (:z-index 999) (:opacity 0.1) (:transform "\"translate(-2px,-4px)")
+                  :draggable true
+                  :on-dragstart $ fn (e d!)
+                    let
+                        event $ :event e
+                      -> event .-dataTransfer $ .!setData |text (:id task)
+                      -> event .-dataTransfer $ .!setDragImage (js/document.querySelector |.transparent) 0 0
+                      d! :mark/dragging $ :id task
+                  :on-dragend $ fn (e d!) (d! :mark/dragging nil) (d! :mark/dropping nil)
+                  :on-dragenter $ fn (e d!)
+                    d! :mark/dropping $ :id task
+                  :on-dragover $ fn (e d!)
+                    -> e :event $ .!preventDefault
+                  :on-drop $ fn (e d!)
+                    let
+                        event $ :event e
+                      if
+                        not= dragging-id $ :id task
+                        do $ d! :task/move
+                          [] dragging-id $ :id task
+                div $ {}
+                  :style $ merge style-done
+                    if (:done? task)
+                      {} $ :transform "|scale(0.7)"
+                  :on-click $ fn (e d!)
+                    d! :task/toggle $ :id task
+                =< 8 nil
+                input $ {}
+                  :value $ :text task
+                  :placeholder |task...
+                  :id $ str |input- idx
+                  :style $ merge ui/input style-text
+                    let
+                        text-width $ get-width (:text task) |Hind 16
+                      {} $ :width (+ 16 text-width)
+                  :on-input $ fn (e d!)
+                    d! :task/edit $ [] (:id task) (:value e)
+                  :on-keydown $ on-keydown (:id task) (:text task) idx
+                  :on-click $ fn (e d!) (d! :pointer/touch idx)
+                <> (:sort-id task)
+                  merge
+                    {} $ :color (hsl 0 0 40 0.1)
+                    if demo? $ {}
+                      :color $ hsl 0 0 0 0.4
+                      :font-size 16
+                      :font-family ui/font-code
         |on-keydown $ quote
           defn on-keydown (task-id text idx)
             fn (e dispatch!)
@@ -129,6 +130,16 @@
             :height 48
             :min-width 48
             :border :none
+        |effect-in $ quote
+          defeffect effect-in () (action el at-place?)
+            when (= :mount action)
+              -> el .-style .-opacity $ set! 0
+              -> el .-style .-transform $ set! "\"translate(8px,0px)"
+              js/setTimeout
+                fn ()
+                  -> el .-style .-opacity $ set! 1
+                  -> el .-style .-transform $ set! "\"translate(0px,0px)"
+                , 10
     |app.comp.container $ {}
       :ns $ quote
         ns app.comp.container $ :require

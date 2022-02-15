@@ -171,9 +171,10 @@
                     :style $ merge style/link
                     :on-click $ fn (e d!)
                       let
-                          w $ js/window.open (if config/dev? "\"http://localhost:7001" "\"http://r.tiye.me/Memkits/pudica-schedule-viewer/")
+                          w $ js/window.open
+                            if config/dev? "\"http://localhost:3000" $ str js/location.origin "\"/Memkits/pudica-schedule-viewer/"
                         js/setTimeout
-                          fn () $ .!postMessage w (pr-str store) "\"*"
+                          fn () $ .!postMessage w (format-cirru-edn store) "\"*"
                           , 800
                 comp-transparent
                 when config/dev? $ comp-inspect "\"Store" store nil

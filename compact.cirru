@@ -171,14 +171,9 @@
                     :style $ merge style/link
                     :on-click $ fn (e d!)
                       let
-                          w $ js/window.open
-                            if config/dev? "\"http://localhost:3000" $ str js/location.origin "\"/Memkits/pudica-schedule-viewer/"
-                        js/setTimeout
-                          fn () $ let
-                              raw $ format-cirru-edn store
-                            js/localStorage.setItem "\"pudica-schedule-viewer" raw
-                            ; .!postMessage w raw "\"*"
-                          , 800
+                          raw $ format-cirru-edn store
+                        js/localStorage.setItem "\"pudica-schedule-viewer" raw
+                        js/window.open $ if config/dev? "\"http://localhost:3000" (str js/location.origin "\"/Memkits/pudica-schedule-viewer/")
                 comp-transparent
                 when config/dev? $ comp-inspect "\"Store" store nil
         |on-clear $ quote

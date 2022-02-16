@@ -2313,23 +2313,34 @@
                                                         :at 1528870416146
                                                         :by |root
                                                         :id |BJQ_fINCeX
-                                                      |j $ {}
+                                                      |j $ {} (:type :expr) (:by |Qr5ffqtY) (:at 1645027001683)
                                                         :data $ {}
-                                                          |T $ {} (:text |.!postMessage) (:type :leaf) (:at 1644379220160) (:by |Qr5ffqtY) (:id |rkW7I4Cl7leaf)
-                                                          |j $ {} (:text |w) (:type :leaf) (:at 1528870429803) (:by |root) (:id |Hk7BmLEAxX)
-                                                          |r $ {}
+                                                          |T $ {}
                                                             :data $ {}
-                                                              |T $ {} (:text |format-cirru-edn) (:type :leaf) (:at 1644940741138) (:by |Qr5ffqtY) (:id |B1YXL4Rgm)
-                                                              |j $ {} (:text |store) (:type :leaf) (:at 1528870435896) (:by |root) (:id |HkbsmUN0gX)
+                                                              |T $ {} (:text |.!postMessage) (:type :leaf) (:at 1644379220160) (:by |Qr5ffqtY) (:id |rkW7I4Cl7leaf)
+                                                              |j $ {} (:text |w) (:type :leaf) (:at 1528870429803) (:by |root) (:id |Hk7BmLEAxX)
+                                                              |v $ {} (:text "|\"*") (:type :leaf) (:at 1528870862979) (:by |root) (:id |BJ2ZDV0lQ)
+                                                              |p $ {} (:type :leaf) (:by |Qr5ffqtY) (:at 1645027015393) (:text |raw)
+                                                              |D $ {} (:type :leaf) (:by |Qr5ffqtY) (:at 1645027213826) (:text |;)
                                                             :type :expr
-                                                            :at 1528870432746
+                                                            :at 1528870425008
                                                             :by |root
-                                                            :id |SygKQ8EAgX
-                                                          |v $ {} (:text "|\"*") (:type :leaf) (:at 1528870862979) (:by |root) (:id |BJ2ZDV0lQ)
-                                                        :type :expr
-                                                        :at 1528870425008
-                                                        :by |root
-                                                        :id |rkW7I4Cl7
+                                                            :id |rkW7I4Cl7
+                                                          |D $ {} (:type :leaf) (:by |Qr5ffqtY) (:at 1645027002526) (:text |let)
+                                                          |L $ {} (:type :expr) (:by |Qr5ffqtY) (:at 1645027002823)
+                                                            :data $ {}
+                                                              |T $ {} (:type :expr) (:by |Qr5ffqtY) (:at 1645027002953)
+                                                                :data $ {}
+                                                                  |T $ {} (:type :leaf) (:by |Qr5ffqtY) (:at 1645027012924) (:text |raw)
+                                                                  |b $ {} (:type :expr) (:by |Qr5ffqtY) (:at 1645027005047)
+                                                                    :data $ {}
+                                                                      |T $ {} (:type :leaf) (:by |Qr5ffqtY) (:at 1645027005047) (:text |format-cirru-edn)
+                                                                      |b $ {} (:type :leaf) (:by |Qr5ffqtY) (:at 1645027005047) (:text |store)
+                                                          |P $ {} (:type :expr) (:by |Qr5ffqtY) (:at 1645027018323)
+                                                            :data $ {}
+                                                              |T $ {} (:type :leaf) (:by |Qr5ffqtY) (:at 1645027024943) (:text |js/localStorage.setItem)
+                                                              |b $ {} (:type :leaf) (:by |Qr5ffqtY) (:at 1645027036706) (:text "|\"pudica-schedule-viewer")
+                                                              |h $ {} (:type :leaf) (:by |Qr5ffqtY) (:at 1645027071033) (:text |raw)
                                                     :type :expr
                                                     :at 1528870415209
                                                     :by |root

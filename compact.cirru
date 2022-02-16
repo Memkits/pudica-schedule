@@ -174,7 +174,10 @@
                           w $ js/window.open
                             if config/dev? "\"http://localhost:3000" $ str js/location.origin "\"/Memkits/pudica-schedule-viewer/"
                         js/setTimeout
-                          fn () $ .!postMessage w (format-cirru-edn store) "\"*"
+                          fn () $ let
+                              raw $ format-cirru-edn store
+                            js/localStorage.setItem "\"pudica-schedule-viewer" raw
+                            ; .!postMessage w raw "\"*"
                           , 800
                 comp-transparent
                 when config/dev? $ comp-inspect "\"Store" store nil

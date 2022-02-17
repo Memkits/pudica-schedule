@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@calcit/procs@^0.5.17-a1":
-  version "0.5.17-a1"
-  resolved "https://registry.npmjs.org/@calcit/procs/-/procs-0.5.17-a1.tgz#de1fdadedd7c2ea7756fa95531aa9491ba0e301b"
-  integrity sha512-DX10SIdGMTmFynK2ZyfJYkfbzYWcBLh2qVjA0TqcDzdibUE2d1UroqehIEC3OvagVJvNqLbpABOnmmUPZOBz9A==
+"@calcit/procs@^0.5.17":
+  version "0.5.17"
+  resolved "https://registry.npmjs.org/@calcit/procs/-/procs-0.5.17.tgz#860c08320c42e95f8720c1d6473e7ce991e8d3dd"
+  integrity sha512-yt8r1m4jmiyMKFwRTJWUe+hkhNQzG+EJiPy68/QrXt3I2z1VP9BSenYHU/LWDQTIQ8YZGKTC2jFxUAB1fhD/Bg==
   dependencies:
     "@calcit/ternary-tree" "0.0.18"
     "@cirru/parser.ts" "^0.0.5"
@@ -239,9 +239,9 @@ nanoid@^2.1.0:
   integrity sha512-s/snB+WGm6uwi0WjsZdaVcuf3KJXlfGl2LcxgwkEwJF0D/BWzVWAZW/XY4bFaiR7s0Jk3FPvlnepg1H1b1UwlA==
 
 nanoid@^3.2.0:
-  version "3.2.0"
-  resolved "https://registry.npmjs.org/nanoid/-/nanoid-3.2.0.tgz#62667522da6673971cca916a6d3eff3f415ff80c"
-  integrity sha512-fmsZYa9lpn69Ad5eDn7FMcnnSR+8R34W9qJEijxYhTbfOWzr22n1QxCMzXLK+ODyW2973V3Fux959iQoUxzUIA==
+  version "3.3.0"
+  resolved "https://registry.npmjs.org/nanoid/-/nanoid-3.3.0.tgz#5906f776fd886c66c24f3653e0c46fcb1d4ad6b0"
+  integrity sha512-JzxqqT5u/x+/KOFSd7JP15DOo9nOoHpx6DYatqIHUW2+flybkm+mdcraotSQR5WcnZr+qhGVh8Ted0KdfSMxlg==
 
 next-tick@^0.2.2:
   version "0.2.2"
@@ -324,10 +324,10 @@ virtual-dom@^2.1.1:
     x-is-array "0.1.0"
     x-is-string "0.1.0"
 
-vite@^2.8.1:
-  version "2.8.1"
-  resolved "https://registry.npmjs.org/vite/-/vite-2.8.1.tgz#4b2a42c1d01d6786a2a4c278cd0ba7223b8ec15c"
-  integrity sha512-Typ8qjUnW0p53gBsJpisrKcZlEbUPZATja9BG6Z09QZjg9YrnEn/htkr/VH4WhnH7eNUQeSD+wKI1lHzQRWskw==
+vite@^2.8.3:
+  version "2.8.3"
+  resolved "https://registry.npmjs.org/vite/-/vite-2.8.3.tgz#bb9b7f1f1446d2e538e81026f48d2fe9f1926963"
+  integrity sha512-967klrEiG7HEsN7fQYYVETs5495Iu6GpI7YyxoO5yVTJCRxjV8HhWgNWKgrbazjoOB9DQuztL53/nUoNqHNsWg==
   dependencies:
     esbuild "^0.14.14"
     postcss "^8.4.6"

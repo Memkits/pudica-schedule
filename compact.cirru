@@ -1,20 +1,52 @@
 
 {} (:package |app)
-  :configs $ {} (:init-fn |app.main/main!) (:reload-fn |app.main/reload!)
+  :configs $ {} (:init-fn |app.main/main!) (:reload-fn |app.main/reload!) (:version |0.0.1)
     :modules $ [] |respo.calcit/ |lilac/ |memof/ |respo-ui.calcit/ |respo-markdown.calcit/ |reel.calcit/ |bisection-key/
-    :version |0.0.1
   :entries $ {}
   :files $ {}
-    |app.comp.task $ {}
+    |app.comp.container $ {}
+      :defs $ {}
+        |comp-container $ quote
+          defcomp comp-container (reel)
+            let
+                store $ :store reel
+              div
+                {} $ :style
+                  merge ui/global ui/fullscreen $ {} (:background-position "|left top") (:color :white) (:overflow :auto) (:padding "|160px 200px")
+                comp-todolist (:tasks store) (:pointer store) (:dragging-id store) (:dropping-id store)
+                div
+                  {} $ :style
+                    {} (:position :fixed) (:bottom 0) (:left 16)
+                  a $ {} (:inner-text |Relax)
+                    :style $ merge style/link
+                    :on-click $ fn (e d!) (d! :task/relax nil)
+                  =< 8 nil
+                  a $ {} (:inner-text |Review)
+                    :style $ merge style/link
+                    :on-click $ fn (e d!)
+                      let
+                          raw $ format-cirru-edn store
+                        js/localStorage.setItem "\"pudica-schedule-viewer" raw
+                        js/window.open $ if config/dev? "\"http://localhost:3000" (str js/location.origin "\"/Memkits/pudica-schedule-viewer/")
+                comp-transparent
+                when config/dev? $ comp-inspect "\"Store" store nil
+        |comp-transparent $ quote
+          defcomp comp-transparent () $ span
+            {} (:class-name |transparent)
+              :style $ {} (:width 1) (:height 1) (:background-color |red) (:display :inline-block)
+        |on-clear $ quote
+          defn on-clear (e dispatch!) (dispatch! :task/clear nil)
       :ns $ quote
-        ns app.comp.task $ :require
-          respo-ui.core :refer $ hsl
-          respo-ui.core :as ui
-          respo.core :refer $ defcomp div span input <> defeffect
-          respo.comp.space :refer $ =<
-          clojure.string :as string
-          app.util.dom :refer $ get-width
-          app.config :refer $ demo?
+        ns app.comp.container $ :require
+          [] hsl.core :refer $ [] hsl
+          [] respo-ui.core :as ui
+          [] respo.core :refer $ [] defcomp action-> <> div span button a
+          [] respo.comp.space :refer $ [] =<
+          [] app.comp.todolist :refer $ [] comp-todolist
+          [] respo.comp.inspect :refer $ [] comp-inspect
+          [] app.style :as style
+          [] app.config :as config
+    |app.comp.task $ {}
       :defs $ {}
         |comp-task $ quote
           defcomp comp-task (task idx focused? dragging-id dropping-id)
@@ -79,6 +111,16 @@
                       :color $ hsl 0 0 0 0.4
                       :font-size 16
                       :font-family ui/font-code
+        |effect-in $ quote
+          defeffect effect-in () (action el at-place?)
+            when (= :mount action)
+              -> el .-style .-opacity $ set! 0
+              -> el .-style .-transform $ set! "\"translate(8px,0px)"
+              js/setTimeout
+                fn ()
+                  -> el .-style .-opacity $ set! 1
+                  -> el .-style .-transform $ set! "\"translate(0px,0px)"
+                , 10
         |on-keydown $ quote
           defn on-keydown (task-id text idx)
             fn (e dispatch!)
@@ -130,65 +172,137 @@
             :height 48
             :min-width 48
             :border :none
-        |effect-in $ quote
-          defeffect effect-in () (action el at-place?)
-            when (= :mount action)
-              -> el .-style .-opacity $ set! 0
-              -> el .-style .-transform $ set! "\"translate(8px,0px)"
-              js/setTimeout
-                fn ()
-                  -> el .-style .-opacity $ set! 1
-                  -> el .-style .-transform $ set! "\"translate(0px,0px)"
-                , 10
-    |app.comp.container $ {}
       :ns $ quote
-        ns app.comp.container $ :require
-          [] hsl.core :refer $ [] hsl
-          [] respo-ui.core :as ui
-          [] respo.core :refer $ [] defcomp action-> <> div span button a
-          [] respo.comp.space :refer $ [] =<
-          [] app.comp.todolist :refer $ [] comp-todolist
-          [] respo.comp.inspect :refer $ [] comp-inspect
-          [] app.style :as style
-          [] app.config :as config
+        ns app.comp.task $ :require
+          respo-ui.core :refer $ hsl
+          respo-ui.core :as ui
+          respo.core :refer $ defcomp div span input <> defeffect
+          respo.comp.space :refer $ =<
+          clojure.string :as string
+          app.util.dom :refer $ get-width
+          app.config :refer $ demo?
+    |app.comp.todolist $ {}
       :defs $ {}
-        |comp-container $ quote
-          defcomp comp-container (reel)
-            let
-                store $ :store reel
+        |comp-todolist $ quote
+          defcomp comp-todolist (tasks pointer dragging-id dropping-id)
+            div
+              {} $ :style
+                {} (:position :relative)
+                  :height $ * 40 (count tasks)
               div
                 {} $ :style
-                  merge ui/global ui/fullscreen $ {} (:background-position "|left top") (:color :white) (:overflow :auto) (:padding "|160px 200px")
-                comp-todolist (:tasks store) (:pointer store) (:dragging-id store) (:dropping-id store)
-                div
-                  {} $ :style
-                    {} (:position :fixed) (:bottom 0) (:left 16)
-                  a $ {} (:inner-text |Relax)
-                    :style $ merge style/link
-                    :on-click $ fn (e d!) (d! :task/relax nil)
-                  =< 8 nil
-                  a $ {} (:inner-text |Review)
-                    :style $ merge style/link
-                    :on-click $ fn (e d!)
-                      let
-                          raw $ format-cirru-edn store
-                        js/localStorage.setItem "\"pudica-schedule-viewer" raw
-                        js/window.open $ if config/dev? "\"http://localhost:3000" (str js/location.origin "\"/Memkits/pudica-schedule-viewer/")
-                comp-transparent
-                when config/dev? $ comp-inspect "\"Store" store nil
-        |on-clear $ quote
-          defn on-clear (e dispatch!) (dispatch! :task/clear nil)
-        |comp-transparent $ quote
-          defcomp comp-transparent () $ span
-            {} (:class-name |transparent)
-              :style $ {} (:width 1) (:height 1) (:background-color |red) (:display :inline-block)
-    |app.schema $ {}
+                  {} (:position :relative)
+                    :height $ str
+                      + 8 $ * 40 (count tasks)
+                      , |px
+                list-> ({})
+                  -> tasks (.to-list)
+                    .sort-by $ fn (pair)
+                      let[] (task-id task) pair $ :sort-id task
+                    map-indexed $ fn (idx pair)
+                      let[] (task-id task) pair $ [] task-id
+                        let
+                            pointed? $ = pointer idx
+                          comp-task task idx pointed? dragging-id dropping-id
+                    .sort-by first
+                div $ {}
+                  :style $ {}
+                    :top $ str
+                      + 2 $ * 49 pointer
+                      , |px
+                    :left -20
+                    :width 8
+                    :height 40
+                    :background-color $ hsl 30 90 80
+                    :position :absolute
+                    :transition |600ms
+                    :border-radius "\"4px"
       :ns $ quote
-        ns app.schema $ :require
-          [] bisection-key.core :refer $ [] mid-id
+        ns app.comp.todolist $ :require
+          [] respo-ui.core :refer $ [] hsl
+          [] respo-ui.core :as ui
+          [] respo.core :refer $ [] defcomp div button list->
+          [] respo.comp.space :refer $ [] =<
+          [] app.comp.task :refer $ [] comp-task
+          [] clojure.string :as string
+    |app.config $ {}
       :defs $ {}
-        |task $ quote
-          def task $ {} (:id nil) (:text |) (:done? false) (:sort-id nil) (:created-time nil) (:done-time nil) (:archived-time nil)
+        |demo? $ quote
+          def demo? $ = "\"true" (get-env "\"demo" "\"false")
+        |dev? $ quote
+          def dev? $ = "\"dev" (get-env "\"mode" "\"release")
+        |site $ quote
+          def site $ {} (:dev-ui "\"http://localhost:8100/main.css") (:release-ui "\"http://cdn.tiye.me/favored-fonts/main.css") (:cdn-url "\"http://cdn.tiye.me/pudica-schedule/") (:cdn-folder "\"tiye.me:cdn/pudica-schedule") (:title "\"Pudica") (:icon "\"http://cdn.tiye.me/logo/pudica.png") (:storage-key "\"pudica-schedule") (:upload-folder "\"tiye.me:repo/Memkits/pudica-schedule/")
+      :ns $ quote (ns app.config)
+    |app.main $ {}
+      :defs $ {}
+        |*reel $ quote
+          defatom *reel $ -> reel-schema/reel (assoc :base schema/store) (assoc :store schema/store)
+        |adjust-focus! $ quote
+          defn adjust-focus! () $ js/setTimeout
+            fn () $ let
+                pointer $ :pointer (:store @*reel)
+                maybe-input $ js/document.getElementById (str |input- pointer)
+              ; println "|Focus to:" pointer maybe-input
+              if
+                and (some? maybe-input)
+                  not $ identical? maybe-input (.-activeElement js/document)
+                .!focus maybe-input
+        |dispatch! $ quote
+          defn dispatch! (op op-data)
+            when config/dev? $ println "\"Dispatch:" op
+            reset! *reel $ reel-updater updater @*reel op op-data
+        |main! $ quote
+          defn main! ()
+            if config/dev? $ load-console-formatter!
+            println "\"Running mode:" $ if config/dev? "\"dev" "\"release"
+            render-app!
+            add-watch *reel :changes $ fn (r p) (render-app!)
+            add-watch *reel :focus $ fn (r p) (adjust-focus!)
+            listen-devtools! |k dispatch!
+            js/window.addEventListener |beforeunload persist-storage!
+            repeat! 60 persist-storage!
+            let
+                raw $ js/localStorage.getItem (:storage-key config/site)
+              when (some? raw)
+                dispatch! :hydrate-storage $ parse-cirru-edn raw
+            println "|App started."
+        |mount-target $ quote
+          def mount-target $ .querySelector js/document |.app
+        |persist-storage! $ quote
+          defn persist-storage! (? e)
+            .setItem js/localStorage (:storage-key config/site)
+              format-cirru-edn $ :store @*reel
+        |reload! $ quote
+          defn reload! () $ if (nil? build-errors)
+            do (remove-watch *reel :changes) (clear-cache!)
+              add-watch *reel :changes $ fn (reel prev) (render-app!)
+              reset! *reel $ refresh-reel @*reel schema/store updater
+              hud! "\"ok~" "\"Ok"
+            hud! "\"error" build-errors
+        |render-app! $ quote
+          defn render-app! () $ render! mount-target (comp-container @*reel) dispatch!
+        |repeat! $ quote
+          defn repeat! (duration cb)
+            js/setTimeout
+              fn () (cb)
+                repeat! (* 1000 duration) cb
+              * 1000 duration
+      :ns $ quote
+        ns app.main $ :require
+          [] respo.core :refer $ [] render! clear-cache! realize-ssr!
+          [] app.comp.container :refer $ [] comp-container
+          [] app.updater :refer $ [] updater
+          [] app.schema :as schema
+          [] reel.util :refer $ [] listen-devtools!
+          [] reel.core :refer $ [] reel-updater refresh-reel
+          [] reel.schema :as reel-schema
+          [] cljs.reader :refer $ [] read-string
+          [] app.config :as config
+          "\"./calcit.build-errors" :default build-errors
+          "\"bottom-tip" :default hud!
+    |app.schema $ {}
+      :defs $ {}
         |store $ quote
           def store $ {}
             :tasks $ {}
@@ -199,12 +313,99 @@
             :dropping-id nil
             :states $ {}
             :archives $ {}
-    |app.updater $ {}
+        |task $ quote
+          def task $ {} (:id nil) (:text |) (:done? false) (:sort-id nil) (:created-time nil) (:done-time nil) (:archived-time nil)
       :ns $ quote
-        ns app.updater $ :require ([] app.schema :as schema)
-          [] respo.cursor :refer $ [] update-states
-          [] bisection-key.core :refer $ [] bisect max-id min-id mid-id
+        ns app.schema $ :require
+          [] bisection-key.core :refer $ [] mid-id
+    |app.style $ {}
       :defs $ {}
+        |link $ quote
+          def link $ merge ui/link
+            {} $ :margin "\"0 8px"
+      :ns $ quote
+        ns app.style $ :require ([] respo-ui.core :as ui)
+    |app.updater $ {}
+      :defs $ {}
+        |add-after $ quote
+          defn add-after (store task-id op-id op-time)
+            let
+                base-task $ get-in store ([] :tasks task-id)
+                base-sort-id $ :sort-id base-task
+                all-sort-ids $ -> (:tasks store) (.to-list) (map last)
+                  map $ fn (x) (:sort-id x)
+                  sort &compare
+                sort-id-after $ first
+                  filter all-sort-ids $ fn (x) (> x base-sort-id)
+                new-sort-id $ bisect (or base-sort-id mid-id) (or sort-id-after max-id)
+                new-task $ merge schema/task
+                  {} (:id op-id) (:sort-id new-sort-id) (:created-time op-time)
+              -> store
+                assoc-in ([] :tasks op-id) new-task
+                update :pointer inc
+        |add-before $ quote
+          defn add-before (store task-id op-id op-time)
+            let
+                base-task $ get-in store ([] :tasks task-id)
+                base-sort-id $ :sort-id base-task
+                all-sort-ids $ -> (:tasks store) (.to-list) (map last)
+                  map $ fn (x) (:sort-id x)
+                  sort &compare
+                sort-id-before $ last
+                  filter all-sort-ids $ fn (x) (< x base-sort-id)
+                new-sort-id $ bisect (or sort-id-before min-id) base-sort-id
+                new-task $ merge schema/task
+                  {} (:id op-id) (:sort-id new-sort-id) (:created-time op-time)
+              -> store $ assoc-in ([] :tasks op-id) new-task
+        |delete-task $ quote
+          defn delete-task (store op-data)
+            let-sugar
+                  [] task-id idx
+                  , op-data
+              if
+                = 1 $ count (:tasks store)
+                , store $ -> store
+                  update :tasks $ fn (tasks) (dissoc tasks task-id)
+                  update :pointer $ fn (pointer)
+                    if (= 0 idx) 0 $ dec pointer
+        |move-task $ quote
+          defn move-task (store op-data)
+            let-sugar
+                  [] from-id to-id
+                  , op-data
+                tasks $ :tasks store
+                before? $ >
+                  get-in tasks $ [] from-id :sort-id
+                  get-in tasks $ [] to-id :sort-id
+                from-task $ get tasks from-id
+                to-task $ get tasks to-id
+                base-sort-id $ :sort-id to-task
+                all-sort-ids $ -> (:tasks store) (vals)
+                  map $ fn (x) (:sort-id x)
+                new-sort-id $ if before?
+                  bisect
+                    or
+                      -> all-sort-ids (.to-list)
+                        filter $ fn (x) (< x base-sort-id)
+                        sort &compare
+                        last
+                      , min-id
+                    , base-sort-id
+                  bisect base-sort-id $ or
+                    -> all-sort-ids (.to-list)
+                      filter $ fn (x) (> x base-sort-id)
+                      sort &compare
+                      first
+                    , max-id
+                new-pointer $ ->
+                  &exclude all-sort-ids $ :sort-id from-task
+                  .to-list
+                  conj new-sort-id
+                  sort &compare
+                  .index-of new-sort-id
+              -> store
+                assoc-in ([] :tasks from-id :sort-id) new-sort-id
+                assoc :pointer new-pointer
         |relax-tasks $ quote
           defn relax-tasks (store op-id op-time)
             let
@@ -226,33 +427,6 @@
                       , next-tasks
                 update :archives $ fn (archives) (merge archives done-tasks)
                 assoc :pointer 0
-        |delete-task $ quote
-          defn delete-task (store op-data)
-            let-sugar
-                  [] task-id idx
-                  , op-data
-              if
-                = 1 $ count (:tasks store)
-                , store $ -> store
-                  update :tasks $ fn (tasks) (dissoc tasks task-id)
-                  update :pointer $ fn (pointer)
-                    if (= 0 idx) 0 $ dec pointer
-        |add-after $ quote
-          defn add-after (store task-id op-id op-time)
-            let
-                base-task $ get-in store ([] :tasks task-id)
-                base-sort-id $ :sort-id base-task
-                all-sort-ids $ -> (:tasks store) (.to-list) (map last)
-                  map $ fn (x) (:sort-id x)
-                  sort &compare
-                sort-id-after $ first
-                  filter all-sort-ids $ fn (x) (> x base-sort-id)
-                new-sort-id $ bisect (or base-sort-id mid-id) (or sort-id-after max-id)
-                new-task $ merge schema/task
-                  {} (:id op-id) (:sort-id new-sort-id) (:created-time op-time)
-              -> store
-                assoc-in ([] :tasks op-id) new-task
-                update :pointer inc
         |swap-tasks $ quote
           defn swap-tasks (store op-data)
             let-sugar
@@ -295,112 +469,14 @@
               :mark/dragging $ assoc store :dragging-id op-data
               :mark/dropping $ assoc store :dropping-id op-data
               :hydrate-storage op-data
-        |move-task $ quote
-          defn move-task (store op-data)
-            let-sugar
-                  [] from-id to-id
-                  , op-data
-                tasks $ :tasks store
-                before? $ >
-                  get-in tasks $ [] from-id :sort-id
-                  get-in tasks $ [] to-id :sort-id
-                from-task $ get tasks from-id
-                to-task $ get tasks to-id
-                base-sort-id $ :sort-id to-task
-                all-sort-ids $ -> (:tasks store) (vals)
-                  map $ fn (x) (:sort-id x)
-                new-sort-id $ if before?
-                  bisect
-                    or
-                      -> all-sort-ids (.to-list)
-                        filter $ fn (x) (< x base-sort-id)
-                        sort &compare
-                        last
-                      , min-id
-                    , base-sort-id
-                  bisect base-sort-id $ or
-                    -> all-sort-ids (.to-list)
-                      filter $ fn (x) (> x base-sort-id)
-                      sort &compare
-                      first
-                    , max-id
-                new-pointer $ ->
-                  &exclude all-sort-ids $ :sort-id from-task
-                  .to-list
-                  conj new-sort-id
-                  sort &compare
-                  .index-of new-sort-id
-              -> store
-                assoc-in ([] :tasks from-id :sort-id) new-sort-id
-                assoc :pointer new-pointer
-        |add-before $ quote
-          defn add-before (store task-id op-id op-time)
-            let
-                base-task $ get-in store ([] :tasks task-id)
-                base-sort-id $ :sort-id base-task
-                all-sort-ids $ -> (:tasks store) (.to-list) (map last)
-                  map $ fn (x) (:sort-id x)
-                  sort &compare
-                sort-id-before $ last
-                  filter all-sort-ids $ fn (x) (< x base-sort-id)
-                new-sort-id $ bisect (or sort-id-before min-id) base-sort-id
-                new-task $ merge schema/task
-                  {} (:id op-id) (:sort-id new-sort-id) (:created-time op-time)
-              -> store $ assoc-in ([] :tasks op-id) new-task
-    |app.comp.todolist $ {}
       :ns $ quote
-        ns app.comp.todolist $ :require
-          [] respo-ui.core :refer $ [] hsl
-          [] respo-ui.core :as ui
-          [] respo.core :refer $ [] defcomp div button list->
-          [] respo.comp.space :refer $ [] =<
-          [] app.comp.task :refer $ [] comp-task
-          [] clojure.string :as string
-      :defs $ {}
-        |comp-todolist $ quote
-          defcomp comp-todolist (tasks pointer dragging-id dropping-id)
-            div
-              {} $ :style
-                {} (:position :relative)
-                  :height $ * 40 (count tasks)
-              div
-                {} $ :style
-                  {} (:position :relative)
-                    :height $ str
-                      + 8 $ * 40 (count tasks)
-                      , |px
-                list-> ({})
-                  -> tasks (.to-list)
-                    .sort-by $ fn (pair)
-                      let[] (task-id task) pair $ :sort-id task
-                    map-indexed $ fn (idx pair)
-                      let[] (task-id task) pair $ [] task-id
-                        let
-                            pointed? $ = pointer idx
-                          comp-task task idx pointed? dragging-id dropping-id
-                    .sort-by first
-                div $ {}
-                  :style $ {}
-                    :top $ str
-                      + 2 $ * 49 pointer
-                      , |px
-                    :left -20
-                    :width 8
-                    :height 40
-                    :background-color $ hsl 30 90 80
-                    :position :absolute
-                    :transition |600ms
-                    :border-radius "\"4px"
-    |app.style $ {}
-      :ns $ quote
-        ns app.style $ :require ([] respo-ui.core :as ui)
-      :defs $ {}
-        |link $ quote
-          def link $ merge ui/link
-            {} $ :margin "\"0 8px"
+        ns app.updater $ :require ([] app.schema :as schema)
+          [] respo.cursor :refer $ [] update-states
+          [] bisection-key.core :refer $ [] bisect max-id min-id mid-id
     |app.util.dom $ {}
-      :ns $ quote (ns app.util.dom)
       :defs $ {}
+        |*canvas-element $ quote
+          defatom *canvas-element $ if (exists? js/document) (js/document.createElement |canvas) nil
         |get-width $ quote
           defn get-width (text font-family font-size)
             if (exists? js/document)
@@ -409,87 +485,4 @@
                 set! (.-font ctx) (str font-size "|px " font-family)
                 .-width $ .measureText ctx text
               , 0
-        |*canvas-element $ quote
-          defatom *canvas-element $ if (exists? js/document) (js/document.createElement |canvas) nil
-    |app.main $ {}
-      :ns $ quote
-        ns app.main $ :require
-          [] respo.core :refer $ [] render! clear-cache! realize-ssr!
-          [] app.comp.container :refer $ [] comp-container
-          [] app.updater :refer $ [] updater
-          [] app.schema :as schema
-          [] reel.util :refer $ [] listen-devtools!
-          [] reel.core :refer $ [] reel-updater refresh-reel
-          [] reel.schema :as reel-schema
-          [] cljs.reader :refer $ [] read-string
-          [] app.config :as config
-          "\"./calcit.build-errors" :default build-errors
-          "\"bottom-tip" :default hud!
-      :defs $ {}
-        |render-app! $ quote
-          defn render-app! () $ render! mount-target (comp-container @*reel) dispatch!
-        |persist-storage! $ quote
-          defn persist-storage! (? e)
-            .setItem js/localStorage (:storage-key config/site)
-              format-cirru-edn $ :store @*reel
-        |mount-target $ quote
-          def mount-target $ .querySelector js/document |.app
-        |*reel $ quote
-          defatom *reel $ -> reel-schema/reel (assoc :base schema/store) (assoc :store schema/store)
-        |main! $ quote
-          defn main! ()
-            if config/dev? $ load-console-formatter!
-            println "\"Running mode:" $ if config/dev? "\"dev" "\"release"
-            render-app!
-            add-watch *reel :changes $ fn (r p) (render-app!)
-            add-watch *reel :focus $ fn (r p) (adjust-focus!)
-            listen-devtools! |k dispatch!
-            js/window.addEventListener |beforeunload persist-storage!
-            repeat! 60 persist-storage!
-            let
-                raw $ js/localStorage.getItem (:storage-key config/site)
-              when (some? raw)
-                dispatch! :hydrate-storage $ parse-cirru-edn raw
-            println "|App started."
-        |dispatch! $ quote
-          defn dispatch! (op op-data)
-            when config/dev? $ println "\"Dispatch:" op
-            reset! *reel $ reel-updater updater @*reel op op-data
-        |reload! $ quote
-          defn reload! () $ if (nil? build-errors)
-            do (remove-watch *reel :changes) (clear-cache!)
-              add-watch *reel :changes $ fn (reel prev) (render-app!)
-              reset! *reel $ refresh-reel @*reel schema/store updater
-              hud! "\"ok~" "\"Ok"
-            hud! "\"error" build-errors
-        |repeat! $ quote
-          defn repeat! (duration cb)
-            js/setTimeout
-              fn () (cb)
-                repeat! (* 1000 duration) cb
-              * 1000 duration
-        |adjust-focus! $ quote
-          defn adjust-focus! () $ js/setTimeout
-            fn () $ let
-                pointer $ :pointer (:store @*reel)
-                maybe-input $ js/document.getElementById (str |input- pointer)
-              ; println "|Focus to:" pointer maybe-input
-              if
-                and (some? maybe-input)
-                  not $ identical? maybe-input (.-activeElement js/document)
-                .!focus maybe-input
-    |app.config $ {}
-      :ns $ quote (ns app.config)
-      :defs $ {}
-        |cdn? $ quote
-          def cdn? $ cond
-              exists? js/window
-              , false
-            (exists? js/process) (= "\"true" js/process.env.cdn)
-            :else false
-        |dev? $ quote
-          def dev? $ = "\"dev" (get-env "\"mode")
-        |site $ quote
-          def site $ {} (:dev-ui "\"http://localhost:8100/main.css") (:release-ui "\"http://cdn.tiye.me/favored-fonts/main.css") (:cdn-url "\"http://cdn.tiye.me/pudica-schedule/") (:cdn-folder "\"tiye.me:cdn/pudica-schedule") (:title "\"Pudica") (:icon "\"http://cdn.tiye.me/logo/pudica.png") (:storage-key "\"pudica-schedule") (:upload-folder "\"tiye.me:repo/Memkits/pudica-schedule/")
-        |demo? $ quote
-          def demo? $ = "\"true" (get-env "\"demo")
+      :ns $ quote (ns app.util.dom)

@@ -50,7 +50,8 @@
       :defs $ {}
         |comp-task $ quote
           defcomp comp-task (task idx focused? dragging-id dropping-id)
-            [] (effect-in)
+            []
+              effect-in $ :done? task
               div
                 {}
                   :style $ merge ui/row style-task
@@ -112,13 +113,13 @@
                       :font-size 16
                       :font-family ui/font-code
         |effect-in $ quote
-          defeffect effect-in () (action el at-place?)
+          defeffect effect-in (done?) (action el at-place?)
             when (= :mount action)
               -> el .-style .-opacity $ set! 0
               -> el .-style .-transform $ set! "\"translate(8px,0px)"
               js/setTimeout
                 fn ()
-                  -> el .-style .-opacity $ set! 1
+                  -> el .-style .-opacity $ set! (if done? 0.5 1)
                   -> el .-style .-transform $ set! "\"translate(0px,0px)"
                 , 10
         |on-keydown $ quote
@@ -155,7 +156,7 @@
             :transition-duration |300ms
             :border-radius "\"50%"
         |style-task $ quote
-          def style-task $ {} (:position :absolute) (:padding "|0 16px") (:transition-duration |300ms) (:transition-property |top,transform,outline) (:align-items :center) (:transform-origin "|8% 50%")
+          def style-task $ {} (:position :absolute) (:padding "|0 16px") (:transition-duration |300ms) (:transition-property |top,transform,outline,opacity) (:align-items :center) (:transform-origin "|8% 50%")
             :background-color $ hsl 0 0 100
             :min-width 720
             :cursor :move

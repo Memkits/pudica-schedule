@@ -11,18 +11,18 @@
             let
                 store $ :store reel
               div
-                {} $ :style
-                  merge ui/global ui/fullscreen $ {} (:background-position "|left top") (:color :white) (:overflow :auto) (:padding "|160px 200px")
+                {}
+                  :class-name $ str-spaced css/global css/fullscreen
+                  :style $ merge
+                    {} (:background-position "|left top") (:color :white) (:overflow :auto) (:padding "|160px 200px")
                 comp-todolist (:tasks store) (:pointer store) (:dragging-id store) (:dropping-id store)
                 div
                   {} $ :style
                     {} (:position :fixed) (:bottom 0) (:left 16)
-                  a $ {} (:inner-text |Relax)
-                    :style $ merge style/link
+                  a $ {} (:inner-text |Relax) (:class-name css/link)
                     :on-click $ fn (e d!) (d! :task/relax nil)
                   =< 8 nil
-                  a $ {} (:inner-text |Review)
-                    :style $ merge style/link
+                  a $ {} (:inner-text |Review) (:class-name css/link)
                     :on-click $ fn (e d!)
                       let
                           raw $ format-cirru-edn store
@@ -38,14 +38,15 @@
           defn on-clear (e dispatch!) (dispatch! :task/clear nil)
       :ns $ quote
         ns app.comp.container $ :require
-          [] hsl.core :refer $ [] hsl
-          [] respo-ui.core :as ui
-          [] respo.core :refer $ [] defcomp action-> <> div span button a
-          [] respo.comp.space :refer $ [] =<
-          [] app.comp.todolist :refer $ [] comp-todolist
-          [] respo.comp.inspect :refer $ [] comp-inspect
-          [] app.style :as style
-          [] app.config :as config
+          respo-ui.core :refer $ hsl
+          respo-ui.core :as ui
+          respo-ui.css :as css
+          respo.core :refer $ defcomp action-> <> div span button a
+          respo.comp.space :refer $ =<
+          app.comp.todolist :refer $ comp-todolist
+          respo.comp.inspect :refer $ comp-inspect
+          app.style :as style
+          app.config :as config
     |app.comp.task $ {}
       :defs $ {}
         |comp-task $ quote
@@ -54,10 +55,10 @@
               effect-in $ :done? task
               div
                 {}
-                  :style $ merge ui/row style-task
-                    {}
-                      :top $ str (* idx 49) |px
-                      :cursor :move
+                  :class-name $ str-spaced css/row css-task
+                  :style $ merge
+                    {} $ :top
+                      str (* idx 49) |px
                     if (:done? task)
                       {} $ :opacity 0.5
                     if
@@ -86,10 +87,9 @@
                         not= dragging-id $ :id task
                         do $ d! :task/move
                           [] dragging-id $ :id task
-                div $ {}
-                  :style $ merge style-done
-                    if (:done? task)
-                      {} $ :transform "|scale(0.7)"
+                div $ {} (:class-name css-done)
+                  :style $ if (:done? task)
+                    {} $ :transform "|scale(0.7)"
                   :on-click $ fn (e d!)
                     d! :task/toggle $ :id task
                 =< 8 nil
@@ -97,10 +97,11 @@
                   :value $ :text task
                   :placeholder |task...
                   :id $ str |input- idx
-                  :style $ merge ui/input style-text
-                    let
-                        text-width $ get-width (:text task) |Hind 16
-                      {} $ :width (+ 16 text-width)
+                  :spellcheck false
+                  :class-name $ str-spaced css/input css-text
+                  :style $ let
+                      text-width $ get-width (:text task) |Hind 16
+                    {} $ :width (+ 16 text-width)
                   :on-input $ fn (e d!)
                     d! :task/edit $ [] (:id task) (:value e)
                   :on-keydown $ on-keydown (:id task) (:text task) idx
@@ -112,6 +113,38 @@
                       :color $ hsl 0 0 0 0.4
                       :font-size 16
                       :font-family ui/font-code
+        |css-done $ quote
+          defstyle css-done $ {}
+            "\"$0" $ {} (:width 20) (:height 20)
+              :background-color $ hsl 240 90 88 0.3
+              :cursor :pointer
+              :transition-duration |300ms
+              :border-radius "\"50%"
+        |css-task $ quote
+          defstyle css-task $ {}
+            "\"$0" $ {} (:position :absolute) (:padding "|0 16px") (:transition-duration |300ms) (:transition-property |top,transform,outline,opacity,box-shadow) (:align-items :center) (:transform-origin "|8% 50%")
+              :background-color $ hsl 0 0 100
+              :min-width 720
+              :cursor :move
+              :border-radius "\"6px"
+              :box-shadow $ str "\"0 0 2px " (hsl 0 0 80 0.1)
+              :cursor :move
+            "\"$0:hover" $ {}
+              :box-shadow $ str "\"2px 2px 8px " (hsl 0 0 40 0.2)
+              :z-index 999
+        |css-text $ quote
+          defstyle css-text $ {}
+            "\"$0" $ {} (:width 600) (:background-color :transparent)
+              :color $ hsl 0 0 20
+              :font-size 16
+              :font-family |Hind
+              :font-weight 300
+              :padding "|0 4px"
+              :line-height |48px
+              :height 48
+              :min-width 48
+              :border :none
+            "\"$0:focus" $ {} (:box-shadow :none) (:border :none)
         |effect-in $ quote
           defeffect effect-in (done?) (action el at-place?)
             when (= :mount action)
@@ -149,37 +182,14 @@
                     do (.preventDefault event) (dispatch! :pointer/before nil)
                   (and (not shift?) (= 9 code))
                     do (.preventDefault event) (dispatch! :pointer/after nil)
-        |style-done $ quote
-          def style-done $ {} (:width 20) (:height 20)
-            :background-color $ hsl 240 90 88 0.3
-            :cursor :pointer
-            :transition-duration |300ms
-            :border-radius "\"50%"
-        |style-task $ quote
-          def style-task $ {} (:position :absolute) (:padding "|0 16px") (:transition-duration |300ms) (:transition-property |top,transform,outline,opacity) (:align-items :center) (:transform-origin "|8% 50%")
-            :background-color $ hsl 0 0 100
-            :min-width 720
-            :cursor :move
-            :border-radius "\"6px"
-            :box-shadow $ str "\"0 0 2px " (hsl 0 0 80 0.1)
-        |style-text $ quote
-          def style-text $ {} (:width 600) (:background-color :transparent)
-            :color $ hsl 0 0 20
-            :font-size 16
-            :font-family |Hind
-            :font-weight 300
-            :padding "|0 4px"
-            :line-height |48px
-            :height 48
-            :min-width 48
-            :border :none
       :ns $ quote
         ns app.comp.task $ :require
           respo-ui.core :refer $ hsl
           respo-ui.core :as ui
+          respo-ui.css :as css
           respo.core :refer $ defcomp div span input <> defeffect
+          respo.css :refer $ defstyle
           respo.comp.space :refer $ =<
-          clojure.string :as string
           app.util.dom :refer $ get-width
           app.config :refer $ demo?
     |app.comp.todolist $ {}
@@ -206,23 +216,24 @@
                             pointed? $ = pointer idx
                           comp-task task idx pointed? dragging-id dropping-id
                     .sort-by first
-                div $ {}
+                div $ {} (:class-name css-cursor)
                   :style $ {}
                     :top $ str
                       + 2 $ * 49 pointer
                       , |px
-                    :left -20
-                    :width 8
-                    :height 40
-                    :background-color $ hsl 30 90 80
-                    :position :absolute
-                    :transition |600ms
-                    :border-radius "\"4px"
+        |css-cursor $ quote
+          defstyle css-cursor $ {}
+            "\"$0" $ {} (:left -20) (:width 8) (:height 40)
+              :background-color $ hsl 30 90 80
+              :position :absolute
+              :transition |600ms
+              :border-radius "\"4px"
       :ns $ quote
         ns app.comp.todolist $ :require
           [] respo-ui.core :refer $ [] hsl
           [] respo-ui.core :as ui
           [] respo.core :refer $ [] defcomp div button list->
+          respo.css :refer $ defstyle
           [] respo.comp.space :refer $ [] =<
           [] app.comp.task :refer $ [] comp-task
           [] clojure.string :as string
@@ -233,7 +244,7 @@
         |dev? $ quote
           def dev? $ = "\"dev" (get-env "\"mode" "\"release")
         |site $ quote
-          def site $ {} (:dev-ui "\"http://localhost:8100/main.css") (:release-ui "\"http://cdn.tiye.me/favored-fonts/main.css") (:cdn-url "\"http://cdn.tiye.me/pudica-schedule/") (:cdn-folder "\"tiye.me:cdn/pudica-schedule") (:title "\"Pudica") (:icon "\"http://cdn.tiye.me/logo/pudica.png") (:storage-key "\"pudica-schedule") (:upload-folder "\"tiye.me:repo/Memkits/pudica-schedule/")
+          def site $ {} (:title "\"Pudica") (:icon "\"http://cdn.tiye.me/logo/pudica.png") (:storage-key "\"pudica-schedule")
       :ns $ quote (ns app.config)
     |app.main $ {}
       :defs $ {}

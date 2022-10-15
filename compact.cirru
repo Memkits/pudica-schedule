@@ -175,9 +175,9 @@
                       not $ .blank? text
                       dispatch! :task/add-after task-id
                   (and (= 38 code))
-                    do (dispatch! :pointer/before) (.preventDefault event)
+                    do (dispatch! :pointer/before nil) (.!preventDefault event)
                   (and (= 40 code))
-                    do (dispatch! :pointer/after) (.preventDefault event)
+                    do (dispatch! :pointer/after nil) (.!preventDefault event)
                   (and shift? (= 9 code))
                     do (.preventDefault event) (dispatch! :pointer/before nil)
                   (and (not shift?) (= 9 code))

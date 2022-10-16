@@ -14,7 +14,7 @@
                 {}
                   :class-name $ str-spaced css/global css/fullscreen
                   :style $ merge
-                    {} (:background-position "|left top") (:color :white) (:overflow :auto) (:padding "|160px 200px")
+                    {} (:background-position "|left top") (:overflow :auto) (:padding "|160px 200px") (; :color :white)
                 comp-todolist (:tasks store) (:pointer store) (:dragging-id store) (:dropping-id store)
                 div
                   {} $ :style
@@ -30,6 +30,7 @@
                         js/window.open $ if config/dev? "\"http://localhost:3000" (str js/location.origin "\"/Memkits/pudica-schedule-viewer/")
                 comp-transparent
                 when config/dev? $ comp-inspect "\"Store" store nil
+                when config/dev? $ comp-reel (:states reel) reel ({})
         |comp-transparent $ quote
           defcomp comp-transparent () $ span
             {} (:class-name |transparent)
@@ -47,6 +48,7 @@
           respo.comp.inspect :refer $ comp-inspect
           app.style :as style
           app.config :as config
+          reel.comp.reel :refer $ comp-reel
     |app.comp.task $ {}
       :defs $ {}
         |comp-task $ quote
@@ -161,6 +163,7 @@
               let
                   event $ :event e
                   shift? $ .-shiftKey event
+                  ctrl? $ .-ctrlKey event
                   meta? $ .-metaKey event
                   code $ :keycode e
                 cond
@@ -174,8 +177,12 @@
                     if
                       not $ .blank? text
                       dispatch! :task/add-after task-id
+                  (and meta? ctrl? (= 38 code))
+                    do (dispatch! :task/move-up task-id) (.!preventDefault event)
                   (and (= 38 code))
                     do (dispatch! :pointer/before nil) (.!preventDefault event)
+                  (and meta? ctrl? (= 40 code))
+                    do (dispatch! :task/move-down task-id) (.!preventDefault event)
                   (and (= 40 code))
                     do (dispatch! :pointer/after nil) (.!preventDefault event)
                   (and shift? (= 9 code))
@@ -302,15 +309,14 @@
               * 1000 duration
       :ns $ quote
         ns app.main $ :require
-          [] respo.core :refer $ [] render! clear-cache! realize-ssr!
-          [] app.comp.container :refer $ [] comp-container
-          [] app.updater :refer $ [] updater
-          [] app.schema :as schema
-          [] reel.util :refer $ [] listen-devtools!
-          [] reel.core :refer $ [] reel-updater refresh-reel
-          [] reel.schema :as reel-schema
-          [] cljs.reader :refer $ [] read-string
-          [] app.config :as config
+          respo.core :refer $ render! clear-cache! realize-ssr!
+          app.comp.container :refer $ comp-container
+          app.updater :refer $ updater
+          app.schema :as schema
+          reel.util :refer $ listen-devtools!
+          reel.core :refer $ reel-updater refresh-reel
+          reel.schema :as reel-schema
+          app.config :as config
           "\"./calcit.build-errors" :default build-errors
           "\"bottom-tip" :default hud!
     |app.schema $ {}
@@ -418,6 +424,52 @@
               -> store
                 assoc-in ([] :tasks from-id :sort-id) new-sort-id
                 assoc :pointer new-pointer
+        |move-task-down $ quote
+          defn move-task-down (store op-data)
+            let-sugar
+                from-id op-data
+                tasks $ :tasks store
+                from-task $ get tasks from-id
+                sorted-pairs $ -> (:tasks store) (vals)
+                  map $ fn (x)
+                    [] (:sort-id x) (:id x)
+                  .to-list
+                  .sort $ fn (a b)
+                    &compare (first a) (first b)
+                current-index $ :pointer store
+                at-bottom? $ = (inc current-index) (count tasks)
+              if at-bottom? store $ let
+                  target-pair $ nth sorted-pairs (inc current-index)
+                  new-sort-id $ first target-pair
+                -> store
+                  assoc-in ([] :tasks from-id :sort-id) new-sort-id
+                  assoc-in
+                    [] :tasks (last target-pair) :sort-id
+                    :sort-id from-task
+                  update :pointer inc
+        |move-task-up $ quote
+          defn move-task-up (store op-data)
+            let-sugar
+                from-id op-data
+                tasks $ :tasks store
+                from-task $ get tasks from-id
+                sorted-pairs $ -> (:tasks store) (vals)
+                  map $ fn (x)
+                    [] (:sort-id x) (:id x)
+                  .to-list
+                  .sort $ fn (a b)
+                    &compare (first a) (first b)
+                current-index $ :pointer store
+                at-head? $ = 0 current-index
+              if at-head? store $ let
+                  target-pair $ nth sorted-pairs (dec current-index)
+                  new-sort-id $ first target-pair
+                -> store
+                  assoc-in ([] :tasks from-id :sort-id) new-sort-id
+                  assoc-in
+                    [] :tasks (last target-pair) :sort-id
+                    :sort-id from-task
+                  update :pointer dec
         |relax-tasks $ quote
           defn relax-tasks (store op-id op-time)
             let
@@ -469,6 +521,8 @@
               :task/relax $ relax-tasks store op-id op-time
               :task/delete $ delete-task store op-data
               :task/move $ move-task store op-data
+              :task/move-up $ move-task-up store op-data
+              :task/move-down $ move-task-down store op-data
               :task/swap $ swap-tasks store op-data
               :pointer/touch $ assoc store :pointer op-data
               :pointer/before $ if
@@ -482,9 +536,9 @@
               :mark/dropping $ assoc store :dropping-id op-data
               :hydrate-storage op-data
       :ns $ quote
-        ns app.updater $ :require ([] app.schema :as schema)
-          [] respo.cursor :refer $ [] update-states
-          [] bisection-key.core :refer $ [] bisect max-id min-id mid-id
+        ns app.updater $ :require (app.schema :as schema)
+          respo.cursor :refer $ [] update-states
+          bisection-key.core :refer $ [] bisect max-id min-id mid-id
     |app.util.dom $ {}
       :defs $ {}
         |*canvas-element $ quote

@@ -4,6 +4,8 @@ body {
   /*background-image: url(./autumn.jpg);*/
   background-size: cover;
   background-color: #f4f4f4;
+  overscroll-behavior-y: none;
+  overscroll-behavior-x: none;
 }
 
 body * {

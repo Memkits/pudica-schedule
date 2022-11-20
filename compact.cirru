@@ -149,14 +149,27 @@
             "\"$0:focus" $ {} (:box-shadow :none) (:border :none)
         |effect-in $ quote
           defeffect effect-in (done?) (action el at-place?)
-            when (= :mount action)
-              -> el .-style .-opacity $ set! 0
-              -> el .-style .-transform $ set! "\"translate(8px,0px)"
-              js/setTimeout
-                fn ()
-                  -> el .-style .-opacity $ set! (if done? 0.5 1)
-                  -> el .-style .-transform $ set! "\"translate(0px,0px)"
-                , 10
+            case-default action nil
+              :mount $ do
+                -> el .-style .-opacity $ set! 0
+                -> el .-style .-transform $ set! "\"translate(8px,0px)"
+                js/setTimeout
+                  fn ()
+                    -> el .-style .-opacity $ set! (if done? 0.5 1)
+                    -> el .-style .-transform $ set! "\"translate(0px,0px)"
+                  , 10
+              :unmount $ let
+                  e2 $ .!cloneNode el true
+                  p $ .-parentNode el
+                .!appendChild p e2
+                js/setTimeout
+                  fn ()
+                    -> e2 .-style .-opacity $ set! 0
+                    -> e2 .-style .-transform $ set! "\"translate(8px,0px)"
+                  , 10
+                js/setTimeout
+                  fn () $ .!remove e2
+                  , 300
         |on-keydown $ quote
           defn on-keydown (task-id text idx)
             fn (e dispatch!)

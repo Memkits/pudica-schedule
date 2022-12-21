@@ -3,9 +3,15 @@ body {
   margin: 0;
   /*background-image: url(./autumn.jpg);*/
   background-size: cover;
-  background-color: #f4f4f4;
+  background-color: hsl(0, 0%, 0%);
   overscroll-behavior-y: none;
   overscroll-behavior-x: none;
+  transition-duration: 800ms;
+  transition-property: background-color;
+}
+
+body:hover {
+  background-color: hsl(240, 60%, 8%);
 }
 
 body * {

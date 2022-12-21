@@ -19,10 +19,12 @@
                 div
                   {} $ :style
                     {} (:position :fixed) (:bottom 0) (:left 16)
-                  a $ {} (:inner-text |Relax) (:class-name css/link)
+                  a $ {} (:inner-text |Ease)
+                    :class-name $ str-spaced css/link css/font-fancy
                     :on-click $ fn (e d!) (d! :task/relax nil)
                   =< 8 nil
-                  a $ {} (:inner-text |Review) (:class-name css/link)
+                  a $ {} (:inner-text |Review)
+                    :class-name $ str-spaced css/link css/font-fancy
                     :on-click $ fn (e d!)
                       let
                           raw $ format-cirru-edn store
@@ -65,11 +67,11 @@
                       {} $ :opacity 0.5
                     if
                       = dropping-id $ :id task
-                      {} (:opacity 0.5) (:transform "\"translate(2px,4px)") (:z-index 900)
+                      {} (:opacity 0.8) (:transform "\"translate(2px,4px)") (:z-index 900)
                         :outline $ str "\"2px solid " (hsl 0 0 86)
                     if
                       = dragging-id $ :id task
-                      {} (:z-index 999) (:opacity 0.1) (:transform "\"translate(-2px,-4px)")
+                      {} (:z-index 999) (:opacity 0.5) (:transform "\"translate(-2px,-4px)")
                   :draggable true
                   :on-dragstart $ fn (e d!)
                     let
@@ -128,7 +130,7 @@
               :background-color $ hsl 0 0 100
               :min-width 720
               :cursor :move
-              :border-radius "\"6px"
+              :border-radius "\"2px"
               :box-shadow $ str "\"0 0 2px " (hsl 0 0 80 0.1)
               :cursor :move
             "\"$0:hover" $ {}
@@ -166,6 +168,7 @@
                   fn ()
                     -> e2 .-style .-opacity $ set! 0
                     -> e2 .-style .-transform $ set! "\"translate(8px,0px)"
+                    -> e2 .-style .-zIndex $ set! -1
                   , 10
                 js/setTimeout
                   fn () $ .!remove e2

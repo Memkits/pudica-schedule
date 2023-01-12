@@ -296,17 +296,17 @@
             add-watch *reel :focus $ fn (r p) (adjust-focus!)
             listen-devtools! |k dispatch!
             js/window.addEventListener |beforeunload persist-storage!
-            repeat! 60 persist-storage!
+            flipped js/setInterval 60000 persist-storage!
             let
                 raw $ js/localStorage.getItem (:storage-key config/site)
               when (some? raw)
                 dispatch! :hydrate-storage $ parse-cirru-edn raw
             println "|App started."
         |mount-target $ quote
-          def mount-target $ .querySelector js/document |.app
+          def mount-target $ js/document.querySelector |.app
         |persist-storage! $ quote
           defn persist-storage! (? e)
-            .setItem js/localStorage (:storage-key config/site)
+            js/localStorage.setItem (:storage-key config/site)
               format-cirru-edn $ :store @*reel
         |reload! $ quote
           defn reload! () $ if (nil? build-errors)
@@ -317,12 +317,6 @@
             hud! "\"error" build-errors
         |render-app! $ quote
           defn render-app! () $ render! mount-target (comp-container @*reel) dispatch!
-        |repeat! $ quote
-          defn repeat! (duration cb)
-            js/setTimeout
-              fn () (cb)
-                repeat! (* 1000 duration) cb
-              * 1000 duration
       :ns $ quote
         ns app.main $ :require
           respo.core :refer $ render! clear-cache! realize-ssr!
@@ -565,6 +559,6 @@
               let
                   ctx $ .!getContext @*canvas-element |2d
                 set! (.-font ctx) (str font-size "|px " font-family)
-                .-width $ .measureText ctx text
+                .-width $ .!measureText ctx text
               , 0
       :ns $ quote (ns app.util.dom)

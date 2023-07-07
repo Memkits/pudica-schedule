@@ -107,7 +107,7 @@
                       text-width $ get-width (:text task) |Hind 16
                     {} $ :width (+ 16 text-width)
                   :on-input $ fn (e d!)
-                    d! :task/edit $ [] (:id task) (:value e)
+                    d! $ :: :task/edit (:id task) (:value e)
                   :on-keydown $ on-keydown (:id task) (:text task) idx
                   :on-click $ fn (e d!) (d! :pointer/touch idx)
                 <> (:sort-id task)
@@ -284,9 +284,9 @@
                   not $ identical? maybe-input (.-activeElement js/document)
                 .!focus maybe-input
         |dispatch! $ quote
-          defn dispatch! (op op-data)
+          defn dispatch! (op)
             when config/dev? $ println "\"Dispatch:" op
-            reset! *reel $ reel-updater updater @*reel op op-data
+            reset! *reel $ reel-updater updater @*reel op
         |main! $ quote
           defn main! ()
             if config/dev? $ load-console-formatter!
@@ -300,7 +300,7 @@
             let
                 raw $ js/localStorage.getItem (:storage-key config/site)
               when (some? raw)
-                dispatch! :hydrate-storage $ parse-cirru-edn raw
+                dispatch! $ :: :hydrate-storage (parse-cirru-edn raw)
             println "|App started."
         |mount-target $ quote
           def mount-target $ js/document.querySelector |.app
@@ -514,37 +514,39 @@
                     assoc-in ([] to-id :sort-id)
                       get-in tasks $ [] from-id :sort-id
         |updater $ quote
-          defn updater (store op op-data op-id op-time)
-            case-default op
-              do (println "\"Unknown op:" op) store
-              :states $ update-states store op-data
-              :task/add-before $ add-before store op-data op-id op-time
-              :task/add-after $ add-after store op-data op-id op-time
-              :task/edit $ let-sugar
-                    [] task-id text
-                    , op-data
+          defn updater (store op op-id op-time)
+            tag-match op
+                :states cursor s
+                update-states store cursor s
+              (:task/add-before data) (add-before store data op-id op-time)
+              (:task/add-after data) (add-after store data op-id op-time)
+              (:task/edit task-id text)
                 assoc-in store ([] :tasks task-id :text) text
-              :task/toggle $ update-in store ([] :tasks op-data)
-                fn (task)
-                  if (:done? task) (assoc task :done? false)
-                    -> task (assoc :done? true) (assoc :done-time op-time)
-              :task/relax $ relax-tasks store op-id op-time
-              :task/delete $ delete-task store op-data
-              :task/move $ move-task store op-data
-              :task/move-up $ move-task-up store op-data
-              :task/move-down $ move-task-down store op-data
-              :task/swap $ swap-tasks store op-data
-              :pointer/touch $ assoc store :pointer op-data
-              :pointer/before $ if
-                = 0 $ :pointer store
-                , store (update store :pointer dec)
-              :pointer/after $ if
-                = (:pointer store)
-                  dec $ count (:tasks store)
-                , store (update store :pointer inc)
-              :mark/dragging $ assoc store :dragging-id op-data
-              :mark/dropping $ assoc store :dropping-id op-data
-              :hydrate-storage op-data
+              (:task/toggle id)
+                update-in store ([] :tasks id)
+                  fn (task)
+                    if (:done? task) (assoc task :done? false)
+                      -> task (assoc :done? true) (assoc :done-time op-time)
+              (:task/relax) (relax-tasks store op-id op-time)
+              (:task/delete data) (delete-task store data)
+              (:task/move id) (move-task store id)
+              (:task/move-up id) (move-task-up store id)
+              (:task/move-down id) (move-task-down store id)
+              (:task/swap data) (swap-tasks store data)
+              (:pointer/touch id) (assoc store :pointer id)
+              (:pointer/before)
+                if
+                  = 0 $ :pointer store
+                  , store $ update store :pointer dec
+              (:pointer/after)
+                if
+                  = (:pointer store)
+                    dec $ count (:tasks store)
+                  , store $ update store :pointer inc
+              (:mark/dragging data) (assoc store :dragging-id data)
+              (:mark/dropping data) (assoc store :dropping-id data)
+              (:hydrate-storage data) data
+              _ $ do (eprintln "\"Unknown op:" op) store
       :ns $ quote
         ns app.updater $ :require (app.schema :as schema)
           respo.cursor :refer $ [] update-states

@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@calcit/procs@^0.8.0-a5":
-  version "0.8.0-a5"
-  resolved "https://registry.npmmirror.com/@calcit/procs/-/procs-0.8.0-a5.tgz#1bf7e8d535cdc29ca02d2b3ce221d60408735a86"
-  integrity sha512-6t7e5n2z1bvF6nUYPdet1nJaAFAiIz2YDNXCdBWQl17eVEi5RVhkWf0FWN7jojzevj7milVT7qjfVNjy6uc7Wg==
+"@calcit/procs@^0.8.2":
+  version "0.8.2"
+  resolved "https://registry.npmmirror.com/@calcit/procs/-/procs-0.8.2.tgz#c27060b9ac686a1a6e548eb1ceb6bffae0e9ae7d"
+  integrity sha512-rJH4LcuUXtGTDSmD3NIxtW1YP6cwFXcytVmiJsqfnOFfeU8dhT6Tn2//TfOwcdOtjMU2p8+Ttga0gV8GPmO0hg==
   dependencies:
     "@calcit/ternary-tree" "0.0.23"
     "@cirru/parser.ts" "^0.0.6"
@@ -259,9 +259,9 @@ picocolors@^1.0.0:
   integrity sha512-1fygroTLlHu66zi26VoTDv8yRgm0Fccecssto+MhsZ0D/DGW2sm8E8AjW7NU5VVTRt5GxbeZ5qBuJr+HyLYkjQ==
 
 postcss@^8.4.27:
-  version "8.4.29"
-  resolved "https://registry.npmmirror.com/postcss/-/postcss-8.4.29.tgz#33bc121cf3b3688d4ddef50be869b2a54185a1dd"
-  integrity sha512-cbI+jaqIeu/VGqXEarWkRCCffhjgXc0qjBtXpqJhTBohMUjUQnbBr0xqX3vEKudc4iviTewcJo5ajcec5+wdJw==
+  version "8.4.30"
+  resolved "https://registry.npmmirror.com/postcss/-/postcss-8.4.30.tgz#0e0648d551a606ef2192a26da4cabafcc09c1aa7"
+  integrity sha512-7ZEao1g4kd68l97aWG/etQKPKq07us0ieSZ2TnFDk11i0ZfDW2AwKHYU8qv4MZKqN2fdBfg+7q0ES06UA73C1g==
   dependencies:
     nanoid "^3.3.6"
     picocolors "^1.0.0"
@@ -273,9 +273,9 @@ process@^0.11.10:
   integrity sha512-cdGef/drWFoydD1JsMzuFf8100nZl+GT+yacc2bEced5f9Rjk4z+WtFUTBu9PhOi9j/jfmBPu0mMEY4wIdAF8A==
 
 rollup@^3.27.1:
-  version "3.28.1"
-  resolved "https://registry.npmmirror.com/rollup/-/rollup-3.28.1.tgz#fb44aa6d5e65c7e13fd5bcfff266d0c4ea9ba433"
-  integrity sha512-R9OMQmIHJm9znrU3m3cpE8uhN0fGdXiawME7aZIpQqvpS/85+Vt1Hq1/yVIcYfOmaQiHjvXkQAoJukvLpau6Yw==
+  version "3.29.3"
+  resolved "https://registry.npmmirror.com/rollup/-/rollup-3.29.3.tgz#97769774ccaa6a3059083d4680fcabd8ead01289"
+  integrity sha512-T7du6Hum8jOkSWetjRgbwpM6Sy0nECYrYRSmZjayFcOddtKJWU4d17AC3HNUk7HRuqy4p+G7aEZclSHytqUmEg==
   optionalDependencies:
     fsevents "~2.3.2"
 

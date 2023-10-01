@@ -319,6 +319,8 @@
               listen-devtools! |k dispatch!
               js/window.addEventListener |beforeunload persist-storage!
               flipped js/setInterval 60000 persist-storage!
+              js/window.addEventListener "\"visibilitychange" $ fn (_)
+                if (not= "\"visible" js/document.visibilityState) (persist-storage!)
               let
                   raw $ js/localStorage.getItem (:storage-key config/site)
                 when (some? raw)
@@ -330,6 +332,7 @@
         |persist-storage! $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn persist-storage! (? e)
+              println "\"Saved to storage:" $ .toISOString (new js/Date)
               js/localStorage.setItem (:storage-key config/site)
                 format-cirru-edn $ :store @*reel
         |reload! $ %{} :CodeEntry (:doc |)

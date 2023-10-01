@@ -2168,6 +2168,27 @@
                   |b $ %{} :Leaf (:at 1673061272457) (:by |Qr5ffqtY) (:text |js/setInterval)
                   |h $ %{} :Leaf (:at 1673061280251) (:by |Qr5ffqtY) (:text |60000)
                   |l $ %{} :Leaf (:at 1673061278585) (:by |Qr5ffqtY) (:text |persist-storage!)
+              |ywT $ %{} :Expr (:at 1695730426972) (:by |Qr5ffqtY)
+                :data $ {}
+                  |T $ %{} :Leaf (:at 1695730432690) (:by |Qr5ffqtY) (:text |js/window.addEventListener)
+                  |b $ %{} :Leaf (:at 1695730438507) (:by |Qr5ffqtY) (:text "|\"visibilitychange")
+                  |h $ %{} :Expr (:at 1695730485908) (:by |Qr5ffqtY)
+                    :data $ {}
+                      |D $ %{} :Leaf (:at 1695730486457) (:by |Qr5ffqtY) (:text |fn)
+                      |L $ %{} :Expr (:at 1695730486802) (:by |Qr5ffqtY)
+                        :data $ {}
+                          |T $ %{} :Leaf (:at 1695730491730) (:by |Qr5ffqtY) (:text |_)
+                      |T $ %{} :Expr (:at 1695730494329) (:by |Qr5ffqtY)
+                        :data $ {}
+                          |D $ %{} :Leaf (:at 1695730495731) (:by |Qr5ffqtY) (:text |if)
+                          |L $ %{} :Expr (:at 1695730516439) (:by |Qr5ffqtY)
+                            :data $ {}
+                              |D $ %{} :Leaf (:at 1695730517744) (:by |Qr5ffqtY) (:text |not=)
+                              |L $ %{} :Leaf (:at 1695730524558) (:by |Qr5ffqtY) (:text "|\"visible")
+                              |T $ %{} :Leaf (:at 1695730521151) (:by |Qr5ffqtY) (:text |js/document.visibilityState)
+                          |T $ %{} :Expr (:at 1695730496197) (:by |Qr5ffqtY)
+                            :data $ {}
+                              |T $ %{} :Leaf (:at 1695730439286) (:by |Qr5ffqtY) (:text |persist-storage!)
               |yx $ %{} :Expr (:at 1553789628765) (:by |root)
                 :data $ {}
                   |T $ %{} :Leaf (:at 1553789628765) (:by |root) (:text |let)
@@ -2223,6 +2244,17 @@
                 :data $ {}
                   |D $ %{} :Leaf (:at 1629053266824) (:by |Qr5ffqtY) (:text |?)
                   |T $ %{} :Leaf (:at 1629051988969) (:by |Qr5ffqtY) (:text |e)
+              |t $ %{} :Expr (:at 1695730448996) (:by |Qr5ffqtY)
+                :data $ {}
+                  |T $ %{} :Leaf (:at 1695730545823) (:by |Qr5ffqtY) (:text |println)
+                  |X $ %{} :Leaf (:at 1695730476180) (:by |Qr5ffqtY) (:text "|\"Saved to storage:")
+                  |b $ %{} :Expr (:at 1695730458547) (:by |Qr5ffqtY)
+                    :data $ {}
+                      |D $ %{} :Leaf (:at 1695730463059) (:by |Qr5ffqtY) (:text |.toISOString)
+                      |T $ %{} :Expr (:at 1695730455199) (:by |Qr5ffqtY)
+                        :data $ {}
+                          |T $ %{} :Leaf (:at 1695730456250) (:by |Qr5ffqtY) (:text |new)
+                          |b $ %{} :Leaf (:at 1695730458153) (:by |Qr5ffqtY) (:text |js/Date)
               |v $ %{} :Expr (:at 1553789628765) (:by |root)
                 :data $ {}
                   |j $ %{} :Leaf (:at 1673061301925) (:by |Qr5ffqtY) (:text |js/localStorage.setItem)

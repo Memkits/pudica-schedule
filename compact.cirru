@@ -332,7 +332,7 @@
         |persist-storage! $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn persist-storage! (? e)
-              println "\"Saved to storage:" $ .toISOString (new js/Date)
+              println "\"Saved to storage:" $ .!toISOString (new js/Date)
               js/localStorage.setItem (:storage-key config/site)
                 format-cirru-edn $ :store @*reel
         |reload! $ %{} :CodeEntry (:doc |)

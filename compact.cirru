@@ -22,7 +22,8 @@
                       {} (:position :fixed) (:bottom 0) (:left 16)
                     a $ {} (:inner-text |Ease)
                       :class-name $ str-spaced css/link css/font-fancy
-                      :on-click $ fn (e d!) (d! :task/relax nil)
+                      :on-click $ fn (e d!)
+                        d! $ :: :task/relax
                     =< 8 nil
                     a $ {} (:inner-text |Review)
                       :class-name $ str-spaced css/link css/font-fancy

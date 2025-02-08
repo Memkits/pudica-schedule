@@ -22,7 +22,8 @@
                       {} (:position :fixed) (:bottom 0) (:left 16)
                     a $ {} (:inner-text |Ease)
                       :class-name $ str-spaced css/link css/font-fancy
-                      :on-click $ fn (e d!) (d! :task/relax nil)
+                      :on-click $ fn (e d!)
+                        d! $ :: :task/relax
                     =< 8 nil
                     a $ {} (:inner-text |Review)
                       :class-name $ str-spaced css/link css/font-fancy
@@ -206,15 +207,21 @@
                     (and meta? ctrl? (= 38 code))
                       do (dispatch! :task/move-up task-id) (.!preventDefault event)
                     (and (= 38 code))
-                      do (dispatch! :pointer/before nil) (.!preventDefault event)
+                      do
+                        dispatch! $ :: :pointer/before
+                        .!preventDefault event
                     (and meta? ctrl? (= 40 code))
                       do (dispatch! :task/move-down task-id) (.!preventDefault event)
                     (and (= 40 code))
-                      do (dispatch! :pointer/after nil) (.!preventDefault event)
+                      do
+                        dispatch! $ :: :pointer/after
+                        .!preventDefault event
                     (and shift? (= 9 code))
-                      do (.preventDefault event) (dispatch! :pointer/before nil)
+                      do (.preventDefault event)
+                        dispatch! $ :: :pointer/before
                     (and (not shift?) (= 9 code))
-                      do (.preventDefault event) (dispatch! :pointer/after nil)
+                      do (.preventDefault event)
+                        dispatch! $ :: :pointer/after
       :ns $ %{} :CodeEntry (:doc |)
         :code $ quote
           ns app.comp.task $ :require

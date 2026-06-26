@@ -1,9 +1,9 @@
 {
+  "packageManager": "yarn@4.12.0",
   "name": "pudica-schedule",
   "version": "0.1.0",
   "description": "A Todolist",
   "main": "index.js",
-  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git@github.com:Memkits/pudica-schedule.git"
@@ -15,7 +15,7 @@
     "vite": "^6.4.2"
   },
   "dependencies": {
-    "@calcit/procs": "^0.9.9",
+    "@calcit/procs": "^0.12.47",
     "shortid": "^2.2.17"
   }
 }

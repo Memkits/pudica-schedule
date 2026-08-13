@@ -12,17 +12,28 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - uses: actions/setup-node@v4
+    - uses: actions/setup-node@v6
       with:
-        node-version: 22
-        cache: yarn
+        node-version: 24
 
-    - uses: calcit-lang/setup-cr@0.0.8
+    - name: "Enable Corepack"
+      run: |
+        corepack enable
+        corepack prepare yarn@4.12.0 --activate
+        yarn --version
 
-    - name: "compiles to js"
-      run: >
-        caps --ci && cr --once js
-        && yarn && yarn vite build --base=./
+    - uses: calcit-lang/setup-cr@0.0.9
+
+    - name: "Install and validate"
+      run: |
+        caps --ci
+        yarn install --immutable
+        cr calcit.cirru edit format
+        git diff --exit-code -- calcit.cirru
+        cr calcit.cirru --check-only
+        yarn check:weak-types
+        cr calcit.cirru js
+        yarn vite build --base=./
 
     - name: Deploy to server
       id: deploy

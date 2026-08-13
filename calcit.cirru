@@ -144,7 +144,7 @@
           :examples $ []
           :schema $ :: 'Fn
             {} (:return 'respo.schema/Component)
-              :args $ [] 'Map 'Number 'Bool 'String 'String
+              :args $ [] (:: 'Map 'Tag 'Dynamic) 'Number 'Bool 'String 'String
               :features $ #{} :js-ffi
         |css-done $ %{} 'CodeEntry (:doc |)
           :code $ quote
@@ -470,6 +470,22 @@
             |bottom-tip :default hud!
     |app.schema $ %{} 'FileEntry
       :defs $ {}
+        |Op $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defenum Op (:states 'Dynamic 'Dynamic) (:task/add-before 'String) (:task/add-after 'String) (:task/edit 'String 'String) (:task/toggle 'String) (:task/relax)
+              :task/delete $ :: 'List 'Dynamic
+              :task/move $ :: 'List 'String
+              :task/move-up 'String
+              :task/move-down 'String
+              :task/swap $ :: 'List 'Dynamic
+              :pointer/touch 'Number
+              :pointer/before
+              :pointer/after
+              :mark/dragging 'String
+              :mark/dropping 'String
+              :hydrate-storage 'Dynamic
+          :examples $ []
+          :schema $ :: 'Dynamic
         |store $ %{} 'CodeEntry (:doc |)
           :code $ quote
             def store $ {}
@@ -477,8 +493,8 @@
                 |root $ merge task
                   {} (:id |root) (:text |) (:sort-id mid-id)
               :pointer 0
-              :dragging-id nil
-              :dropping-id nil
+              :dragging-id |
+              :dropping-id |
               :states $ {}
               :archives $ {}
           :examples $ []
@@ -777,7 +793,7 @@
           :examples $ []
           :schema $ :: 'Fn
             {} (:return 'Map)
-              :args $ [] (:: 'Map 'Tag 'Dynamic) 'Dynamic 'String 'Number
+              :args $ [] (:: 'Map 'Tag 'Dynamic) 'app.schema/Op 'String 'Number
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote
           ns app.updater $ :require (app.schema :as schema)

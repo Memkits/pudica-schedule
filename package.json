@@ -1,7 +1,10 @@
 {
-  "packageManager": "yarn@4.12.0",
   "name": "pudica-schedule",
   "version": "0.1.0",
+  "packageManager": "yarn@4.12.0",
+  "scripts": {
+    "check:weak-types": "node scripts/check-weak-types.cjs"
+  },
   "description": "A Todolist",
   "main": "index.js",
   "repository": {
@@ -12,10 +15,10 @@
   "license": "MIT",
   "devDependencies": {
     "bottom-tip": "^0.1.5",
-    "vite": "^6.4.3"
+    "vite": "^8.2.1"
   },
   "dependencies": {
-    "@calcit/procs": "^0.12.47",
+    "@calcit/procs": "^0.13.13",
     "shortid": "^2.2.17"
   }
 }

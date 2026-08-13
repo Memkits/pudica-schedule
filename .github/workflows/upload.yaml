@@ -16,15 +16,24 @@ jobs:
       with:
         node-version: 24
 
-    - name: Enable Corepack
-      run: corepack enable
+    - name: "Enable Corepack"
+      run: |
+        corepack enable
+        corepack prepare yarn@4.12.0 --activate
+        yarn --version
 
     - uses: calcit-lang/setup-cr@0.0.9
 
-    - name: "compiles to js"
-      run: >
-        caps --ci && cr js
-        && yarn install --immutable && yarn vite build --base=./
+    - name: "Install and validate"
+      run: |
+        caps --ci
+        yarn install --immutable
+        cr calcit.cirru edit format
+        git diff --exit-code -- calcit.cirru
+        cr calcit.cirru --check-only
+        yarn check:weak-types
+        cr calcit.cirru js
+        yarn vite build --base=./
 
     - name: Deploy to server
       id: deploy

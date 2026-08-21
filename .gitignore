@@ -8,3 +8,5 @@ node_modules/
 dist/
 .yarn/*.gz
 compact.cirru
+
+.DS_Store

@@ -3,7 +3,7 @@ const { execFileSync } = require("node:child_process");
 const MAX_UNRESOLVED_DYNAMIC_SLOTS = 24;
 const report = JSON.parse(
   execFileSync(
-    "cr",
+    "calcit",
     [
       "calcit.cirru",
       "analyze",

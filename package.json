@@ -18,7 +18,7 @@
     "vite": "^8.2.1"
   },
   "dependencies": {
-    "@calcit/procs": "^0.13.27",
+    "@calcit/procs": "^0.13.29",
     "shortid": "^2.2.17"
   }
 }

@@ -38,6 +38,8 @@ jobs:
         git diff --exit-code -- calcit.cirru
         calcit calcit.cirru --check-only
         yarn check:weak-types
+        calcit analyze quality --baseline config/pudica-schedule-quality.cirru
+        calcit analyze dynamic-methods
         calcit calcit.cirru js
         yarn vite build --base=./
 

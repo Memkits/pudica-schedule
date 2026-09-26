@@ -1,6 +1,6 @@
 {
   "name": "pudica-schedule",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "packageManager": "yarn@4.12.0",
   "scripts": {
     "check:weak-types": "node scripts/check-weak-types.cjs"
@@ -18,7 +18,7 @@
     "vite": "^8.2.2"
   },
   "dependencies": {
-    "@calcit/procs": "0.18.1",
+    "@calcit/procs": "0.22.0-alpha.3",
     "shortid": "^2.2.17"
   }
 }

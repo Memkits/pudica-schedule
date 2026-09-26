@@ -418,7 +418,7 @@
                     map-indexed $ fn (idx pair)
                       let[] (task-id task) pair $ [] task-id $ let
                           pointed? $ = pointer idx
-                        comp-task task idx pointed? dragging-id dropping-id
+                        comp-task (assert-type task 'app.schema/Task) idx pointed? dragging-id dropping-id
                     sort $ fn (a b)
                       &compare
                         option:unwrap $ first a

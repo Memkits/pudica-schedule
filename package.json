@@ -1,9 +1,13 @@
 {
   "name": "pudica-schedule",
-  "version": "0.1.2",
-  "packageManager": "yarn@4.12.0",
+  "version": "0.1.3",
+  "packageManager": "yarn@4.18.0",
   "scripts": {
-    "check:weak-types": "node scripts/check-weak-types.cjs"
+    "check:weak-types": "node scripts/check-weak-types.cjs",
+    "compile": "calcit calcit.cirru js",
+    "build": "yarn compile && vite build",
+    "dev": "vite",
+    "release": "yarn build"
   },
   "description": "A Todolist",
   "main": "index.js",
@@ -15,10 +19,10 @@
   "license": "MIT",
   "devDependencies": {
     "bottom-tip": "^0.1.5",
-    "vite": "^8.2.2"
+    "vite": "8.3.1"
   },
   "dependencies": {
-    "@calcit/procs": "0.18.1",
+    "@calcit/procs": "0.27.0",
     "shortid": "^2.2.17"
   }
 }

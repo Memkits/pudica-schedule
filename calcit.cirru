@@ -3,7 +3,7 @@
   :about "|Machine-generated snapshot. Do not edit directly — changes will be overwritten. Use `calcit query` to inspect and `calcit edit`/`calcit tree` to modify. Run `calcit docs agents --contract` before mutations; use `--full` for first orientation or changed contract digest. Manual edits must follow format and schema conventions, then run `calcit edit format`."
   :package |app
   :entries $ {} $ :default
-    {} (:description |) (:init-fn 'app.main/main!) (:mode :js) (:reload-fn 'app.main/reload!)
+    {} (:description |) (:init-fn 'app.main/main!) (:mode :js) (:reload-fn 'app.main/reload!) (:target :browser)
       :feature-policy $ {}
       :modules $ [] |respo.calcit/ |respo-ui.calcit/ |respo-markdown.calcit/ |reel.calcit/ |bisection-key/ |js-ffi/
       :type-slots $ {} $ :dispatch-op |app.schema/Op
@@ -186,7 +186,7 @@
                     :drop $ fn (e d!)
                       if
                         not= dragging-id $ :id task
-                        do $ d! $ :: :task/move dragging-id (:id task)
+                        d! $ :: :task/move dragging-id $ :id task
                 div $ {} (:class-name css-done)
                   :style $ if (:done? task)
                     {} $ :transform "|scale(0.7)"
@@ -209,12 +209,12 @@
                 <> (:sort-id task)
                   merge
                     assert-type
-                      {} $ :color $ hsl 0 0 40 (%some 0.1)
+                      {} $ :color $ hsl 0 0 40 (Option :some 0.1)
                       :: 'Map 'Tag 'Dynamic
                     assert-type
                       if demo?
                         {}
-                          :color $ hsl 0 0 0 $ %some 0.4
+                          :color $ hsl 0 0 0 $ Option :some 0.4
                           :font-size 16
                           :font-family ui/font-code
                         {}
@@ -225,7 +225,7 @@
         'css-done $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defstyle css-done
             {} $ |$0 $ {} (:width 20) (:height 20)
-              :background-color $ hsl 240 90 88 $ %some 0.3
+              :background-color $ hsl 240 90 88 $ Option :some 0.3
               :cursor :pointer
               :transition-duration |300ms
               :border-radius |50%
@@ -239,10 +239,10 @@
                 :min-width 720
                 :cursor :move
                 :border-radius |2px
-                :box-shadow $ str "|0 0 2px " $ hsl 0 0 80 (%some 0.1)
+                :box-shadow $ str "|0 0 2px " $ hsl 0 0 80 (Option :some 0.1)
                 :cursor :move
               |$0:hover $ {}
-                :box-shadow $ str "|2px 2px 8px " $ hsl 0 0 40 (%some 0.2)
+                :box-shadow $ str "|2px 2px 8px " $ hsl 0 0 40 (Option :some 0.2)
                 :z-index 999
           :examples $ []
           :schema $ :: 'String
@@ -310,10 +310,7 @@
           :code $ quote $ defn event-key-info (e)
             let
                 event $ event-host e
-              %{} KeyInfo
-                :shift? $ .-shift-key? event
-                :ctrl? $ .-ctrl-key? event
-                :meta? $ .-meta-key? event
+              KeyInfo :shift? (.-shift-key? event) :ctrl? (.-ctrl-key? event) :meta? $ .-meta-key? event
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'app.comp.task/KeyInfo)
             :args $ [] 'respo.schema/RespoEvent
@@ -418,7 +415,7 @@
                     map-indexed $ fn (idx pair)
                       let[] (task-id task) pair $ [] task-id $ let
                           pointed? $ = pointer idx
-                        comp-task task idx pointed? dragging-id dropping-id
+                        comp-task (assert-type task 'app.schema/Task) idx pointed? dragging-id dropping-id
                     sort $ fn (a b)
                       &compare
                         option:unwrap $ first a
@@ -464,7 +461,7 @@
           :schema $ :: 'Bool
         'site $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def site
-            {} (:title |Pudica) (:icon |http://cdn.tiye.me/logo/pudica.png) (:storage-key |pudica-schedule)
+            {} (:title |Pudica) (:icon |https://cdn.tiye.me/logo/pudica.png) (:storage-key |pudica-schedule)
           :examples $ []
           :schema $ :: 'Map 'Tag 'String
       :ns $ %{} 'NsEntry (:doc |)
@@ -632,21 +629,14 @@
           :schema $ :: 'StructDef
         'store $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def store
-            %{} Store
-              :tasks $ {} $ |root
-                -> task (assoc :id |root) (assoc :sort-id mid-id)
-              :pointer 0
-              :dragging-id |
-              :dropping-id |
-              :states $ {}
-              :archives $ {}
+            Store :tasks
+              {} $ |root $ -> task (assoc :id |root) (assoc :sort-id mid-id)
+              , :pointer 0 :dragging-id | :dropping-id | :states ({}) :archives $ {}
           :examples $ []
           :schema $ :: 'app.schema/Store
         'task $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def task
-            %{} Task (:id |) (:text |) (:done? false) (:sort-id mid-id) (:created-time 0)
-              :done-time $ %none
-              :archived-time $ %none
+            Task :id | :text | :done? false :sort-id mid-id :created-time 0 :done-time (Option :none) :archived-time $ Option :none
           :examples $ []
           :schema $ :: 'app.schema/Task
       :ns $ %{} 'NsEntry (:doc |)
@@ -828,14 +818,7 @@
                       let
                           task-id $ assert-type (&list:nth pair 0) 'String
                           task $ assert-type (&list:nth pair 1) 'app.schema/Task
-                          archived-task $ %{} schema/Task
-                            :id $ :id task
-                            :text $ :text task
-                            :done? $ :done? task
-                            :sort-id $ :sort-id task
-                            :created-time $ :created-time task
-                            :done-time $ :done-time task
-                            :archived-time $ %some op-time
+                          archived-task $ schema/Task :id (:id task) :text (:text task) :done? (:done? task) :sort-id (:sort-id task) :created-time (:created-time task) :done-time (:done-time task) :archived-time $ Option :some op-time
                         [] task-id archived-task
                   :: 'Map 'String 'app.schema/Task
                 next-tasks $ assert-type
@@ -883,14 +866,7 @@
                     tasks $ :tasks store
                     task $ assert-type (&map:get tasks task-id) 'app.schema/Task
                     next-task $ if (:done? task) (assoc task :done? false)
-                      %{} schema/Task
-                        :id $ :id task
-                        :text $ :text task
-                        :done? true
-                        :sort-id $ :sort-id task
-                        :created-time $ :created-time task
-                        :done-time $ %some op-time
-                        :archived-time $ :archived-time task
+                      schema/Task :id (:id task) :text (:text task) :done? true :sort-id (:sort-id task) :created-time (:created-time task) :done-time (Option :some op-time) :archived-time $ :archived-time task
                   assoc store :tasks $ assoc tasks task-id next-task
               (:task/relax) (relax-tasks store op-id op-time)
               (:task/delete task-id idx) (delete-task store task-id idx)
@@ -953,8 +929,8 @@
         'create-canvas $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-canvas ()
             if (browser/document-available?)
-              %some $ unsafe-coerce (browser/create-element |canvas) CanvasHost
-              %none
+              Option :some $ unsafe-coerce (browser/create-element |canvas) CanvasHost
+              Option :none
           :examples $ []
           :schema $ :: 'Fn $ {}
             :args $ []

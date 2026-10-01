@@ -6,7 +6,7 @@
     "check:weak-types": "node scripts/check-weak-types.cjs",
     "compile": "calcit calcit.cirru js",
     "build": "yarn compile && vite build",
-    "dev": "vite",
+    "dev": "yarn compile && vite",
     "release": "yarn build"
   },
   "description": "A Todolist",

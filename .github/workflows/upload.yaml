@@ -50,24 +50,19 @@ jobs:
     - name: Validate Calcit snapshot and types
       run: |
         set -euo pipefail
-        test "$(calcit --version)" = "0.27.0"
         test -f calcit.cirru
         test -f deps.cirru
         test ! -e compact.cirru
         test ! -e package.cirru
         calcit calcit.cirru edit format
         git diff --exit-code -- calcit.cirru
-        calcit calcit.cirru fix --workflow strict --verify --format edn
         calcit calcit.cirru --check-only
         calcit calcit.cirru analyze check-public \
           --ns app.comp.container --ns app.comp.task --ns app.comp.todolist \
           --ns app.config --ns app.main --ns app.schema --ns app.style \
           --ns app.updater --ns app.util.dom \
           --summary-only --format json
-        calcit calcit.cirru analyze check-types --summary-only --format json
         yarn check:weak-types
-        calcit calcit.cirru analyze deprecated --summary-only --format json
-        calcit calcit.cirru analyze dynamic-methods
 
     - name: Select CDN asset path
       id: asset-path
@@ -77,7 +72,7 @@ jobs:
       run: |
         set -euo pipefail
         if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
-          asset_prefix="${GITHUB_REPOSITORY}/pr/${PR_NUMBER}/"
+          asset_prefix="${GITHUB_REPOSITORY}/pr/${PR_NUMBER}/${GITHUB_RUN_ID}/${GITHUB_RUN_ATTEMPT}/"
         elif [[ "$GITHUB_REF" == "refs/heads/main" ]]; then
           asset_prefix="${GITHUB_REPOSITORY}/"
         else

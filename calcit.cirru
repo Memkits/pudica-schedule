@@ -5,7 +5,7 @@
   :entries $ {} $ :default
     {} (:description |) (:init-fn 'app.main/main!) (:mode :js) (:reload-fn 'app.main/reload!) (:target :browser)
       :feature-policy $ {}
-      :modules $ [] |respo.calcit/ |respo-ui.calcit/ |respo-markdown.calcit/ |reel.calcit/ |bisection-key/ |js-ffi/
+      :modules $ [] |respo.calcit/ |respo-ui.calcit/ |reel.calcit/ |bisection-key/ |js-ffi/
       :type-slots $ {} $ :dispatch-op |app.schema/Op
   :files $ {}
     'app.comp.container $ %{} 'FileEntry
@@ -178,10 +178,12 @@
                   :on $ {}
                     :dragstart $ fn (e d!)
                       begin-drag! e $ :id task
-                      d! :mark/dragging $ :id task
-                    :dragend $ fn (e d!) (d! :mark/dragging |) (d! :mark/dropping |)
+                      d! $ :: :mark/dragging $ :id task
+                    :dragend $ fn (e d!)
+                      d! $ :: :mark/dragging |
+                      d! $ :: :mark/dropping |
                     :dragenter $ fn (e d!)
-                      d! :mark/dropping $ :id task
+                      d! $ :: :mark/dropping $ :id task
                     :dragover $ fn (e d!) (prevent-default! e)
                     :drop $ fn (e d!)
                       if
@@ -191,7 +193,7 @@
                   :style $ if (:done? task)
                     {} $ :transform "|scale(0.7)"
                   :on-click $ fn (e d!)
-                    d! :task/toggle $ :id task
+                    d! $ :: :task/toggle $ :id task
                 =< 8 &unit
                 input $ {}
                   :value $ :text task
@@ -203,9 +205,13 @@
                       text-width $ get-width (:text task) |Hind 16
                     {} $ :width $ + 16 text-width
                   :on-input $ fn (e d!)
-                    d! $ :: :task/edit (:id task) (&map:get e :value)
+                    d! $ :: :task/edit (:id task)
+                      assert-type
+                        :value $ assert-type e 'respo.schema/RespoEvent
+                        , 'String
                   :on-keydown $ on-keydown (:id task) (:text task) idx
-                  :on-click $ fn (e d!) (d! :pointer/touch idx)
+                  :on-click $ fn (e d!)
+                    d! $ :: :pointer/touch idx
                 <> (:sort-id task)
                   merge
                     assert-type
@@ -323,26 +329,32 @@
                   shift? $ :shift? key-info
                   ctrl? $ :ctrl? key-info
                   meta? $ :meta? key-info
-                  code $ &map:get e :key-code
+                  code $ assert-type
+                    :key-code $ assert-type e 'respo.schema/RespoEvent
+                    , 'Number
                 cond
                     and shift? $ = 13 code
                     if
                       not $ blank? text
-                      dispatch! :task/add-before task-id
+                      dispatch! $ :: :task/add-before task-id
                   (and (blank? text) (and (or shift? meta?) (= 8 code)))
                     dispatch! $ :: :task/delete task-id idx
                   (and (not shift?) (= 13 code))
                     if
                       not $ blank? text
-                      dispatch! :task/add-after task-id
+                      dispatch! $ :: :task/add-after task-id
                   (and meta? ctrl? (= 38 code))
-                    do (dispatch! :task/move-up task-id) (prevent-default! e)
+                    do
+                      dispatch! $ :: :task/move-up task-id
+                      prevent-default! e
                   (and (= 38 code))
                     do
                       dispatch! $ :: :pointer/before
                       prevent-default! e
                   (and meta? ctrl? (= 40 code))
-                    do (dispatch! :task/move-down task-id) (prevent-default! e)
+                    do
+                      dispatch! $ :: :task/move-down task-id
+                      prevent-default! e
                   (and (= 40 code))
                     do
                       dispatch! $ :: :pointer/after

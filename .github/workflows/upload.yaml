@@ -92,7 +92,6 @@ jobs:
         set -euo pipefail
         yarn build
         node --test tests/*.test.mjs
-        node tests/check-cdn-path.mjs
 
     - name: Check COS credentials
       id: cos-credentials

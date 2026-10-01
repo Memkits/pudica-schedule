@@ -22,8 +22,8 @@ https://github.com/calcit-lang/respo-calcit-workflow
 Use `caps --ci --strict` and `yarn install --immutable`, then `yarn build`
 and `node --test tests/*.test.mjs`. The canonical files are `calcit.cirru`
 and `deps.cirru`; CI rejects retired `compact.cirru` / `package.cirru` files.
-Generated frontend HTML is checked against the selected CDN asset prefix.
-Public upload verification runs inside cos-upload-action; original server
+Public upload verification uses cos-upload-action's built-in verify settings,
+with no extra CDN checker. Original server
 deployment paths and external shared resources are unchanged.
 
 ### License

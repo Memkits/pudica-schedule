@@ -12,10 +12,12 @@ permissions:
 concurrency:
   group: cos-upload-${{ github.repository }}-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'production' }}
   cancel-in-progress: false
+  queue: max
 
 jobs:
   test:
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
     steps:
     - name: Check out repository
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -37,6 +39,7 @@ jobs:
     - name: Set up Calcit and Caps
       uses: calcit-lang/setup-calcit@ca701be5a471759e442aa053cd100720bbe1f09f # v1.5.0
       with:
+        deps-file: deps.cirru
         tools: calcit,caps
         caps-version: "0.1.1"
 
@@ -111,7 +114,8 @@ jobs:
 
     - name: Upload and verify static assets on COS
       if: steps.cos-credentials.outputs.available == 'true'
-      uses: worktools/cos-upload-action@17e6d213fe9f6772a6090a13c8ba044cd6cbcb09 # v1.1.1
+      timeout-minutes: 10
+      uses: worktools/cos-upload-action@06d6027dcca6413c5936e04a9b6e9f0d5ef71ba0 # v1.2.0
       with:
         source-dir: dist
         bucket: ${{ secrets.COS_BUCKET }}

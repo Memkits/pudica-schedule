@@ -2,16 +2,21 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import * as c from "../js-out/calcit.core.mjs";
 import { store } from "../js-out/app.schema.mjs";
+import { comp_todolist } from "../js-out/app.comp.todolist.mjs";
 import { updater } from "../js-out/app.updater.mjs";
 import { comp_task, on_keydown } from "../js-out/app.comp.task.mjs";
-import { RespoEvent } from "../js-out/respo.schema.mjs";
+import { event__GT_edn } from "../js-out/respo.util.format.mjs";
 import { component_$q_, component_tree } from "../js-out/respo.util.detect.mjs";
-const t = c.init_tags(["tasks", "archives", "root", "id", "text", "done?", "done-time", "archived-time", "sort-id", "pointer", "dragging-id", "dropping-id", "states", "editor", "data", "event", "children", "click", "input", "dragenter", "dragend", "drop", "value", "key-code", "original-event"]);
+const t = c.init_tags(["tasks", "archives", "root", "id", "text", "done?", "done-time", "archived-time", "sort-id", "pointer", "dragging-id", "dropping-id", "states", "editor", "data", "event", "children", "click", "input", "dragenter", "dragend", "drop", "value", "key-code", "original-event", "node"]);
 const map = c._$n__$M_;
 const get = (x, key) => c.option_$o_unwrap(c.get(x, key));
 const nth = (x, i) => c.option_$o_unwrap(c.nth(x, i));
 const op = (name, ...args) => c._$o__$o_(c.init_tags([name])[name], ...args);
 function handlers(node, kind, found = []) {
+  if (c.enum_$q_(node)) {
+    if (node.tag.value === "none") return found;
+    return handlers(c._$n_enum_$o_nth(node, 1), kind, found);
+  }
   if (component_$q_(node)) return handlers(c.option_$o_unwrap(component_tree(node)), kind, found);
   if (c.list_$q_(node)) {
     for (const item of node.toArray()) handlers(item, kind, found);
@@ -23,7 +28,7 @@ function handlers(node, kind, found = []) {
     if (c.option_$o_some_$q_(fn)) found.push(c.option_$o_unwrap(fn));
   }
   const children = c.get(node, t.children);
-  if (c.option_$o_some_$q_(children)) for (const pair of c.option_$o_unwrap(children).toArray()) handlers(nth(pair, 1), kind, found);
+  if (c.option_$o_some_$q_(children)) for (const pair of c.option_$o_unwrap(children).toArray()) handlers(get(pair, t.node), kind, found);
   return found;
 }
 function session() {
@@ -38,7 +43,7 @@ function session() {
 }
 const root = (db) => get(get(db, t.tasks), "root");
 function respoEvent(values) {
-  return c._$n__PCT__$M_(RespoEvent, ...RespoEvent.fields.flatMap((field) => [field, values[field.value] ?? null]));
+  return map(...Object.entries(values).flatMap(([key, value]) => [c.init_tags([key])[key], value]));
 }
 test("task text, toggle and pointer click dispatch one Enum", () => {
   const s = session();
@@ -112,4 +117,20 @@ test("nested UI state updates preserve tasks and archive fields", () => {
   assert.ok(c._$e_(get(s.db, t.tasks), get(before, t.tasks)));
   assert.ok(c._$e_(get(s.db, t.archives), get(before, t.archives)));
   assert.equal(get(get(get(s.db, t.states), t.editor), t.data), "draft");
+});
+
+test("real Respo input events update task text without Struct casts", () => {
+  const s = session();
+  const node = comp_task(root(s.db), 0, true, "", "");
+  const event = event__GT_edn({ type: "input", target: { value: "browser input", checked: false } });
+  assert.ok(c.map_$q_(event));
+  handlers(node, t.input)[0](event, s.dispatch);
+  assert.equal(get(root(s.db), t.text), "browser input");
+});
+
+test("multiple Struct tasks render and retain both input handlers", () => {
+  const s = session();
+  s.dispatch(op("task/add-after", "root"));
+  const node = comp_todolist(get(s.db, t.tasks), get(s.db, t.pointer), "", "");
+  assert.equal(handlers(node, t.input).length, 2);
 });

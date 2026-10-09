@@ -143,7 +143,7 @@
               , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
-            :args $ [] 'respo.schema/RespoEvent 'String
+            :args $ [] (:: 'Map 'Tag 'Dynamic) 'String
             :features $ #{} :js-ffi
         'comp-task $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-task (task idx focused? dragging-id dropping-id)
@@ -207,7 +207,7 @@
                   :on-input $ fn (e d!)
                     d! $ :: :task/edit (:id task)
                       assert-type
-                        :value $ assert-type e 'respo.schema/RespoEvent
+                        option:unwrap $ get e :value
                         , 'String
                   :on-keydown $ on-keydown (:id task) (:text task) idx
                   :on-click $ fn (e d!)
@@ -307,10 +307,12 @@
             :features $ #{} :js-ffi
         'event-host $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn event-host (e)
-            unsafe-coerce (:original-event e) InteractionEventHost
+            unsafe-coerce
+              option:unwrap $ get e :original-event
+              , InteractionEventHost
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'app.comp.task/InteractionEventHost)
-            :args $ [] 'respo.schema/RespoEvent
+            :args $ [] $ :: 'Map 'Tag 'Dynamic
             :features $ #{} :js-ffi
         'event-key-info $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn event-key-info (e)
@@ -319,7 +321,7 @@
               KeyInfo :shift? (.-shift-key? event) :ctrl? (.-ctrl-key? event) :meta? $ .-meta-key? event
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'app.comp.task/KeyInfo)
-            :args $ [] 'respo.schema/RespoEvent
+            :args $ [] $ :: 'Map 'Tag 'Dynamic
             :features $ #{} :js-ffi
         'on-keydown $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn on-keydown (task-id text idx)
@@ -330,7 +332,7 @@
                   ctrl? $ :ctrl? key-info
                   meta? $ :meta? key-info
                   code $ assert-type
-                    :key-code $ assert-type e 'respo.schema/RespoEvent
+                    option:unwrap $ get e :key-code
                     , 'Number
                 cond
                     and shift? $ = 13 code
@@ -378,7 +380,7 @@
               , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
-            :args $ [] 'respo.schema/RespoEvent
+            :args $ [] $ :: 'Map 'Tag 'Dynamic
             :features $ #{} :js-ffi
         'set-transparent-drag-image! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn set-transparent-drag-image! (data-transfer)
@@ -418,12 +420,12 @@
                   -> tasks (&map:to-list)
                     sort $ fn (a b)
                       &compare
-                        &map:get
+                        :sort-id $ assert-type
                           option:unwrap $ last a
-                          , :sort-id
-                        &map:get
+                          , 'app.schema/Task
+                        :sort-id $ assert-type
                           option:unwrap $ last b
-                          , :sort-id
+                          , 'app.schema/Task
                     map-indexed $ fn (idx pair)
                       let[] (task-id task) pair $ [] task-id $ let
                           pointed? $ = pointer idx
@@ -485,6 +487,10 @@
             -> reel-schema/reel (assoc :base schema/store) (assoc :store schema/store)
           :examples $ []
           :schema $ :: 'Ref $ :: 'Map 'Tag 'Dynamic
+        '*storage-failed? $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defatom *storage-failed? false
+          :examples $ []
+          :schema $ :: 'Ref 'Bool
         'adjust-focus! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn adjust-focus! () (browser/set-timeout! adjust-focus-now! 0) &unit
           :examples $ []
@@ -508,6 +514,7 @@
           :code $ quote $ defn dispatch! (op)
             when config/dev? $ println |Dispatch: op
             reset! *reel $ reel-updater updater @*reel op
+            , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'app.schema/Op
@@ -526,8 +533,7 @@
             match
               browser/storage-get $ &map:get config/site :storage-key
               (:none) &unit
-              (:some raw)
-                dispatch! $ :: :hydrate-storage $ parse-store raw
+              (:some raw) (restore-storage! raw)
             println "|App started."
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
@@ -538,8 +544,7 @@
           :examples $ []
           :schema $ :: 'JsNullish 'respo.dom/DomElement
         'parse-store $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn parse-store (raw)
-            unsafe-coerce (parse-cirru-edn raw) 'app.schema/Store
+          :code $ quote $ defn parse-store (raw) (storage/parse-store raw)
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'app.schema/Store)
             :args $ [] 'String
@@ -551,7 +556,7 @@
             :args $ [] 'js-ffi.browser/EventHost
         'persist-storage! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn persist-storage! (& e)
-            browser/storage-set! (&map:get config/site :storage-key)
+            when-not @*storage-failed? $ browser/storage-set! (&map:get config/site :storage-key)
               format-cirru-edn $ &map:get @*reel :store
             , &unit
           :examples $ []
@@ -585,6 +590,21 @@
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ []
+        'restore-storage! $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn restore-storage! (raw)
+            try
+              let
+                  store $ parse-store raw
+                dispatch! $ :: :hydrate-storage store
+                reset! *storage-failed? false
+                , &unit
+              fn (message) (reset! *storage-failed? true)
+                hud! |error $ str "|存档加载失败，已暂停自动保存以保留原数据：" message
+                , &unit
+          :examples $ []
+          :schema $ :: 'Fn $ {} (:return 'Unit)
+            :args $ [] 'String
+            :features $ #{} :js-ffi
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.main
           :require
@@ -600,6 +620,7 @@
             app.config :as config
             |./calcit.build-errors :default build-errors
             |bottom-tip :default hud!
+            app.storage :as storage
     'app.schema $ %{} 'FileEntry
       :defs $ {}
         'Op $ %{} 'CodeEntry (:doc |)
@@ -654,16 +675,49 @@
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.schema
           :require $ [] bisection-key.core :refer $ [] mid-id
-    'app.style $ %{} 'FileEntry
-      :defs $ {} $ 'link
+    'app.storage $ %{} 'FileEntry
+      :defs $ {} $ 'parse-store
         %{} 'CodeEntry (:doc |)
-          :code $ quote $ def link
-            merge ui/link $ {} $ :margin "|0 8px"
+          :code $ quote $ defn parse-store (raw)
+            let
+                as-map $ fn (value)
+                  if (struct? value) (&struct:to-map value) value
+                normalize-task $ fn (value)
+                  let
+                      data $ as-map value
+                    if (map? data)
+                      let
+                          normalized $ if
+                            nil? $ &map:get data :created-time
+                            assoc data :created-time 0
+                            , data
+                          normalized $ if
+                            nil? $ &map:get normalized :done-time
+                            dissoc normalized :done-time
+                            , normalized
+                        if
+                          nil? $ &map:get normalized :archived-time
+                          dissoc normalized :archived-time
+                          , normalized
+                      , data
+                data $ as-map $ parse-cirru-edn raw
+                  {} $ :Option Option
+                normalized $ if (map? data)
+                  foldl ([] :tasks :archives) data $ fn (acc field)
+                    let
+                        tasks $ &map:get acc field
+                      if (map? tasks)
+                        assoc acc field $ filter-map-kv tasks $ fn (id task)
+                          MapEntryDecision :keep id $ normalize-task task
+                        , acc
+                  , data
+              decode-map-as normalized schema/Store
           :examples $ []
-          :schema $ :: 'String
+          :schema $ :: 'Fn $ {} (:return 'app.schema/Store)
+            :args $ [] 'String
       :ns $ %{} 'NsEntry (:doc |)
-        :code $ quote $ ns app.style
-          :require $ [] respo-ui.core :as ui
+        :code $ quote $ ns app.storage
+          :require $ app.schema :as schema
     'app.updater $ %{} 'FileEntry
       :defs $ {}
         'add-after $ %{} 'CodeEntry (:doc |)

@@ -4,7 +4,7 @@
   "packageManager": "yarn@4.18.0",
   "scripts": {
     "check:weak-types": "node scripts/check-weak-types.cjs",
-    "compile": "calcit calcit.cirru js",
+    "compile": "node scripts/compile.cjs",
     "build": "yarn compile && vite build",
     "dev": "yarn compile && vite",
     "release": "yarn build"
@@ -22,7 +22,7 @@
     "vite": "8.3.1"
   },
   "dependencies": {
-    "@calcit/procs": "0.27.0",
+    "@calcit/procs": "0.29.0-alpha.20",
     "shortid": "^2.2.17"
   }
 }

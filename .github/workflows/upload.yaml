@@ -62,8 +62,8 @@ jobs:
         calcit calcit.cirru --check-only
         calcit calcit.cirru analyze check-public \
           --ns app.comp.container --ns app.comp.task --ns app.comp.todolist \
-          --ns app.config --ns app.main --ns app.schema --ns app.style \
-          --ns app.updater --ns app.util.dom \
+          --ns app.config --ns app.main --ns app.schema \
+          --ns app.storage --ns app.updater --ns app.util.dom \
           --summary-only --format json
         yarn check:weak-types
 

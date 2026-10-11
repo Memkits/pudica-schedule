@@ -27,7 +27,7 @@
         'comp-container $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-container (reel)
             let
-                store $ assert-type (&map:get reel :store) 'app.schema/Store
+                store $ :store reel
               div
                 {}
                   :class-name $ str-spaced css/global css/fullscreen
@@ -38,18 +38,17 @@
                   a $ {} (:inner-text |Ease)
                     :class-name $ str-spaced css/link css/font-fancy
                     :on-click $ fn (e d!)
-                      d! $ :: :task/relax
+                      d! $ schema/Op :task/relax
                   =< 8 &unit
                   a $ {} (:inner-text |Review)
                     :class-name $ str-spaced css/link css/font-fancy
                     :on-click $ fn (e d!) (open-reviewer! store)
                 comp-transparent
                 when config/dev? $ comp-inspect |Store store &unit
-                when config/dev? $ comp-reel (&map:get reel :states) reel $ {}
+                when config/dev? $ comp-reel (:states store) (reel-view/view-data reel) ({})
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
-            :args $ [] 'T
-            :generics $ [] 'T
+            :args $ [] $ :: 'reel.typed/State 'app.schema/Op 'app.schema/Store
         'comp-transparent $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-transparent ()
             span $ {} (:class-name |transparent)
@@ -84,6 +83,8 @@
             app.style :as style
             app.config :as config
             reel.comp.reel :refer $ comp-reel
+            reel.typed-compat :as reel-view
+            app.schema :as schema
     'app.comp.task $ %{} 'FileEntry
       :defs $ {}
         'DataTransferHost $ %{} 'CodeEntry (:doc |)
@@ -178,22 +179,22 @@
                   :on $ {}
                     :dragstart $ fn (e d!)
                       begin-drag! e $ :id task
-                      d! $ :: :mark/dragging $ :id task
+                      d! $ schema/Op :mark/dragging $ :id task
                     :dragend $ fn (e d!)
-                      d! $ :: :mark/dragging |
-                      d! $ :: :mark/dropping |
+                      d! $ schema/Op :mark/dragging |
+                      d! $ schema/Op :mark/dropping |
                     :dragenter $ fn (e d!)
-                      d! $ :: :mark/dropping $ :id task
+                      d! $ schema/Op :mark/dropping $ :id task
                     :dragover $ fn (e d!) (prevent-default! e)
                     :drop $ fn (e d!)
                       if
                         not= dragging-id $ :id task
-                        d! $ :: :task/move dragging-id $ :id task
+                        d! $ schema/Op :task/move dragging-id $ :id task
                 div $ {} (:class-name css-done)
                   :style $ if (:done? task)
                     {} $ :transform "|scale(0.7)"
                   :on-click $ fn (e d!)
-                    d! $ :: :task/toggle $ :id task
+                    d! $ schema/Op :task/toggle $ :id task
                 =< 8 &unit
                 input $ {}
                   :value $ :text task
@@ -205,13 +206,13 @@
                       text-width $ get-width (:text task) |Hind 16
                     {} $ :width $ + 16 text-width
                   :on-input $ fn (e d!)
-                    d! $ :: :task/edit (:id task)
+                    d! $ schema/Op :task/edit (:id task)
                       assert-type
                         option:unwrap $ get e :value
                         , 'String
                   :on-keydown $ on-keydown (:id task) (:text task) idx
                   :on-click $ fn (e d!)
-                    d! $ :: :pointer/touch idx
+                    d! $ schema/Op :pointer/touch idx
                 <> (:sort-id task)
                   merge
                     assert-type
@@ -270,7 +271,7 @@
           :schema $ :: 'String
         'effect-in $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defeffect effect-in (done?) (action el at-place?)
-            case-default action &unit
+            match action
               :mount $ let
                   element $ unsafe-coerce el ElementHost
                   style $ .-style element
@@ -301,6 +302,7 @@
                   fn () (e2 .remove!) &unit
                   , 300
                 , &unit
+              _ &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'respo.schema/Effect)
             :args $ [] 'Bool
@@ -338,35 +340,35 @@
                     and shift? $ = 13 code
                     if
                       not $ blank? text
-                      dispatch! $ :: :task/add-before task-id
+                      dispatch! $ schema/Op :task/add-before task-id
                   (and (blank? text) (and (or shift? meta?) (= 8 code)))
-                    dispatch! $ :: :task/delete task-id idx
+                    dispatch! $ schema/Op :task/delete task-id idx
                   (and (not shift?) (= 13 code))
                     if
                       not $ blank? text
-                      dispatch! $ :: :task/add-after task-id
+                      dispatch! $ schema/Op :task/add-after task-id
                   (and meta? ctrl? (= 38 code))
                     do
-                      dispatch! $ :: :task/move-up task-id
+                      dispatch! $ schema/Op :task/move-up task-id
                       prevent-default! e
                   (and (= 38 code))
                     do
-                      dispatch! $ :: :pointer/before
+                      dispatch! $ schema/Op :pointer/before
                       prevent-default! e
                   (and meta? ctrl? (= 40 code))
                     do
-                      dispatch! $ :: :task/move-down task-id
+                      dispatch! $ schema/Op :task/move-down task-id
                       prevent-default! e
                   (and (= 40 code))
                     do
-                      dispatch! $ :: :pointer/after
+                      dispatch! $ schema/Op :pointer/after
                       prevent-default! e
                   (and shift? (= 9 code))
                     do (prevent-default! e)
-                      dispatch! $ :: :pointer/before
+                      dispatch! $ schema/Op :pointer/before
                   (and (not shift?) (= 9 code))
                     do (prevent-default! e)
-                      dispatch! $ :: :pointer/after
+                      dispatch! $ schema/Op :pointer/after
                   true &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'respo.schema/EventHandler)
@@ -404,6 +406,7 @@
             js-ffi.browser :as browser
             app.util.dom :refer $ get-width
             app.config :refer $ demo?
+            app.schema :as schema
     'app.comp.todolist $ %{} 'FileEntry
       :defs $ {}
         'comp-todolist $ %{} 'CodeEntry (:doc |)
@@ -483,10 +486,9 @@
     'app.main $ %{} 'FileEntry
       :defs $ {}
         '*reel $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *reel
-            -> reel-schema/reel (assoc :base schema/store) (assoc :store schema/store)
+          :code $ quote $ defatom *reel (reel/new-reel schema/store)
           :examples $ []
-          :schema $ :: 'Ref $ :: 'Map 'Tag 'Dynamic
+          :schema $ :: 'Ref $ :: 'reel.typed/State 'app.schema/Op 'app.schema/Store
         '*storage-failed? $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defatom *storage-failed? false
           :examples $ []
@@ -500,7 +502,7 @@
         'adjust-focus-now! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn adjust-focus-now! ()
             let
-                store $ assert-type (&map:get @*reel :store) 'app.schema/Store
+                store $ :store @*reel
                 pointer $ :pointer store
               match
                 browser/query-selector $ str |#input- pointer
@@ -513,19 +515,22 @@
         'dispatch! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn dispatch! (op)
             when config/dev? $ println |Dispatch: op
-            reset! *reel $ reel-updater updater @*reel op
+            reset! *reel $ match (reel/decode-control op)
+              (:some control) (reel/apply-control updater @*reel control)
+              (:none)
+                reel/record-op updater @*reel (decode-map-as op 'app.schema/Op) (generate-id!) (host/now-ms)
             , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
-            :args $ [] 'app.schema/Op
+            :args $ [] 'Enum
             :features $ #{} :js-ffi
         'main! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn main! ()
             if config/dev? $ load-console-formatter!
             println "|Running mode:" $ if config/dev? |dev |release
             render-app!
-            add-watch *reel :changes $ fn (r p) (render-app!)
-            add-watch *reel :focus $ fn (r p) (adjust-focus!)
+            add-watch! *reel :changes $ fn (r p) (render-app!)
+            add-watch! *reel :focus $ fn (r p) (adjust-focus!)
             listen-devtools! |k dispatch!
             browser/set-before-unload! persist-on-unload!
             browser/set-interval! persist-storage! 60000
@@ -557,7 +562,7 @@
         'persist-storage! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn persist-storage! (& e)
             when-not @*storage-failed? $ browser/storage-set! (&map:get config/site :storage-key)
-              format-cirru-edn $ &map:get @*reel :store
+              format-cirru-edn $ :store @*reel
             , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
@@ -576,9 +581,9 @@
         'reload! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn reload! ()
             if (nil? build-errors)
-              do (remove-watch *reel :changes) (clear-cache!)
-                add-watch *reel :changes $ fn (reel prev) (render-app!)
-                reset! *reel $ assert-type (refresh-reel @*reel schema/store updater) (:: 'Map 'Tag 'Dynamic)
+              do (remove-watch! *reel :changes) (clear-cache!)
+                add-watch! *reel :changes $ fn (reel prev) (render-app!)
+                reset! *reel $ reel/refresh updater @*reel schema/store
                 hud! |ok~ |Ok
               hud! |error build-errors
           :examples $ []
@@ -595,7 +600,7 @@
             try
               let
                   store $ parse-store raw
-                dispatch! $ :: :hydrate-storage store
+                reset! *reel $ reel/record-op updater @*reel (schema/Op :hydrate-storage store) (generate-id!) (host/now-ms)
                 reset! *storage-failed? false
                 , &unit
               fn (message) (reset! *storage-failed? true)
@@ -615,12 +620,12 @@
             app.updater :refer $ updater
             app.schema :as schema
             reel.util :refer $ listen-devtools!
-            reel.core :refer $ reel-updater refresh-reel
-            reel.schema :as reel-schema
             app.config :as config
             |./calcit.build-errors :default build-errors
             |bottom-tip :default hud!
             app.storage :as storage
+            reel.typed :as reel
+            js-ffi.shared :as host
     'app.schema $ %{} 'FileEntry
       :defs $ {}
         'Op $ %{} 'CodeEntry (:doc |)
@@ -726,7 +731,7 @@
                 tasks $ :tasks store
                 base-task $ assert-type (&map:get tasks task-id) 'app.schema/Task
                 base-sort-id $ :sort-id base-task
-                all-sort-ids $ -> tasks (vals) (&set:to-list)
+                all-sort-ids $ -> tasks (distinct-values) (&set:to-list)
                   map $ fn (task)
                     :sort-id $ assert-type task 'app.schema/Task
                   sort &compare
@@ -748,7 +753,7 @@
                 tasks $ :tasks store
                 base-task $ assert-type (&map:get tasks task-id) 'app.schema/Task
                 base-sort-id $ :sort-id base-task
-                all-sort-ids $ -> tasks (vals) (&set:to-list)
+                all-sort-ids $ -> tasks (distinct-values) (&set:to-list)
                   map $ fn (task)
                     :sort-id $ assert-type task 'app.schema/Task
                   sort &compare
@@ -776,14 +781,14 @@
             :args $ [] 'app.schema/Store 'String 'Number
         'move-task $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn move-task (store from-id to-id)
-            let-sugar
+            let
                 tasks $ :tasks store
                 from-task $ assert-type (&map:get tasks from-id) 'app.schema/Task
                 to-task $ assert-type (&map:get tasks to-id) 'app.schema/Task
                 from-sort-id $ :sort-id from-task
                 base-sort-id $ :sort-id to-task
                 before? $ > (&compare from-sort-id base-sort-id) 0
-                all-sort-ids $ -> tasks (vals) (&set:to-list)
+                all-sort-ids $ -> tasks (distinct-values) (&set:to-list)
                   map $ fn (task)
                     :sort-id $ assert-type task 'app.schema/Task
                 smaller-sort-ids $ -> all-sort-ids
@@ -813,10 +818,10 @@
             :args $ [] 'app.schema/Store 'String 'String
         'move-task-down $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn move-task-down (store from-id)
-            let-sugar
+            let
                 tasks $ :tasks store
                 from-task $ assert-type (&map:get tasks from-id) 'app.schema/Task
-                sorted-pairs $ -> tasks (vals) (&set:to-list)
+                sorted-pairs $ -> tasks (distinct-values) (&set:to-list)
                   map $ fn (task)
                     let
                         typed-task $ assert-type task 'app.schema/Task
@@ -843,10 +848,10 @@
             :args $ [] 'app.schema/Store 'String
         'move-task-up $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn move-task-up (store from-id)
-            let-sugar
+            let
                 tasks $ :tasks store
                 from-task $ assert-type (&map:get tasks from-id) 'app.schema/Task
-                sorted-pairs $ -> tasks (vals) (&set:to-list)
+                sorted-pairs $ -> tasks (distinct-values) (&set:to-list)
                   map $ fn (task)
                     let
                         typed-task $ assert-type task 'app.schema/Task

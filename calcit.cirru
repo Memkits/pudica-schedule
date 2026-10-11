@@ -10,20 +10,6 @@
   :files $ {}
     'app.comp.container $ %{} 'FileEntry
       :defs $ {}
-        'LocationOriginHost $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ deftrait LocationOriginHost (:origin 'String)
-          :examples $ []
-          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
-          :schema $ :: 'Trait
-        'WindowOpenHost $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ deftrait WindowOpenHost
-            .open! $ :: 'Fn $ {}
-              :args $ [] 'app.comp.container/WindowOpenHost 'String
-              :return 'Unit
-          :examples $ []
-          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
-            :names $ {} $ :open! |open
-          :schema $ :: 'Trait
         'comp-container $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-container (reel)
             let
@@ -59,11 +45,11 @@
         'open-reviewer! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn open-reviewer! (store)
             let
-                host-window $ unsafe-coerce js/window WindowOpenHost
-                location $ unsafe-coerce js/location LocationOriginHost
-                url $ if config/dev? |http://localhost:3000 $ str (.-origin location) |/Memkits/pudica-schedule-viewer/
+                url $ if config/dev? |http://localhost:3000 $ str
+                  :origin $ browser/location-snapshot
+                  , |/Memkits/pudica-schedule-viewer/
               browser/storage-set! |pudica-schedule-viewer $ format-cirru-edn store
-              host-window .open! url
+              browser/window-open url
               , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
@@ -93,7 +79,7 @@
               :args $ [] 'app.comp.task/DataTransferHost 'String 'String
               :return 'Unit
             .set-drag-image! $ :: 'Fn $ {}
-              :args $ [] 'app.comp.task/DataTransferHost 'app.comp.task/ElementHost 'Number 'Number
+              :args $ [] 'app.comp.task/DataTransferHost 'js-ffi.browser/DomElementHost 'Number 'Number
               :return 'Unit
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
@@ -388,8 +374,7 @@
           :code $ quote $ defn set-transparent-drag-image! (data-transfer)
             match (browser/query-selector |.transparent)
               (:none) &unit
-              (:some transparent)
-                data-transfer .set-drag-image! (unsafe-coerce transparent ElementHost) 0 0
+              (:some transparent) (data-transfer .set-drag-image! transparent 0 0)
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'app.comp.task/DataTransferHost

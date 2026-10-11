@@ -10,24 +10,10 @@
   :files $ {}
     'app.comp.container $ %{} 'FileEntry
       :defs $ {}
-        'LocationOriginHost $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ deftrait LocationOriginHost (:origin 'String)
-          :examples $ []
-          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
-          :schema $ :: 'Trait
-        'WindowOpenHost $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ deftrait WindowOpenHost
-            .open! $ :: 'Fn $ {}
-              :args $ [] 'app.comp.container/WindowOpenHost 'String
-              :return 'Unit
-          :examples $ []
-          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
-            :names $ {} $ :open! |open
-          :schema $ :: 'Trait
         'comp-container $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-container (reel)
             let
-                store $ assert-type (&map:get reel :store) 'app.schema/Store
+                store $ :store reel
               div
                 {}
                   :class-name $ str-spaced css/global css/fullscreen
@@ -38,18 +24,17 @@
                   a $ {} (:inner-text |Ease)
                     :class-name $ str-spaced css/link css/font-fancy
                     :on-click $ fn (e d!)
-                      d! $ :: :task/relax
+                      d! $ schema/Op :task/relax
                   =< 8 &unit
                   a $ {} (:inner-text |Review)
                     :class-name $ str-spaced css/link css/font-fancy
                     :on-click $ fn (e d!) (open-reviewer! store)
                 comp-transparent
                 when config/dev? $ comp-inspect |Store store &unit
-                when config/dev? $ comp-reel (&map:get reel :states) reel $ {}
+                when config/dev? $ comp-reel (:states store) (reel-view/view-data reel) ({})
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
-            :args $ [] 'T
-            :generics $ [] 'T
+            :args $ [] $ :: 'reel.typed/State 'app.schema/Op 'app.schema/Store
         'comp-transparent $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-transparent ()
             span $ {} (:class-name |transparent)
@@ -60,11 +45,11 @@
         'open-reviewer! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn open-reviewer! (store)
             let
-                host-window $ unsafe-coerce js/window WindowOpenHost
-                location $ unsafe-coerce js/location LocationOriginHost
-                url $ if config/dev? |http://localhost:3000 $ str (.-origin location) |/Memkits/pudica-schedule-viewer/
+                url $ if config/dev? |http://localhost:3000 $ str
+                  :origin $ browser/location-snapshot
+                  , |/Memkits/pudica-schedule-viewer/
               browser/storage-set! |pudica-schedule-viewer $ format-cirru-edn store
-              host-window .open! url
+              browser/window-open url
               , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
@@ -84,6 +69,8 @@
             app.style :as style
             app.config :as config
             reel.comp.reel :refer $ comp-reel
+            reel.typed-compat :as reel-view
+            app.schema :as schema
     'app.comp.task $ %{} 'FileEntry
       :defs $ {}
         'DataTransferHost $ %{} 'CodeEntry (:doc |)
@@ -92,42 +79,60 @@
               :args $ [] 'app.comp.task/DataTransferHost 'String 'String
               :return 'Unit
             .set-drag-image! $ :: 'Fn $ {}
-              :args $ [] 'app.comp.task/DataTransferHost 'app.comp.task/ElementHost 'Number 'Number
+              :args $ [] 'app.comp.task/DataTransferHost 'js-ffi.browser/DomElementHost 'Number 'Number
               :return 'Unit
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
             :names $ {} (:set-data! |setData) (:set-drag-image! |setDragImage)
           :schema $ :: 'Trait
+        'DragEventHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait DragEventHost
+            :data-transfer $ :: 'JsNullish 'JsObject
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+          :schema $ :: 'Trait
         'ElementHost $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ deftrait ElementHost (:style 'app.comp.task/StyleHost) (:parent-node 'app.comp.task/ElementHost)
+          :code $ quote $ deftrait ElementHost (:style 'app.comp.task/StyleHost)
+            :parent-node $ :: 'JsNullish 'app.comp.task/ParentHost
             .clone-node $ :: 'Fn $ {}
               :args $ [] 'app.comp.task/ElementHost 'Bool
-              :return 'app.comp.task/ElementHost
-            .append-child! $ :: 'Fn $ {}
-              :args $ [] 'app.comp.task/ElementHost 'app.comp.task/ElementHost
               :return 'app.comp.task/ElementHost
             .remove! $ :: 'Fn $ {}
               :args $ [] 'app.comp.task/ElementHost
               :return 'Unit
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
-            :names $ {} (:append-child! |appendChild) (:clone-node |cloneNode) (:parent-node |parentNode) (:remove! |remove)
+            :names $ {} (:clone-node |cloneNode) (:parent-node |parentNode) (:remove! |remove)
           :schema $ :: 'Trait
         'InteractionEventHost $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ deftrait InteractionEventHost (:shift-key? 'Bool) (:ctrl-key? 'Bool) (:meta-key? 'Bool) (:data-transfer 'app.comp.task/DataTransferHost)
+          :code $ quote $ deftrait InteractionEventHost
             .prevent-default! $ :: 'Fn $ {}
               :args $ [] 'app.comp.task/InteractionEventHost
               :return 'Unit
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
-            :names $ {} (:ctrl-key? |ctrlKey) (:data-transfer |dataTransfer) (:meta-key? |metaKey) (:prevent-default! |preventDefault) (:shift-key? |shiftKey)
+            :names $ {} $ :prevent-default! |preventDefault
           :schema $ :: 'Trait
         'KeyInfo $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defstruct KeyInfo (:shift? 'Bool) (:ctrl? 'Bool) (:meta? 'Bool)
           :examples $ []
           :schema $ :: 'StructDef
+        'KeyboardModifiersHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait KeyboardModifiersHost (:shift-key? 'Bool) (:ctrl-key? 'Bool) (:meta-key? 'Bool)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+            :names $ {} (:ctrl-key? |ctrlKey) (:meta-key? |metaKey) (:shift-key? |shiftKey)
+          :schema $ :: 'Trait
+        'ParentHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait ParentHost
+            .append-child! $ :: 'Fn $ {}
+              :args $ [] 'app.comp.task/ParentHost 'app.comp.task/ElementHost
+              :return 'app.comp.task/ElementHost
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+          :schema $ :: 'Trait
         'StyleHost $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ deftrait StyleHost (:opacity 'Number) (:transform 'String) (:z-index 'Number)
+          :code $ quote $ deftrait StyleHost (:opacity 'String) (:transform 'String) (:z-index 'String)
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
             :names $ {} $ :z-index |zIndex
@@ -136,10 +141,15 @@
         'begin-drag! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn begin-drag! (e task-id)
             let
-                event $ event-host e
-                data-transfer $ .-data-transfer event
-              data-transfer .set-data! |text task-id
-              set-transparent-drag-image! data-transfer
+                event $ js-cast
+                  option:unwrap $ get e :original-event
+                  , 'app.comp.task/DragEventHost
+                raw-transfer $ .-data-transfer event
+              when (js-present? raw-transfer)
+                let
+                    data-transfer $ js-cast raw-transfer 'app.comp.task/DataTransferHost
+                  data-transfer .set-data! |text task-id
+                  set-transparent-drag-image! data-transfer
               , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
@@ -178,22 +188,22 @@
                   :on $ {}
                     :dragstart $ fn (e d!)
                       begin-drag! e $ :id task
-                      d! $ :: :mark/dragging $ :id task
+                      d! $ schema/Op :mark/dragging $ :id task
                     :dragend $ fn (e d!)
-                      d! $ :: :mark/dragging |
-                      d! $ :: :mark/dropping |
+                      d! $ schema/Op :mark/dragging |
+                      d! $ schema/Op :mark/dropping |
                     :dragenter $ fn (e d!)
-                      d! $ :: :mark/dropping $ :id task
+                      d! $ schema/Op :mark/dropping $ :id task
                     :dragover $ fn (e d!) (prevent-default! e)
                     :drop $ fn (e d!)
                       if
                         not= dragging-id $ :id task
-                        d! $ :: :task/move dragging-id $ :id task
+                        d! $ schema/Op :task/move dragging-id $ :id task
                 div $ {} (:class-name css-done)
                   :style $ if (:done? task)
                     {} $ :transform "|scale(0.7)"
                   :on-click $ fn (e d!)
-                    d! $ :: :task/toggle $ :id task
+                    d! $ schema/Op :task/toggle $ :id task
                 =< 8 &unit
                 input $ {}
                   :value $ :text task
@@ -205,13 +215,13 @@
                       text-width $ get-width (:text task) |Hind 16
                     {} $ :width $ + 16 text-width
                   :on-input $ fn (e d!)
-                    d! $ :: :task/edit (:id task)
+                    d! $ schema/Op :task/edit (:id task)
                       assert-type
                         option:unwrap $ get e :value
                         , 'String
                   :on-keydown $ on-keydown (:id task) (:text task) idx
                   :on-click $ fn (e d!)
-                    d! $ :: :pointer/touch idx
+                    d! $ schema/Op :pointer/touch idx
                 <> (:sort-id task)
                   merge
                     assert-type
@@ -270,46 +280,47 @@
           :schema $ :: 'String
         'effect-in $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defeffect effect-in (done?) (action el at-place?)
-            case-default action &unit
+            match action
               :mount $ let
-                  element $ unsafe-coerce el ElementHost
+                  element $ js-cast el 'app.comp.task/ElementHost
                   style $ .-style element
-                set! (.-opacity style) 0
+                set! (.-opacity style) |0
                 set! (.-transform style) "|translate(8px,0px)"
                 browser/set-timeout!
                   fn () $ let
                       next-style $ .-style element
-                    set! (.-opacity next-style) (if done? 0.5 1)
+                    set! (.-opacity next-style) (if done? |0.5 |1)
                     set! (.-transform next-style) "|translate(0px,0px)"
                     , &unit
                   , 10
                 , &unit
               :unmount $ let
-                  element $ unsafe-coerce el ElementHost
+                  element $ js-cast el 'app.comp.task/ElementHost
                   e2 $ element .clone-node true
                   p $ .-parent-node element
-                p .append-child! e2
+                when (js-present? p) (p .append-child! e2)
                 browser/set-timeout!
                   fn () $ let
                       style $ .-style e2
-                    set! (.-opacity style) 0
+                    set! (.-opacity style) |0
                     set! (.-transform style) "|translate(8px,0px)"
-                    set! (.-z-index style) -1
+                    set! (.-z-index style) |-1
                     , &unit
                   , 10
                 browser/set-timeout!
                   fn () (e2 .remove!) &unit
                   , 300
                 , &unit
+              _ &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'respo.schema/Effect)
             :args $ [] 'Bool
             :features $ #{} :js-ffi
         'event-host $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn event-host (e)
-            unsafe-coerce
+            js-cast
               option:unwrap $ get e :original-event
-              , InteractionEventHost
+              , 'app.comp.task/InteractionEventHost
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'app.comp.task/InteractionEventHost)
             :args $ [] $ :: 'Map 'Tag 'Dynamic
@@ -317,7 +328,9 @@
         'event-key-info $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn event-key-info (e)
             let
-                event $ event-host e
+                event $ js-cast
+                  option:unwrap $ get e :original-event
+                  , 'app.comp.task/KeyboardModifiersHost
               KeyInfo :shift? (.-shift-key? event) :ctrl? (.-ctrl-key? event) :meta? $ .-meta-key? event
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'app.comp.task/KeyInfo)
@@ -338,35 +351,35 @@
                     and shift? $ = 13 code
                     if
                       not $ blank? text
-                      dispatch! $ :: :task/add-before task-id
+                      dispatch! $ schema/Op :task/add-before task-id
                   (and (blank? text) (and (or shift? meta?) (= 8 code)))
-                    dispatch! $ :: :task/delete task-id idx
+                    dispatch! $ schema/Op :task/delete task-id idx
                   (and (not shift?) (= 13 code))
                     if
                       not $ blank? text
-                      dispatch! $ :: :task/add-after task-id
+                      dispatch! $ schema/Op :task/add-after task-id
                   (and meta? ctrl? (= 38 code))
                     do
-                      dispatch! $ :: :task/move-up task-id
+                      dispatch! $ schema/Op :task/move-up task-id
                       prevent-default! e
                   (and (= 38 code))
                     do
-                      dispatch! $ :: :pointer/before
+                      dispatch! $ schema/Op :pointer/before
                       prevent-default! e
                   (and meta? ctrl? (= 40 code))
                     do
-                      dispatch! $ :: :task/move-down task-id
+                      dispatch! $ schema/Op :task/move-down task-id
                       prevent-default! e
                   (and (= 40 code))
                     do
-                      dispatch! $ :: :pointer/after
+                      dispatch! $ schema/Op :pointer/after
                       prevent-default! e
                   (and shift? (= 9 code))
                     do (prevent-default! e)
-                      dispatch! $ :: :pointer/before
+                      dispatch! $ schema/Op :pointer/before
                   (and (not shift?) (= 9 code))
                     do (prevent-default! e)
-                      dispatch! $ :: :pointer/after
+                      dispatch! $ schema/Op :pointer/after
                   true &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'respo.schema/EventHandler)
@@ -386,8 +399,7 @@
           :code $ quote $ defn set-transparent-drag-image! (data-transfer)
             match (browser/query-selector |.transparent)
               (:none) &unit
-              (:some transparent)
-                data-transfer .set-drag-image! (unsafe-coerce transparent ElementHost) 0 0
+              (:some transparent) (data-transfer .set-drag-image! transparent 0 0)
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'app.comp.task/DataTransferHost
@@ -404,6 +416,7 @@
             js-ffi.browser :as browser
             app.util.dom :refer $ get-width
             app.config :refer $ demo?
+            app.schema :as schema
     'app.comp.todolist $ %{} 'FileEntry
       :defs $ {}
         'comp-todolist $ %{} 'CodeEntry (:doc |)
@@ -483,10 +496,9 @@
     'app.main $ %{} 'FileEntry
       :defs $ {}
         '*reel $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *reel
-            -> reel-schema/reel (assoc :base schema/store) (assoc :store schema/store)
+          :code $ quote $ defatom *reel (reel/new-reel schema/store)
           :examples $ []
-          :schema $ :: 'Ref $ :: 'Map 'Tag 'Dynamic
+          :schema $ :: 'Ref $ :: 'reel.typed/State 'app.schema/Op 'app.schema/Store
         '*storage-failed? $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defatom *storage-failed? false
           :examples $ []
@@ -500,7 +512,7 @@
         'adjust-focus-now! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn adjust-focus-now! ()
             let
-                store $ assert-type (&map:get @*reel :store) 'app.schema/Store
+                store $ :store @*reel
                 pointer $ :pointer store
               match
                 browser/query-selector $ str |#input- pointer
@@ -513,19 +525,22 @@
         'dispatch! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn dispatch! (op)
             when config/dev? $ println |Dispatch: op
-            reset! *reel $ reel-updater updater @*reel op
+            reset! *reel $ match (reel/decode-control op)
+              (:some control) (reel/apply-control updater @*reel control)
+              (:none)
+                reel/record-op updater @*reel (decode-map-as op 'app.schema/Op) (generate-id!) (host/now-ms)
             , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
-            :args $ [] 'app.schema/Op
+            :args $ [] 'Enum
             :features $ #{} :js-ffi
         'main! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn main! ()
             if config/dev? $ load-console-formatter!
             println "|Running mode:" $ if config/dev? |dev |release
             render-app!
-            add-watch *reel :changes $ fn (r p) (render-app!)
-            add-watch *reel :focus $ fn (r p) (adjust-focus!)
+            add-watch! *reel :changes $ fn (r p) (render-app!)
+            add-watch! *reel :focus $ fn (r p) (adjust-focus!)
             listen-devtools! |k dispatch!
             browser/set-before-unload! persist-on-unload!
             browser/set-interval! persist-storage! 60000
@@ -557,7 +572,7 @@
         'persist-storage! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn persist-storage! (& e)
             when-not @*storage-failed? $ browser/storage-set! (&map:get config/site :storage-key)
-              format-cirru-edn $ &map:get @*reel :store
+              format-cirru-edn $ :store @*reel
             , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
@@ -576,9 +591,9 @@
         'reload! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn reload! ()
             if (nil? build-errors)
-              do (remove-watch *reel :changes) (clear-cache!)
-                add-watch *reel :changes $ fn (reel prev) (render-app!)
-                reset! *reel $ assert-type (refresh-reel @*reel schema/store updater) (:: 'Map 'Tag 'Dynamic)
+              do (remove-watch! *reel :changes) (clear-cache!)
+                add-watch! *reel :changes $ fn (reel prev) (render-app!)
+                reset! *reel $ reel/refresh updater @*reel schema/store
                 hud! |ok~ |Ok
               hud! |error build-errors
           :examples $ []
@@ -595,7 +610,7 @@
             try
               let
                   store $ parse-store raw
-                dispatch! $ :: :hydrate-storage store
+                reset! *reel $ reel/record-op updater @*reel (schema/Op :hydrate-storage store) (generate-id!) (host/now-ms)
                 reset! *storage-failed? false
                 , &unit
               fn (message) (reset! *storage-failed? true)
@@ -615,12 +630,12 @@
             app.updater :refer $ updater
             app.schema :as schema
             reel.util :refer $ listen-devtools!
-            reel.core :refer $ reel-updater refresh-reel
-            reel.schema :as reel-schema
             app.config :as config
             |./calcit.build-errors :default build-errors
             |bottom-tip :default hud!
             app.storage :as storage
+            reel.typed :as reel
+            js-ffi.shared :as host
     'app.schema $ %{} 'FileEntry
       :defs $ {}
         'Op $ %{} 'CodeEntry (:doc |)
@@ -726,7 +741,7 @@
                 tasks $ :tasks store
                 base-task $ assert-type (&map:get tasks task-id) 'app.schema/Task
                 base-sort-id $ :sort-id base-task
-                all-sort-ids $ -> tasks (vals) (&set:to-list)
+                all-sort-ids $ -> tasks (distinct-values) (&set:to-list)
                   map $ fn (task)
                     :sort-id $ assert-type task 'app.schema/Task
                   sort &compare
@@ -748,7 +763,7 @@
                 tasks $ :tasks store
                 base-task $ assert-type (&map:get tasks task-id) 'app.schema/Task
                 base-sort-id $ :sort-id base-task
-                all-sort-ids $ -> tasks (vals) (&set:to-list)
+                all-sort-ids $ -> tasks (distinct-values) (&set:to-list)
                   map $ fn (task)
                     :sort-id $ assert-type task 'app.schema/Task
                   sort &compare
@@ -776,14 +791,14 @@
             :args $ [] 'app.schema/Store 'String 'Number
         'move-task $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn move-task (store from-id to-id)
-            let-sugar
+            let
                 tasks $ :tasks store
                 from-task $ assert-type (&map:get tasks from-id) 'app.schema/Task
                 to-task $ assert-type (&map:get tasks to-id) 'app.schema/Task
                 from-sort-id $ :sort-id from-task
                 base-sort-id $ :sort-id to-task
                 before? $ > (&compare from-sort-id base-sort-id) 0
-                all-sort-ids $ -> tasks (vals) (&set:to-list)
+                all-sort-ids $ -> tasks (distinct-values) (&set:to-list)
                   map $ fn (task)
                     :sort-id $ assert-type task 'app.schema/Task
                 smaller-sort-ids $ -> all-sort-ids
@@ -813,10 +828,10 @@
             :args $ [] 'app.schema/Store 'String 'String
         'move-task-down $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn move-task-down (store from-id)
-            let-sugar
+            let
                 tasks $ :tasks store
                 from-task $ assert-type (&map:get tasks from-id) 'app.schema/Task
-                sorted-pairs $ -> tasks (vals) (&set:to-list)
+                sorted-pairs $ -> tasks (distinct-values) (&set:to-list)
                   map $ fn (task)
                     let
                         typed-task $ assert-type task 'app.schema/Task
@@ -843,10 +858,10 @@
             :args $ [] 'app.schema/Store 'String
         'move-task-up $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn move-task-up (store from-id)
-            let-sugar
+            let
                 tasks $ :tasks store
                 from-task $ assert-type (&map:get tasks from-id) 'app.schema/Task
-                sorted-pairs $ -> tasks (vals) (&set:to-list)
+                sorted-pairs $ -> tasks (distinct-values) (&set:to-list)
                   map $ fn (task)
                     let
                         typed-task $ assert-type task 'app.schema/Task
@@ -982,7 +997,7 @@
           :code $ quote $ deftrait CanvasHost
             .get-context $ :: 'Fn $ {}
               :args $ [] 'app.util.dom/CanvasHost 'String
-              :return 'app.util.dom/CanvasContextHost
+              :return $ :: 'JsNullish 'JsObject
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
             :names $ {} $ :get-context |getContext
@@ -995,7 +1010,7 @@
         'create-canvas $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-canvas ()
             if (browser/document-available?)
-              Option :some $ unsafe-coerce (browser/create-element |canvas) CanvasHost
+              Option :some $ js-cast (browser/create-element |canvas) 'app.util.dom/CanvasHost
               Option :none
           :examples $ []
           :schema $ :: 'Fn $ {}
@@ -1008,9 +1023,11 @@
               (:none) 0
               (:some canvas)
                 let
-                    ctx $ canvas .get-context |2d
-                  set! (.-font ctx) (str font-size "|px " font-family)
-                  .-width $ ctx .measure-text text
+                    raw-context $ canvas .get-context |2d
+                  if (js-nullish? raw-context) 0 $ let
+                      ctx $ js-cast raw-context 'app.util.dom/CanvasContextHost
+                    set! (.-font ctx) (str font-size "|px " font-family)
+                    .-width $ ctx .measure-text text
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Number)
             :args $ [] 'String 'String 'Number

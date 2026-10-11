@@ -85,36 +85,54 @@
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
             :names $ {} (:set-data! |setData) (:set-drag-image! |setDragImage)
           :schema $ :: 'Trait
+        'DragEventHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait DragEventHost
+            :data-transfer $ :: 'JsNullish 'JsObject
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+          :schema $ :: 'Trait
         'ElementHost $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ deftrait ElementHost (:style 'app.comp.task/StyleHost) (:parent-node 'app.comp.task/ElementHost)
+          :code $ quote $ deftrait ElementHost (:style 'app.comp.task/StyleHost)
+            :parent-node $ :: 'JsNullish 'app.comp.task/ParentHost
             .clone-node $ :: 'Fn $ {}
               :args $ [] 'app.comp.task/ElementHost 'Bool
-              :return 'app.comp.task/ElementHost
-            .append-child! $ :: 'Fn $ {}
-              :args $ [] 'app.comp.task/ElementHost 'app.comp.task/ElementHost
               :return 'app.comp.task/ElementHost
             .remove! $ :: 'Fn $ {}
               :args $ [] 'app.comp.task/ElementHost
               :return 'Unit
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
-            :names $ {} (:append-child! |appendChild) (:clone-node |cloneNode) (:parent-node |parentNode) (:remove! |remove)
+            :names $ {} (:clone-node |cloneNode) (:parent-node |parentNode) (:remove! |remove)
           :schema $ :: 'Trait
         'InteractionEventHost $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ deftrait InteractionEventHost (:shift-key? 'Bool) (:ctrl-key? 'Bool) (:meta-key? 'Bool) (:data-transfer 'app.comp.task/DataTransferHost)
+          :code $ quote $ deftrait InteractionEventHost
             .prevent-default! $ :: 'Fn $ {}
               :args $ [] 'app.comp.task/InteractionEventHost
               :return 'Unit
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
-            :names $ {} (:ctrl-key? |ctrlKey) (:data-transfer |dataTransfer) (:meta-key? |metaKey) (:prevent-default! |preventDefault) (:shift-key? |shiftKey)
+            :names $ {} $ :prevent-default! |preventDefault
           :schema $ :: 'Trait
         'KeyInfo $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defstruct KeyInfo (:shift? 'Bool) (:ctrl? 'Bool) (:meta? 'Bool)
           :examples $ []
           :schema $ :: 'StructDef
+        'KeyboardModifiersHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait KeyboardModifiersHost (:shift-key? 'Bool) (:ctrl-key? 'Bool) (:meta-key? 'Bool)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+            :names $ {} (:ctrl-key? |ctrlKey) (:meta-key? |metaKey) (:shift-key? |shiftKey)
+          :schema $ :: 'Trait
+        'ParentHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait ParentHost
+            .append-child! $ :: 'Fn $ {}
+              :args $ [] 'app.comp.task/ParentHost 'app.comp.task/ElementHost
+              :return 'app.comp.task/ElementHost
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+          :schema $ :: 'Trait
         'StyleHost $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ deftrait StyleHost (:opacity 'Number) (:transform 'String) (:z-index 'Number)
+          :code $ quote $ deftrait StyleHost (:opacity 'String) (:transform 'String) (:z-index 'String)
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
             :names $ {} $ :z-index |zIndex
@@ -123,10 +141,15 @@
         'begin-drag! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn begin-drag! (e task-id)
             let
-                event $ event-host e
-                data-transfer $ .-data-transfer event
-              data-transfer .set-data! |text task-id
-              set-transparent-drag-image! data-transfer
+                event $ js-cast
+                  option:unwrap $ get e :original-event
+                  , 'app.comp.task/DragEventHost
+                raw-transfer $ .-data-transfer event
+              when (js-present? raw-transfer)
+                let
+                    data-transfer $ js-cast raw-transfer 'app.comp.task/DataTransferHost
+                  data-transfer .set-data! |text task-id
+                  set-transparent-drag-image! data-transfer
               , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
@@ -259,29 +282,29 @@
           :code $ quote $ defeffect effect-in (done?) (action el at-place?)
             match action
               :mount $ let
-                  element $ unsafe-coerce el ElementHost
+                  element $ js-cast el 'app.comp.task/ElementHost
                   style $ .-style element
-                set! (.-opacity style) 0
+                set! (.-opacity style) |0
                 set! (.-transform style) "|translate(8px,0px)"
                 browser/set-timeout!
                   fn () $ let
                       next-style $ .-style element
-                    set! (.-opacity next-style) (if done? 0.5 1)
+                    set! (.-opacity next-style) (if done? |0.5 |1)
                     set! (.-transform next-style) "|translate(0px,0px)"
                     , &unit
                   , 10
                 , &unit
               :unmount $ let
-                  element $ unsafe-coerce el ElementHost
+                  element $ js-cast el 'app.comp.task/ElementHost
                   e2 $ element .clone-node true
                   p $ .-parent-node element
-                p .append-child! e2
+                when (js-present? p) (p .append-child! e2)
                 browser/set-timeout!
                   fn () $ let
                       style $ .-style e2
-                    set! (.-opacity style) 0
+                    set! (.-opacity style) |0
                     set! (.-transform style) "|translate(8px,0px)"
-                    set! (.-z-index style) -1
+                    set! (.-z-index style) |-1
                     , &unit
                   , 10
                 browser/set-timeout!
@@ -295,9 +318,9 @@
             :features $ #{} :js-ffi
         'event-host $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn event-host (e)
-            unsafe-coerce
+            js-cast
               option:unwrap $ get e :original-event
-              , InteractionEventHost
+              , 'app.comp.task/InteractionEventHost
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'app.comp.task/InteractionEventHost)
             :args $ [] $ :: 'Map 'Tag 'Dynamic
@@ -305,7 +328,9 @@
         'event-key-info $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn event-key-info (e)
             let
-                event $ event-host e
+                event $ js-cast
+                  option:unwrap $ get e :original-event
+                  , 'app.comp.task/KeyboardModifiersHost
               KeyInfo :shift? (.-shift-key? event) :ctrl? (.-ctrl-key? event) :meta? $ .-meta-key? event
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'app.comp.task/KeyInfo)

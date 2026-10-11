@@ -972,7 +972,7 @@
           :code $ quote $ deftrait CanvasHost
             .get-context $ :: 'Fn $ {}
               :args $ [] 'app.util.dom/CanvasHost 'String
-              :return 'app.util.dom/CanvasContextHost
+              :return $ :: 'JsNullish 'JsObject
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
             :names $ {} $ :get-context |getContext
@@ -985,7 +985,7 @@
         'create-canvas $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-canvas ()
             if (browser/document-available?)
-              Option :some $ unsafe-coerce (browser/create-element |canvas) CanvasHost
+              Option :some $ js-cast (browser/create-element |canvas) 'app.util.dom/CanvasHost
               Option :none
           :examples $ []
           :schema $ :: 'Fn $ {}
@@ -998,9 +998,11 @@
               (:none) 0
               (:some canvas)
                 let
-                    ctx $ canvas .get-context |2d
-                  set! (.-font ctx) (str font-size "|px " font-family)
-                  .-width $ ctx .measure-text text
+                    raw-context $ canvas .get-context |2d
+                  if (js-nullish? raw-context) 0 $ let
+                      ctx $ js-cast raw-context 'app.util.dom/CanvasContextHost
+                    set! (.-font ctx) (str font-size "|px " font-family)
+                    .-width $ ctx .measure-text text
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Number)
             :args $ [] 'String 'String 'Number

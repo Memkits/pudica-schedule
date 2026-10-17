@@ -187,14 +187,19 @@
                   :draggable true
                   :on $ {}
                     :dragstart $ fn (e d!)
-                      begin-drag! e $ :id task
-                      d! $ schema/Op :mark/dragging $ :id task
+                      let
+                          e $ decode-map-as e $ :: 'Map 'Tag 'Dynamic
+                        begin-drag! e $ :id task
+                        d! $ schema/Op :mark/dragging $ :id task
                     :dragend $ fn (e d!)
                       d! $ schema/Op :mark/dragging |
                       d! $ schema/Op :mark/dropping |
                     :dragenter $ fn (e d!)
                       d! $ schema/Op :mark/dropping $ :id task
-                    :dragover $ fn (e d!) (prevent-default! e)
+                    :dragover $ fn (e d!)
+                      let
+                          e $ decode-map-as e $ :: 'Map 'Tag 'Dynamic
+                        prevent-default! e
                     :drop $ fn (e d!)
                       if
                         not= dragging-id $ :id task
@@ -215,10 +220,12 @@
                       text-width $ get-width (:text task) |Hind 16
                     {} $ :width $ + 16 text-width
                   :on-input $ fn (e d!)
-                    d! $ schema/Op :task/edit (:id task)
-                      assert-type
-                        option:unwrap $ get e :value
-                        , 'String
+                    let
+                        e $ decode-map-as e $ :: 'Map 'Tag 'Dynamic
+                      d! $ schema/Op :task/edit (:id task)
+                        decode-map-as
+                          option:unwrap $ get e :value
+                          , 'String
                   :on-keydown $ on-keydown (:id task) (:text task) idx
                   :on-click $ fn (e d!)
                     d! $ schema/Op :pointer/touch idx
@@ -339,48 +346,57 @@
         'on-keydown $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn on-keydown (task-id text idx)
             fn (e dispatch!)
+              hint-fn $ {} (:return 'Unit)
+                :args $ [] (:: 'Map 'Tag 'Dynamic)
+                  :: 'Fn $ {}
+                    :args $ [] 'Dynamic
+                    :rest 'Dynamic
+                    :return 'Unit
               let
-                  key-info $ event-key-info e
-                  shift? $ :shift? key-info
-                  ctrl? $ :ctrl? key-info
-                  meta? $ :meta? key-info
-                  code $ assert-type
-                    option:unwrap $ get e :key-code
-                    , 'Number
-                cond
-                    and shift? $ = 13 code
-                    if
-                      not $ blank? text
-                      dispatch! $ schema/Op :task/add-before task-id
-                  (and (blank? text) (and (or shift? meta?) (= 8 code)))
-                    dispatch! $ schema/Op :task/delete task-id idx
-                  (and (not shift?) (= 13 code))
-                    if
-                      not $ blank? text
-                      dispatch! $ schema/Op :task/add-after task-id
-                  (and meta? ctrl? (= 38 code))
-                    do
-                      dispatch! $ schema/Op :task/move-up task-id
-                      prevent-default! e
-                  (and (= 38 code))
-                    do
-                      dispatch! $ schema/Op :pointer/before
-                      prevent-default! e
-                  (and meta? ctrl? (= 40 code))
-                    do
-                      dispatch! $ schema/Op :task/move-down task-id
-                      prevent-default! e
-                  (and (= 40 code))
-                    do
-                      dispatch! $ schema/Op :pointer/after
-                      prevent-default! e
-                  (and shift? (= 9 code))
-                    do (prevent-default! e)
-                      dispatch! $ schema/Op :pointer/before
-                  (and (not shift?) (= 9 code))
-                    do (prevent-default! e)
-                      dispatch! $ schema/Op :pointer/after
-                  true &unit
+                  e $ decode-map-as e $ :: 'Map 'Tag 'Dynamic
+                let
+                    key-info $ event-key-info e
+                    shift? $ :shift? key-info
+                    ctrl? $ :ctrl? key-info
+                    meta? $ :meta? key-info
+                    code $ decode-map-as
+                      option:unwrap $ get e :key-code
+                      , 'Number
+                  cond
+                      and shift? $ = 13 code
+                      if
+                        not $ blank? text
+                        dispatch! $ schema/Op :task/add-before task-id
+                    (and (blank? text) (and (or shift? meta?) (= 8 code)))
+                      dispatch! $ schema/Op :task/delete task-id idx
+                    (and (not shift?) (= 13 code))
+                      if
+                        not $ blank? text
+                        dispatch! $ schema/Op :task/add-after task-id
+                    (and meta? ctrl? (= 38 code))
+                      do
+                        dispatch! $ schema/Op :task/move-up task-id
+                        prevent-default! e
+                    (and (= 38 code))
+                      do
+                        dispatch! $ schema/Op :pointer/before
+                        prevent-default! e
+                    (and meta? ctrl? (= 40 code))
+                      do
+                        dispatch! $ schema/Op :task/move-down task-id
+                        prevent-default! e
+                    (and (= 40 code))
+                      do
+                        dispatch! $ schema/Op :pointer/after
+                        prevent-default! e
+                    (and shift? (= 9 code))
+                      do (prevent-default! e)
+                        dispatch! $ schema/Op :pointer/before
+                    (and (not shift?) (= 9 code))
+                      do (prevent-default! e)
+                        dispatch! $ schema/Op :pointer/after
+                    true &unit
+              , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'respo.schema/EventHandler)
             :args $ [] 'String 'String 'Number
@@ -430,19 +446,15 @@
                     + 8 $ * 40 $ count tasks
                     , |px
                 list-> ({})
-                  -> tasks (&map:to-list)
+                  -> tasks (keys) (.to-list)
                     sort $ fn (a b)
                       &compare
-                        :sort-id $ assert-type
-                          option:unwrap $ last a
-                          , 'app.schema/Task
-                        :sort-id $ assert-type
-                          option:unwrap $ last b
-                          , 'app.schema/Task
-                    map-indexed $ fn (idx pair)
-                      let[] (task-id task) pair $ [] task-id $ let
-                          pointed? $ = pointer idx
-                        comp-task (assert-type task 'app.schema/Task) idx pointed? dragging-id dropping-id
+                        :sort-id $ .unwrap $ get tasks a
+                        :sort-id $ .unwrap $ get tasks b
+                    map-indexed $ fn (idx task-id)
+                      [] task-id $ comp-task
+                        .unwrap $ get tasks task-id
+                        , idx (= pointer idx) dragging-id dropping-id
                     sort $ fn (a b)
                       &compare
                         option:unwrap $ first a
@@ -467,13 +479,13 @@
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.comp.todolist
           :require
-            [] respo-ui.core :refer $ [] hsl
-            [] respo-ui.core :as ui
-            [] respo.core :refer $ [] defcomp div button list->
+            respo-ui.core :refer $ hsl
+            respo-ui.core :as ui
+            respo.core :refer $ defcomp div button list->
             respo.css :refer $ defstyle
-            [] respo.comp.space :refer $ [] =<
-            [] app.comp.task :refer $ [] comp-task
-            [] clojure.string :as string
+            respo.comp.space :refer $ =<
+            app.comp.task :refer $ comp-task
+            clojure.string :as string
     'app.config $ %{} 'FileEntry
       :defs $ {}
         'demo? $ %{} 'CodeEntry (:doc |)
@@ -496,11 +508,11 @@
     'app.main $ %{} 'FileEntry
       :defs $ {}
         '*reel $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *reel (reel/new-reel schema/store)
+          :code $ quote $ defref *reel (reel/new-reel schema/store)
           :examples $ []
           :schema $ :: 'Ref $ :: 'reel.typed/State 'app.schema/Op 'app.schema/Store
         '*storage-failed? $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *storage-failed? false
+          :code $ quote $ defref *storage-failed? false
           :examples $ []
           :schema $ :: 'Ref 'Bool
         'adjust-focus! $ %{} 'CodeEntry (:doc |)
@@ -524,15 +536,19 @@
             :features $ #{} :js-ffi
         'dispatch! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn dispatch! (op)
-            when config/dev? $ println |Dispatch: op
-            reset! *reel $ match (reel/decode-control op)
-              (:some control) (reel/apply-control updater @*reel control)
-              (:none)
-                reel/record-op updater @*reel (decode-map-as op 'app.schema/Op) (generate-id!) (host/now-ms)
+            if (enum? op)
+              do
+                when config/dev? $ println |Dispatch: op
+                reset! *reel $ match (reel/decode-control op)
+                  (:some control) (reel/apply-control updater @*reel control)
+                  (:none)
+                    reel/record-op updater @*reel (decode-map-as op 'app.schema/Op) (generate-id!) (host/now-ms)
+                , &unit
+              raise |Expected-Enum-operation
             , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
-            :args $ [] 'Enum
+            :args $ [] 'Dynamic
             :features $ #{} :js-ffi
         'main! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn main! ()
@@ -546,7 +562,7 @@
             browser/set-interval! persist-storage! 60000
             browser/add-event-listener! |visibilitychange persist-when-hidden!
             match
-              browser/storage-get $ &map:get config/site :storage-key
+              browser/storage-get $ .unwrap $ get config/site :storage-key
               (:none) &unit
               (:some raw) (restore-storage! raw)
             println "|App started."
@@ -571,7 +587,8 @@
             :args $ [] 'js-ffi.browser/EventHost
         'persist-storage! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn persist-storage! (& e)
-            when-not @*storage-failed? $ browser/storage-set! (&map:get config/site :storage-key)
+            when-not @*storage-failed? $ browser/storage-set!
+              .unwrap $ get config/site :storage-key
               format-cirru-edn $ :store @*reel
             , &unit
           :examples $ []
@@ -596,6 +613,7 @@
                 reset! *reel $ reel/refresh updater @*reel schema/store
                 hud! |ok~ |Ok
               hud! |error build-errors
+            , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ []
@@ -624,7 +642,7 @@
         :code $ quote $ ns app.main
           :require
             respo.core :refer $ render! clear-cache! realize-ssr!
-            respo.main :refer $ [] query-mount-target
+            respo.main :refer $ query-mount-target
             js-ffi.browser :as browser
             app.comp.container :refer $ comp-container
             app.updater :refer $ updater
@@ -658,7 +676,7 @@
             :mark/dropping 'String
             :hydrate-storage 'app.schema/Store
           :examples $ []
-          :schema $ :: 'Enum
+          :schema $ :: 'EnumDef
         'Store $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defstruct Store
             :tasks $ :: 'Map 'String 'app.schema/Task
@@ -689,7 +707,7 @@
           :schema $ :: 'app.schema/Task
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.schema
-          :require $ [] bisection-key.core :refer $ [] mid-id
+          :require $ bisection-key.core :refer $ mid-id
     'app.storage $ %{} 'FileEntry
       :defs $ {} $ 'parse-store
         %{} 'CodeEntry (:doc |)
@@ -703,15 +721,15 @@
                     if (map? data)
                       let
                           normalized $ if
-                            nil? $ &map:get data :created-time
+                            nil? $ .unwrap-or (get data :created-time) nil
                             assoc data :created-time 0
                             , data
                           normalized $ if
-                            nil? $ &map:get normalized :done-time
+                            nil? $ .unwrap-or (get normalized :done-time) nil
                             dissoc normalized :done-time
                             , normalized
                         if
-                          nil? $ &map:get normalized :archived-time
+                          nil? $ .unwrap-or (get normalized :archived-time) nil
                           dissoc normalized :archived-time
                           , normalized
                       , data
@@ -720,7 +738,7 @@
                 normalized $ if (map? data)
                   foldl ([] :tasks :archives) data $ fn (acc field)
                     let
-                        tasks $ &map:get acc field
+                        tasks $ .unwrap-or (get acc field) nil
                       if (map? tasks)
                         assoc acc field $ filter-map-kv tasks $ fn (id task)
                           MapEntryDecision :keep id $ normalize-task task
@@ -739,7 +757,7 @@
           :code $ quote $ defn add-after (store task-id op-id op-time)
             let
                 tasks $ :tasks store
-                base-task $ assert-type (&map:get tasks task-id) 'app.schema/Task
+                base-task $ .unwrap $ get tasks task-id
                 base-sort-id $ :sort-id base-task
                 all-sort-ids $ -> tasks (distinct-values) (&set:to-list)
                   map $ fn (task)
@@ -761,7 +779,7 @@
           :code $ quote $ defn add-before (store task-id op-id op-time)
             let
                 tasks $ :tasks store
-                base-task $ assert-type (&map:get tasks task-id) 'app.schema/Task
+                base-task $ .unwrap $ get tasks task-id
                 base-sort-id $ :sort-id base-task
                 all-sort-ids $ -> tasks (distinct-values) (&set:to-list)
                   map $ fn (task)
@@ -793,8 +811,8 @@
           :code $ quote $ defn move-task (store from-id to-id)
             let
                 tasks $ :tasks store
-                from-task $ assert-type (&map:get tasks from-id) 'app.schema/Task
-                to-task $ assert-type (&map:get tasks to-id) 'app.schema/Task
+                from-task $ .unwrap $ get tasks from-id
+                to-task $ .unwrap $ get tasks to-id
                 from-sort-id $ :sort-id from-task
                 base-sort-id $ :sort-id to-task
                 before? $ > (&compare from-sort-id base-sort-id) 0
@@ -830,7 +848,7 @@
           :code $ quote $ defn move-task-down (store from-id)
             let
                 tasks $ :tasks store
-                from-task $ assert-type (&map:get tasks from-id) 'app.schema/Task
+                from-task $ .unwrap $ get tasks from-id
                 sorted-pairs $ -> tasks (distinct-values) (&set:to-list)
                   map $ fn (task)
                     let
@@ -847,7 +865,7 @@
                     target-pair $ option:unwrap $ nth sorted-pairs (inc current-index)
                     new-sort-id $ assert-type (&list:nth target-pair 0) 'String
                     target-id $ assert-type (&list:nth target-pair 1) 'String
-                    target-task $ assert-type (&map:get tasks target-id) 'app.schema/Task
+                    target-task $ .unwrap $ get tasks target-id
                     next-tasks $ -> tasks
                       assoc from-id $ assoc from-task :sort-id new-sort-id
                       assoc target-id $ assoc target-task :sort-id $ :sort-id from-task
@@ -860,7 +878,7 @@
           :code $ quote $ defn move-task-up (store from-id)
             let
                 tasks $ :tasks store
-                from-task $ assert-type (&map:get tasks from-id) 'app.schema/Task
+                from-task $ .unwrap $ get tasks from-id
                 sorted-pairs $ -> tasks (distinct-values) (&set:to-list)
                   map $ fn (task)
                     let
@@ -875,7 +893,7 @@
                   target-pair $ option:unwrap $ nth sorted-pairs (dec current-index)
                   new-sort-id $ assert-type (&list:nth target-pair 0) 'String
                   target-id $ assert-type (&list:nth target-pair 1) 'String
-                  target-task $ assert-type (&map:get tasks target-id) 'app.schema/Task
+                  target-task $ .unwrap $ get tasks target-id
                   next-tasks $ -> tasks
                     assoc from-id $ assoc from-task :sort-id new-sort-id
                     assoc target-id $ assoc target-task :sort-id $ :sort-id from-task
@@ -888,28 +906,16 @@
           :code $ quote $ defn relax-tasks (store op-id op-time)
             let
                 tasks $ :tasks store
-                done-tasks $ assert-type
-                  -> tasks
-                    filter $ fn (pair)
-                      let
-                          task $ assert-type (&list:nth pair 1) 'app.schema/Task
-                        and (:done? task)
-                          not $ blank? $ :text task
-                    map $ fn (pair)
-                      let
-                          task-id $ assert-type (&list:nth pair 0) 'String
-                          task $ assert-type (&list:nth pair 1) 'app.schema/Task
-                          archived-task $ schema/Task :id (:id task) :text (:text task) :done? (:done? task) :sort-id (:sort-id task) :created-time (:created-time task) :done-time (:done-time task) :archived-time $ Option :some op-time
-                        [] task-id archived-task
-                  :: 'Map 'String 'app.schema/Task
-                next-tasks $ assert-type
-                  filter tasks $ fn (pair)
-                    let
-                        task $ assert-type (&list:nth pair 1) 'app.schema/Task
-                      not $ :done? task
-                  :: 'Map 'String 'app.schema/Task
+                done-tasks $ filter-map-kv tasks $ fn (id task)
+                  if
+                    and (:done? task)
+                      not $ blank? $ :text task
+                    MapEntryDecision :keep id $ assoc task :archived-time $ Option :some op-time
+                    MapEntryDecision :drop
+                next-tasks $ filter-map-kv tasks $ fn (id task)
+                  if (:done? task) (MapEntryDecision :drop) (MapEntryDecision :keep id task)
                 ensured-tasks $ if (empty? next-tasks)
-                  assoc ({}) op-id $ -> schema/task (assoc :id op-id) (assoc :created-time op-time) (assoc :sort-id mid-id)
+                  {} $ op-id $ -> schema/task (assoc :id op-id) (assoc :created-time op-time) (assoc :sort-id mid-id)
                   , next-tasks
               -> store (assoc :tasks ensured-tasks)
                 assoc :archives $ merge (:archives store) done-tasks
@@ -921,8 +927,8 @@
           :code $ quote $ defn swap-tasks (store from-id to-id new-pointer)
             let
                 tasks $ :tasks store
-                from-task $ assert-type (&map:get tasks from-id) 'app.schema/Task
-                to-task $ assert-type (&map:get tasks to-id) 'app.schema/Task
+                from-task $ .unwrap $ get tasks from-id
+                to-task $ .unwrap $ get tasks to-id
                 next-tasks $ -> tasks
                   assoc from-id $ assoc from-task :sort-id $ :sort-id to-task
                   assoc to-id $ assoc to-task :sort-id $ :sort-id from-task
@@ -934,18 +940,20 @@
           :code $ quote $ defn updater (store op op-id op-time)
             match op
               (:states cursor s)
-                assert-type (update-states store cursor s) 'app.schema/Store
+                assoc store :states $ decode-map-as
+                  assoc-in (:states store) (conj cursor :data) s
+                  :: 'Map 'Tag 'Dynamic
               (:task/add-before data) (add-before store data op-id op-time)
               (:task/add-after data) (add-after store data op-id op-time)
               (:task/edit task-id text)
                 let
                     tasks $ :tasks store
-                    task $ assert-type (&map:get tasks task-id) 'app.schema/Task
+                    task $ .unwrap $ get tasks task-id
                   assoc store :tasks $ assoc tasks task-id $ assoc task :text text
               (:task/toggle task-id)
                 let
                     tasks $ :tasks store
-                    task $ assert-type (&map:get tasks task-id) 'app.schema/Task
+                    task $ .unwrap $ get tasks task-id
                     next-task $ if (:done? task) (assoc task :done? false)
                       schema/Task :id (:id task) :text (:text task) :done? true :sort-id (:sort-id task) :created-time (:created-time task) :done-time (Option :some op-time) :archived-time $ :archived-time task
                   assoc store :tasks $ assoc tasks task-id next-task
@@ -975,12 +983,11 @@
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.updater
           :require (app.schema :as schema)
-            respo.cursor :refer $ [] update-states
-            bisection-key.core :refer $ [] bisect max-id min-id mid-id
+            bisection-key.core :refer $ bisect max-id min-id mid-id
     'app.util.dom $ %{} 'FileEntry
       :defs $ {}
         '*canvas-element $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *canvas-element (create-canvas)
+          :code $ quote $ defref *canvas-element (create-canvas)
           :examples $ []
           :schema $ :: 'Ref $ :: 'Option 'app.util.dom/CanvasHost
         'CanvasContextHost $ %{} 'CodeEntry (:doc |)

@@ -26,7 +26,9 @@ Public upload verification uses cos-upload-action's built-in verify settings,
 with no extra CDN checker. Original server
 deployment paths and external shared resources are unchanged.
 
-Calcit/procs 必须精确配对正式 0.30.1。模块固定正式 Reel 0.6.41、Respo 0.16.124、UI 0.8.0、Bisection Key 0.0.35 和 JS-FFI 0.2.5。应用源码、业务类型、存档格式、排序键及原有 HUD 提示不变；不因升级而重写已有任务。
+Calcit/procs 必须精确配对正式 0.30.1。模块固定正式 Reel 0.6.42、Respo 0.16.126、UI 0.8.1、Bisection Key 0.0.36 和 JS-FFI 0.2.6，不固定未发布的候选或 hash。业务类型、存档格式、排序键及原有 `hud!` 页面提示不变，不因升级而重写已有任务。
+
+本轮迁移 26 处旧调用：16 处 Option helper、四处 Map 合并、一处存档字段 List 累加、五处排序集合转 List，采用公开接收者方法。原有解码、类型断言、泛型关系、旧 Map 时间戳归一化和坏存档保护全部保留；不新增强转、默认值、预算或编译器规则。迁移器和完整视图只用于临时验收，不进入项目，不增加永久验证脚本或测试组。
 
 CI 保留严格依赖、工具链一致性、规范格式、全定义/公开定义/完整 strict 与原有 11 项业务测试。Reel 使用真实 `reel.typed/State Op Store`，事件使用 nominal Op；开放 renderer/事件输入先检查再进入业务类型，不用 Dynamic 数量作为真实性证明。任务集合按 typed key/value 关系处理，不再从异构 pair 断言出 Task。开放 Respo 事件和 UI states 仍是明确边界。COS 仅用 Action 内置 verify，没有重复 CDN 脚本。
 

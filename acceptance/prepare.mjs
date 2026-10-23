@@ -2,7 +2,14 @@ import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
 import {readFileSync,writeFileSync} from 'node:fs';
 const run=(...args)=>execFileSync('calcit',args,{encoding:'utf8',maxBuffer:20*1024*1024});
-const q=(...args)=>JSON.parse(run('query',...args,'--format','json')).data;
+// Only EDN Set transport members are unordered; source AST Lists stay ordered.
+function canonical(value){
+  if(Array.isArray(value))return value.map(canonical);
+  if(value&&typeof value==='object')return Object.fromEntries(Object.entries(value).map(([key,item])=>[key,
+    key==='__edn_set'?item.map(canonical).sort((a,b)=>JSON.stringify(a).localeCompare(JSON.stringify(b))):canonical(item)]));
+  return value;
+}
+const q=(...args)=>canonical(JSON.parse(run('query',...args,'--format','json')).data);
 assert.equal(run('-v').trim(),'0.30.1');run('docs','agents','--contract');
 const config=q('config');
 const inventory=()=>{
@@ -15,7 +22,7 @@ const inventory=()=>{
   assert.equal(all.length,64);assert.equal(all.reduce((n,d)=>n+d.tests.length,0),0);
   assert.equal(all.reduce((n,d)=>n+d.examples.length,0),0);return all;
 };
-const before=inventory();assert.deepEqual(before,JSON.parse(readFileSync('acceptance/reviewed.json','utf8')));
+const before=inventory();assert.deepEqual(before,canonical(JSON.parse(readFileSync('acceptance/reviewed.json','utf8'))));
 const expected=structuredClone(before),operations=[],counts={option:0,merge:0,fold:0,setList:0};
 const methods={'option:unwrap':'.unwrap','option:unwrap-or':'.unwrap-or','merge':'.merge','foldl':'.fold','&set:to-list':'.to-list'};
 const option=q('type',":: 'Option 'String").methods;

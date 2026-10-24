@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { invoke_method } from "@calcit/procs";
 import * as c from "../js-out/calcit.core.mjs";
 import { store, Store, Task } from "../js-out/app.schema.mjs";
 import { parse_store } from "../js-out/app.storage.mjs";
@@ -18,7 +19,7 @@ const tags = c.init_tags([
   "dropping-id",
   "task/edit",
 ]);
-const get = (value, key) => c.option_$o_unwrap(c.get(value, key));
+const get = (value, key) => invoke_method("unwrap", c.get(value, key));
 export const legacy = `{}
   :tasks $ {} $ |root
     {} (:id |root) (:text |saved-task) (:done? false) (:sort-id |T)
@@ -42,10 +43,10 @@ test("legacy Map storage migrates nested tasks, archives and nullable timestamps
   assert.equal(task.structRef, Task);
   assert.equal(get(task, tags.text), "saved-task");
   assert.equal(get(task, tags["created-time"]), 0);
-  assert.ok(c.option_$o_none_$q_(get(task, tags["done-time"])));
+  assert.ok(invoke_method("none?", get(task, tags["done-time"])));
   const archive = get(get(restored, tags.archives), "archived");
   assert.equal(archive.structRef, Task);
-  assert.equal(c.option_$o_unwrap(get(archive, tags["archived-time"])), 30);
+  assert.equal(invoke_method("unwrap", get(archive, tags["archived-time"])), 30);
   const edited = updater(
     restored,
     c._$o__$o_(tags["task/edit"], "root", "edited"),

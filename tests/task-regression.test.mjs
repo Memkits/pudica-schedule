@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { invoke_method } from "@calcit/procs";
 import * as c from "../js-out/calcit.core.mjs";
 import { store } from "../js-out/app.schema.mjs";
 import { comp_todolist } from "../js-out/app.comp.todolist.mjs";
@@ -9,26 +10,26 @@ import { event__GT_edn } from "../js-out/respo.util.format.mjs";
 import { component_$q_, component_tree } from "../js-out/respo.util.detect.mjs";
 const t = c.init_tags(["tasks", "archives", "root", "id", "text", "done?", "done-time", "archived-time", "sort-id", "pointer", "dragging-id", "dropping-id", "states", "editor", "data", "event", "children", "click", "input", "dragenter", "dragend", "drop", "value", "key-code", "original-event", "node"]);
 const map = c._$n__$M_;
-const get = (x, key) => c.option_$o_unwrap(c.get(x, key));
-const nth = (x, i) => c.option_$o_unwrap(c.nth(x, i));
+const get = (x, key) => invoke_method("unwrap", c.get(x, key));
+const nth = (x, i) => invoke_method("unwrap", c.nth(x, i));
 const op = (name, ...args) => c._$o__$o_(c.init_tags([name])[name], ...args);
 function handlers(node, kind, found = []) {
   if (c.enum_$q_(node)) {
     if (node.tag.value === "none") return found;
     return handlers(c._$n_enum_$o_nth(node, 1), kind, found);
   }
-  if (component_$q_(node)) return handlers(c.option_$o_unwrap(component_tree(node)), kind, found);
+  if (component_$q_(node)) return handlers(invoke_method("unwrap", component_tree(node)), kind, found);
   if (c.list_$q_(node)) {
     for (const item of node.toArray()) handlers(item, kind, found);
     return found;
   }
   const event = c.get(node, t.event);
-  if (c.option_$o_some_$q_(event)) {
-    const fn = c.get(c.option_$o_unwrap(event), kind);
-    if (c.option_$o_some_$q_(fn)) found.push(c.option_$o_unwrap(fn));
+  if (invoke_method("some?", event)) {
+    const fn = c.get(invoke_method("unwrap", event), kind);
+    if (invoke_method("some?", fn)) found.push(invoke_method("unwrap", fn));
   }
   const children = c.get(node, t.children);
-  if (c.option_$o_some_$q_(children)) for (const pair of c.option_$o_unwrap(children).toArray()) handlers(get(pair, t.node), kind, found);
+  if (invoke_method("some?", children)) for (const pair of invoke_method("unwrap", children).toArray()) handlers(get(pair, t.node), kind, found);
   return found;
 }
 function session() {
@@ -53,7 +54,7 @@ test("task text, toggle and pointer click dispatch one Enum", () => {
   const clicks = handlers(node, t.click);
   clicks[0](null, s.dispatch);
   assert.equal(get(root(s.db), t["done?"]), true);
-  assert.equal(c.option_$o_unwrap(get(root(s.db), t["done-time"])), 1000);
+  assert.equal(invoke_method("unwrap", get(root(s.db), t["done-time"])), 1000);
   clicks[1](null, s.dispatch);
   assert.equal(get(s.db, t.pointer), 0);
 });
@@ -74,9 +75,9 @@ test("Enter adds a task and modified Backspace removes it", () => {
     return respoEvent(values);
   };
   on_keydown("root", "existing", 0)(event(13), s.dispatch);
-  assert.equal(c.count(get(s.db, t.tasks)), 2);
+  assert.equal(invoke_method("len", get(s.db, t.tasks)), 2);
   on_keydown("fixture", "", 1)(event(8, true), s.dispatch);
-  assert.equal(c.count(get(s.db, t.tasks)), 1);
+  assert.equal(invoke_method("len", get(s.db, t.tasks)), 1);
   assert.equal(get(root(s.db), t.id), "root");
 });
 test("completed tasks move to archives and a fresh task remains", () => {
@@ -85,8 +86,8 @@ test("completed tasks move to archives and a fresh task remains", () => {
   s.dispatch(op("task/toggle", "root"));
   s.dispatch(op("task/relax"));
   assert.equal(get(get(get(s.db, t.archives), "root"), t["done?"]), true);
-  assert.equal(c.option_$o_unwrap(get(get(get(s.db, t.archives), "root"), t["archived-time"])), 1000);
-  assert.equal(c.count(get(s.db, t.tasks)), 1);
+  assert.equal(invoke_method("unwrap", get(get(get(s.db, t.archives), "root"), t["archived-time"])), 1000);
+  assert.equal(invoke_method("len", get(s.db, t.tasks)), 1);
 });
 test("modified arrow keys and drop keep task ordering and pointer consistent", () => {
   const s = session();
@@ -105,7 +106,7 @@ test("modified arrow keys and drop keep task ordering and pointer consistent", (
   assert.equal(prevented, 2);
   const target = comp_task(root(s.db), 0, false, "fixture", "root");
   handlers(target, t.drop)[0](null, s.dispatch);
-  assert.equal(c.count(get(s.db, t.tasks)), 2);
+  assert.equal(invoke_method("len", get(s.db, t.tasks)), 2);
   assert.equal(get(root(s.db), t["sort-id"]), originalSort);
   assert.ok(c._$n_compare(get(get(get(s.db, t.tasks), "fixture"), t["sort-id"]), originalSort) < 0);
   assert.equal(get(s.db, t.pointer), 0);

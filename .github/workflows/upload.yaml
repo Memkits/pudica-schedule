@@ -61,8 +61,7 @@ jobs:
         git diff --exit-code -- calcit.cirru
         calcit calcit.cirru --check-only --all-defs
         calcit calcit.cirru --check-only --ns app.schema --ns app.updater --ns app.storage --summary-only
-        calcit calcit.cirru fix --workflow strict --verify --format json | tee /tmp/calcit-strict.json
-        jq -e '.data.workflow.status == "passed" and .diagnostics == []' /tmp/calcit-strict.json
+        calcit calcit.cirru fix --workflow strict --verify --format json | jq -e 'if .data.workflow.status == "passed" and .diagnostics == [] then true else ., false end'
         calcit calcit.cirru analyze weak-types --only deprecated-call --summary-only --format json | jq -e '.data.summary.calls == 0'
 
     - name: Select CDN asset path

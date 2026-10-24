@@ -17,7 +17,7 @@
               div
                 {}
                   :class-name $ str-spaced css/global css/fullscreen
-                  :style $ merge $ {} (:background-position "|left top") (:overflow :auto) (:padding "|160px 200px") (; :color :white)
+                  :style $ .merge $ {} (:background-position "|left top") (:overflow :auto) (:padding "|160px 200px") (; :color :white)
                 comp-todolist (:tasks store) (:pointer store) (:dragging-id store) (:dropping-id store)
                 div
                   {} $ :style $ {} (:position :fixed) (:bottom 0) (:left 16)
@@ -142,7 +142,7 @@
           :code $ quote $ defn begin-drag! (e task-id)
             let
                 event $ js-cast
-                  option:unwrap $ get e :original-event
+                  .unwrap $ get e :original-event
                   , 'app.comp.task/DragEventHost
                 raw-transfer $ .-data-transfer event
               when (js-present? raw-transfer)
@@ -162,7 +162,7 @@
               div
                 {}
                   :class-name $ str-spaced css/row css-task
-                  :style $ merge
+                  :style $ .merge
                     assert-type
                       {} $ :top $ str (* idx 49) |px
                       :: 'Map 'Tag 'Dynamic
@@ -224,13 +224,13 @@
                         e $ decode-map-as e $ :: 'Map 'Tag 'Dynamic
                       d! $ schema/Op :task/edit (:id task)
                         decode-map-as
-                          option:unwrap $ get e :value
+                          .unwrap $ get e :value
                           , 'String
                   :on-keydown $ on-keydown (:id task) (:text task) idx
                   :on-click $ fn (e d!)
                     d! $ schema/Op :pointer/touch idx
                 <> (:sort-id task)
-                  merge
+                  .merge
                     assert-type
                       {} $ :color $ hsl 0 0 40 (Option :some 0.1)
                       :: 'Map 'Tag 'Dynamic
@@ -326,7 +326,7 @@
         'event-host $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn event-host (e)
             js-cast
-              option:unwrap $ get e :original-event
+              .unwrap $ get e :original-event
               , 'app.comp.task/InteractionEventHost
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'app.comp.task/InteractionEventHost)
@@ -336,7 +336,7 @@
           :code $ quote $ defn event-key-info (e)
             let
                 event $ js-cast
-                  option:unwrap $ get e :original-event
+                  .unwrap $ get e :original-event
                   , 'app.comp.task/KeyboardModifiersHost
               KeyInfo :shift? (.-shift-key? event) :ctrl? (.-ctrl-key? event) :meta? $ .-meta-key? event
           :examples $ []
@@ -360,7 +360,7 @@
                     ctrl? $ :ctrl? key-info
                     meta? $ :meta? key-info
                     code $ decode-map-as
-                      option:unwrap $ get e :key-code
+                      .unwrap $ get e :key-code
                       , 'Number
                   cond
                       and shift? $ = 13 code
@@ -457,8 +457,8 @@
                         , idx (= pointer idx) dragging-id dropping-id
                     sort $ fn (a b)
                       &compare
-                        option:unwrap $ first a
-                        option:unwrap $ first b
+                        .unwrap $ first a
+                        .unwrap $ first b
                 div $ {} (:class-name css-cursor)
                   :style $ {} $ :top
                     str
@@ -490,12 +490,12 @@
       :defs $ {}
         'demo? $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def demo?
-            = |true $ option:unwrap-or (get-env |demo) |false
+            = |true $ .unwrap-or (get-env |demo) |false
           :examples $ []
           :schema $ :: 'Bool
         'dev? $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def dev?
-            = |dev $ option:unwrap-or (get-env |mode) |release
+            = |dev $ .unwrap-or (get-env |mode) |release
           :examples $ []
           :schema $ :: 'Bool
         'site $ %{} 'CodeEntry (:doc |)
@@ -736,7 +736,7 @@
                 data $ as-map $ parse-cirru-edn raw
                   {} $ :Option Option
                 normalized $ if (map? data)
-                  foldl ([] :tasks :archives) data $ fn (acc field)
+                  .fold ([] :tasks :archives) data $ fn (acc field)
                     let
                         tasks $ .unwrap-or (get acc field) nil
                       if (map? tasks)
@@ -759,11 +759,11 @@
                 tasks $ :tasks store
                 base-task $ .unwrap $ get tasks task-id
                 base-sort-id $ :sort-id base-task
-                all-sort-ids $ -> tasks (distinct-values) (&set:to-list)
+                all-sort-ids $ -> tasks (distinct-values) (.to-list)
                   map $ fn (task)
                     :sort-id $ assert-type task 'app.schema/Task
                   sort &compare
-                sort-id-after $ option:unwrap-or
+                sort-id-after $ .unwrap-or
                   first $ filter all-sort-ids $ fn (x)
                     > (&compare x base-sort-id) 0
                   , max-id
@@ -781,11 +781,11 @@
                 tasks $ :tasks store
                 base-task $ .unwrap $ get tasks task-id
                 base-sort-id $ :sort-id base-task
-                all-sort-ids $ -> tasks (distinct-values) (&set:to-list)
+                all-sort-ids $ -> tasks (distinct-values) (.to-list)
                   map $ fn (task)
                     :sort-id $ assert-type task 'app.schema/Task
                   sort &compare
-                sort-id-before $ option:unwrap-or
+                sort-id-before $ .unwrap-or
                   last $ filter all-sort-ids $ fn (x)
                     < (&compare x base-sort-id) 0
                   , min-id
@@ -816,7 +816,7 @@
                 from-sort-id $ :sort-id from-task
                 base-sort-id $ :sort-id to-task
                 before? $ > (&compare from-sort-id base-sort-id) 0
-                all-sort-ids $ -> tasks (distinct-values) (&set:to-list)
+                all-sort-ids $ -> tasks (distinct-values) (.to-list)
                   map $ fn (task)
                     :sort-id $ assert-type task 'app.schema/Task
                 smaller-sort-ids $ -> all-sort-ids
@@ -829,10 +829,10 @@
                   sort &compare
                 new-sort-id $ if before?
                   bisect
-                    option:unwrap-or (last smaller-sort-ids) min-id
+                    .unwrap-or (last smaller-sort-ids) min-id
                     , base-sort-id
-                  bisect base-sort-id $ option:unwrap-or (first greater-sort-ids) max-id
-                new-pointer $ option:unwrap $ index-of
+                  bisect base-sort-id $ .unwrap-or (first greater-sort-ids) max-id
+                new-pointer $ .unwrap $ index-of
                   -> all-sort-ids
                     filter $ fn (x) (not= x from-sort-id)
                     conj new-sort-id
@@ -849,7 +849,7 @@
             let
                 tasks $ :tasks store
                 from-task $ .unwrap $ get tasks from-id
-                sorted-pairs $ -> tasks (distinct-values) (&set:to-list)
+                sorted-pairs $ -> tasks (distinct-values) (.to-list)
                   map $ fn (task)
                     let
                         typed-task $ assert-type task 'app.schema/Task
@@ -862,7 +862,7 @@
               if
                 = (inc current-index) (count tasks)
                 , store $ let
-                    target-pair $ option:unwrap $ nth sorted-pairs (inc current-index)
+                    target-pair $ .unwrap $ nth sorted-pairs (inc current-index)
                     new-sort-id $ assert-type (&list:nth target-pair 0) 'String
                     target-id $ assert-type (&list:nth target-pair 1) 'String
                     target-task $ .unwrap $ get tasks target-id
@@ -879,7 +879,7 @@
             let
                 tasks $ :tasks store
                 from-task $ .unwrap $ get tasks from-id
-                sorted-pairs $ -> tasks (distinct-values) (&set:to-list)
+                sorted-pairs $ -> tasks (distinct-values) (.to-list)
                   map $ fn (task)
                     let
                         typed-task $ assert-type task 'app.schema/Task
@@ -890,7 +890,7 @@
                       assert-type (&list:nth b 0) 'String
                 current-index $ :pointer store
               if (= 0 current-index) store $ let
-                  target-pair $ option:unwrap $ nth sorted-pairs (dec current-index)
+                  target-pair $ .unwrap $ nth sorted-pairs (dec current-index)
                   new-sort-id $ assert-type (&list:nth target-pair 0) 'String
                   target-id $ assert-type (&list:nth target-pair 1) 'String
                   target-task $ .unwrap $ get tasks target-id
@@ -918,7 +918,7 @@
                   {} $ op-id $ -> schema/task (assoc :id op-id) (assoc :created-time op-time) (assoc :sort-id mid-id)
                   , next-tasks
               -> store (assoc :tasks ensured-tasks)
-                assoc :archives $ merge (:archives store) done-tasks
+                assoc :archives $ .merge (:archives store) done-tasks
                 assoc :pointer 0
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'app.schema/Store)

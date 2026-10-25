@@ -439,11 +439,11 @@
           :code $ quote $ defcomp comp-todolist (tasks pointer dragging-id dropping-id)
             div
               {} $ :style $ {} (:position :relative)
-                :height $ * 40 $ count tasks
+                :height $ * 40 $ .len tasks
               div
                 {} $ :style $ {} (:position :relative)
                   :height $ str
-                    + 8 $ * 40 $ count tasks
+                    + 8 $ * 40 $ .len tasks
                     , |px
                 list-> ({})
                   -> tasks (keys) (.to-list)
@@ -799,7 +799,7 @@
         'delete-task $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn delete-task (store task-id idx)
             if
-              = 1 $ count $ :tasks store
+              = 1 $ .len $ :tasks store
               , store $ let
                   next-pointer $ if (= 0 idx) 0 $ dec (:pointer store)
                   next-tasks $ dissoc (:tasks store) task-id
@@ -860,7 +860,7 @@
                       assert-type (&list:nth b 0) 'String
                 current-index $ :pointer store
               if
-                = (inc current-index) (count tasks)
+                = (inc current-index) (.len tasks)
                 , store $ let
                     target-pair $ .unwrap $ nth sorted-pairs (inc current-index)
                     new-sort-id $ assert-type (&list:nth target-pair 0) 'String
@@ -971,7 +971,7 @@
               (:pointer/after)
                 if
                   = (:pointer store)
-                    dec $ count $ :tasks store
+                    dec $ .len $ :tasks store
                   , store $ assoc store :pointer $ inc (:pointer store)
               (:mark/dragging data) (assoc store :dragging-id data)
               (:mark/dropping data) (assoc store :dropping-id data)

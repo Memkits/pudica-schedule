@@ -1,0 +1,82 @@
+name: Protected Pudica Map length migration
+on:
+  push:
+    branches: [prepare/pudica-length-0301]
+permissions:
+  contents: read
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6.5.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Enable Corepack
+        run: corepack enable && corepack prepare yarn@4.18.0 --activate
+      - uses: calcit-lang/setup-calcit@v1.5.0
+        with:
+          tools: calcit,caps
+          deps-file: deps.cirru
+          caps-version: "0.1.1"
+      - name: Install exact published graph
+        run: caps --ci --strict && yarn install --immutable && caps verify --toolchain
+      - name: Original full gates and eleven business tests
+        run: |
+          set -euo pipefail
+          mkdir -p acceptance
+          test ! -e compact.cirru
+          test ! -e package.cirru
+          node prepare-length.mjs before
+          source_blob="$(git hash-object calcit.cirru)"
+          calcit calcit.cirru edit format
+          test "$(git hash-object calcit.cirru)" = "$source_blob"
+          calcit calcit.cirru --check-only --all-defs > acceptance/before-all-defs.log
+          calcit calcit.cirru --check-only --ns app.schema --ns app.updater --ns app.storage --summary-only > acceptance/before-public.log
+          calcit calcit.cirru fix --workflow strict --verify --format json > acceptance/before-strict.json
+          jq -e '.data.workflow.status == "passed" and .diagnostics == []' acceptance/before-strict.json
+          calcit calcit.cirru analyze weak-types --only deprecated-call --summary-only --format json > acceptance/before-deprecated.json
+          jq -e '.data.summary.calls == 0' acceptance/before-deprecated.json
+          VITE_BASE_URL=./ yarn build
+          node --test tests/*.test.mjs > acceptance/before-tests.log
+          node prepare-length.mjs before-js
+      - name: Exact official source transaction
+        run: node prepare-length.mjs apply
+      - name: Candidate unchanged original gates and business tests
+        run: |
+          set -euo pipefail
+          source_blob="$(git hash-object calcit.cirru)"
+          calcit calcit.cirru edit format
+          test "$(git hash-object calcit.cirru)" = "$source_blob"
+          calcit calcit.cirru --check-only --all-defs > acceptance/after-all-defs.log
+          calcit calcit.cirru --check-only --ns app.schema --ns app.updater --ns app.storage --summary-only > acceptance/after-public.log
+          calcit calcit.cirru fix --workflow strict --verify --format json > acceptance/after-strict.json
+          jq -e '.data.workflow.status == "passed" and .diagnostics == []' acceptance/after-strict.json
+          calcit calcit.cirru analyze weak-types --only deprecated-call --summary-only --format json > acceptance/after-deprecated.json
+          jq -e '.data.summary.calls == 0' acceptance/after-deprecated.json
+          VITE_BASE_URL=./ yarn build
+          node --test tests/*.test.mjs > acceptance/after-tests.log
+          node prepare-length.mjs after-js
+          node prepare-length.mjs after
+      - uses: actions/upload-artifact@v7.0.2
+        if: success()
+        with:
+          name: accepted-source
+          path: calcit.cirru
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7.0.2
+        if: success()
+        with:
+          name: accepted-runtime
+          path: dist/
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7.0.2
+        if: always()
+        with:
+          name: diagnostics
+          path: acceptance/
+          if-no-files-found: error

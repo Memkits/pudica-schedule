@@ -6,12 +6,12 @@
     {} (:description |) (:init-fn 'app.main/main!) (:mode :js) (:reload-fn 'app.main/reload!) (:target :browser)
       :feature-policy $ {}
       :modules $ [] |respo.calcit/ |respo-ui.calcit/ |reel.calcit/ |bisection-key/ |js-ffi/
-      :type-slots $ {} $ :dispatch-op |app.schema/Op
+      :type-slots $ {} $ :dispatch-op 'app.schema/Op
   :files $ {}
     'app.comp.container $ %{} 'FileEntry
       :defs $ {}
         'comp-container $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defcomp comp-container (reel)
+          :code $ quote $ defcomp comp-container (reel on-control)
             let
                 store $ :store reel
               div
@@ -25,23 +25,28 @@
                     :class-name $ str-spaced css/link css/font-fancy
                     :on-click $ fn (e d!)
                       d! $ schema/Op :task/relax
-                  =< 8 &unit
+                  space-x 8
                   a $ {} (:inner-text |Review)
                     :class-name $ str-spaced css/link css/font-fancy
                     :on-click $ fn (e d!) (open-reviewer! store)
                 comp-transparent
-                when config/dev? $ comp-inspect |Store store &unit
-                when config/dev? $ comp-reel (:states store) (reel-view/view-data reel) ({})
+                if config/dev?
+                  Option :some $ comp-inspect |Store store $ {}
+                  Option :none
+                if config/dev?
+                  Option :some $ comp-typed-reel (:states store) reel ({}) on-control
+                  Option :none
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
-            :args $ [] $ :: 'reel.typed/State 'app.schema/Op 'app.schema/Store
+          :schema $ quote $ Fn (reel.typed/State app.schema/Op app.schema/Store)
+            Fn reel.typed/Control $ -> Unit
+            -> respo.schema/Component
+            :features :js-ffi
         'comp-transparent $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-transparent ()
             span $ {} (:class-name |transparent)
               :style $ {} (:width 1) (:height 1) (:background-color |red) (:display :inline-block)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
-            :args $ []
+          :schema $ quote $ Fn (-> respo.schema/Component)
         'open-reviewer! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn open-reviewer! (store)
             let
@@ -52,9 +57,7 @@
               browser/window-open url
               , &unit
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Unit)
-            :args $ [] 'app.schema/Store
-            :features $ #{} :js-ffi
+          :schema $ quote $ Fn app.schema/Store (-> Unit) (:features :js-ffi)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.comp.container
           :require
@@ -62,88 +65,73 @@
             respo-ui.core :as ui
             respo-ui.css :as css
             respo.core :refer $ defcomp action-> <> div span button a
-            respo.comp.space :refer $ =<
+            respo.comp.space :refer $ space-x
             js-ffi.browser :as browser
             app.comp.todolist :refer $ comp-todolist
             respo.comp.inspect :refer $ comp-inspect
             app.style :as style
             app.config :as config
-            reel.comp.reel :refer $ comp-reel
-            reel.typed-compat :as reel-view
+            reel.comp.reel :refer $ comp-typed-reel
             app.schema :as schema
     'app.comp.task $ %{} 'FileEntry
       :defs $ {}
         'DataTransferHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait DataTransferHost
-            .set-data! $ :: 'Fn $ {}
-              :args $ [] 'app.comp.task/DataTransferHost 'String 'String
-              :return 'Unit
-            .set-drag-image! $ :: 'Fn $ {}
-              :args $ [] 'app.comp.task/DataTransferHost 'js-ffi.browser/DomElementHost 'Number 'Number
-              :return 'Unit
+            .set-data! $ Fn app.comp.task/DataTransferHost String String $ -> Unit
+            .set-drag-image! $ Fn app.comp.task/DataTransferHost js-ffi.browser/DomElementHost Number Number $ -> Unit
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
             :names $ {} (:set-data! |setData) (:set-drag-image! |setDragImage)
-          :schema $ :: 'Trait
+          :schema $ quote Trait
         'DragEventHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait DragEventHost
-            :data-transfer $ :: 'JsNullish 'JsObject
+            :data-transfer $ JsNullish JsObject
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
-          :schema $ :: 'Trait
+          :schema $ quote Trait
         'ElementHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait ElementHost (:style 'app.comp.task/StyleHost)
-            :parent-node $ :: 'JsNullish 'app.comp.task/ParentHost
-            .clone-node $ :: 'Fn $ {}
-              :args $ [] 'app.comp.task/ElementHost 'Bool
-              :return 'app.comp.task/ElementHost
-            .remove! $ :: 'Fn $ {}
-              :args $ [] 'app.comp.task/ElementHost
-              :return 'Unit
+            :parent-node $ JsNullish app.comp.task/ParentHost
+            .clone-node $ Fn app.comp.task/ElementHost Bool $ -> app.comp.task/ElementHost
+            .remove! $ Fn app.comp.task/ElementHost $ -> Unit
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
             :names $ {} (:clone-node |cloneNode) (:parent-node |parentNode) (:remove! |remove)
-          :schema $ :: 'Trait
+          :schema $ quote Trait
         'InteractionEventHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait InteractionEventHost
-            .prevent-default! $ :: 'Fn $ {}
-              :args $ [] 'app.comp.task/InteractionEventHost
-              :return 'Unit
+            .prevent-default! $ Fn app.comp.task/InteractionEventHost $ -> Unit
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
             :names $ {} $ :prevent-default! |preventDefault
-          :schema $ :: 'Trait
+          :schema $ quote Trait
         'KeyInfo $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defstruct KeyInfo (:shift? 'Bool) (:ctrl? 'Bool) (:meta? 'Bool)
+          :code $ quote $ defstruct KeyInfo (:shift? Bool) (:ctrl? Bool) (:meta? Bool)
           :examples $ []
-          :schema $ :: 'StructDef
+          :schema $ quote StructDef
         'KeyboardModifiersHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait KeyboardModifiersHost (:shift-key? 'Bool) (:ctrl-key? 'Bool) (:meta-key? 'Bool)
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
             :names $ {} (:ctrl-key? |ctrlKey) (:meta-key? |metaKey) (:shift-key? |shiftKey)
-          :schema $ :: 'Trait
+          :schema $ quote Trait
         'ParentHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait ParentHost
-            .append-child! $ :: 'Fn $ {}
-              :args $ [] 'app.comp.task/ParentHost 'app.comp.task/ElementHost
-              :return 'app.comp.task/ElementHost
+            .append-child! $ Fn app.comp.task/ParentHost app.comp.task/ElementHost $ -> app.comp.task/ElementHost
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
-          :schema $ :: 'Trait
+          :schema $ quote Trait
         'StyleHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait StyleHost (:opacity 'String) (:transform 'String) (:z-index 'String)
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
             :names $ {} $ :z-index |zIndex
             :writable $ #{} :opacity :transform :z-index
-          :schema $ :: 'Trait
+          :schema $ quote Trait
         'begin-drag! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn begin-drag! (e task-id)
             let
-                event $ js-cast
-                  .unwrap $ get e :original-event
-                  , 'app.comp.task/DragEventHost
+                event $ js-cast (:original-event e) 'app.comp.task/DragEventHost
                 raw-transfer $ .-data-transfer event
               when (js-present? raw-transfer)
                 let
@@ -152,9 +140,7 @@
                   set-transparent-drag-image! data-transfer
               , &unit
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Unit)
-            :args $ [] (:: 'Map 'Tag 'Dynamic) 'String
-            :features $ #{} :js-ffi
+          :schema $ quote $ Fn respo.schema/RespoEvent String (-> Unit) (:features :js-ffi)
         'comp-task $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-task (task idx focused? dragging-id dropping-id)
             []
@@ -165,41 +151,45 @@
                   :style $ .merge
                     assert-type
                       {} $ :top $ str (* idx 49) |px
-                      :: 'Map 'Tag 'Dynamic
+                      Map Tag respo.schema/CssValue
                     assert-type
                       if (:done? task)
                         {} $ :opacity 0.5
                         {}
-                      :: 'Map 'Tag 'Dynamic
+                      Map Tag respo.schema/CssValue
                     assert-type
                       if
                         = dropping-id $ :id task
                         {} (:opacity 0.8) (:transform "|translate(2px,4px)") (:z-index 900)
                           :outline $ str "|2px solid " $ hsl 0 0 86
                         {}
-                      :: 'Map 'Tag 'Dynamic
+                      Map Tag respo.schema/CssValue
                     assert-type
                       if
                         = dragging-id $ :id task
                         {} (:z-index 999) (:opacity 0.5) (:transform "|translate(-2px,-4px)")
                         {}
-                      :: 'Map 'Tag 'Dynamic
+                      Map Tag respo.schema/CssValue
                   :draggable true
                   :on $ {}
                     :dragstart $ fn (e d!)
-                      let
-                          e $ decode-map-as e $ :: 'Map 'Tag 'Dynamic
-                        begin-drag! e $ :id task
-                        d! $ schema/Op :mark/dragging $ :id task
+                      hint-fn $ Fn respo.schema/RespoEvent
+                        Fn app.schema/Op $ -> Unit
+                        -> Unit
+                      begin-drag! e $ :id task
+                      d! $ schema/Op :mark/dragging $ :id task
+                      , &unit
                     :dragend $ fn (e d!)
                       d! $ schema/Op :mark/dragging |
                       d! $ schema/Op :mark/dropping |
                     :dragenter $ fn (e d!)
                       d! $ schema/Op :mark/dropping $ :id task
                     :dragover $ fn (e d!)
-                      let
-                          e $ decode-map-as e $ :: 'Map 'Tag 'Dynamic
-                        prevent-default! e
+                      hint-fn $ Fn respo.schema/RespoEvent
+                        Fn app.schema/Op $ -> Unit
+                        -> Unit
+                      prevent-default! e
+                      , &unit
                     :drop $ fn (e d!)
                       if
                         not= dragging-id $ :id task
@@ -207,9 +197,10 @@
                 div $ {} (:class-name css-done)
                   :style $ if (:done? task)
                     {} $ :transform "|scale(0.7)"
+                    {}
                   :on-click $ fn (e d!)
                     d! $ schema/Op :task/toggle $ :id task
-                =< 8 &unit
+                space-x 8
                 input $ {}
                   :value $ :text task
                   :placeholder |task...
@@ -220,12 +211,8 @@
                       text-width $ get-width (:text task) |Hind 16
                     {} $ :width $ + 16 text-width
                   :on-input $ fn (e d!)
-                    let
-                        e $ decode-map-as e $ :: 'Map 'Tag 'Dynamic
-                      d! $ schema/Op :task/edit (:id task)
-                        decode-map-as
-                          .unwrap $ get e :value
-                          , 'String
+                    d! $ schema/Op :task/edit (:id task) (respo.core/event-value e)
+                    , &unit
                   :on-keydown $ on-keydown (:id task) (:text task) idx
                   :on-click $ fn (e d!)
                     d! $ schema/Op :pointer/touch idx
@@ -233,7 +220,7 @@
                   .merge
                     assert-type
                       {} $ :color $ hsl 0 0 40 (Option :some 0.1)
-                      :: 'Map 'Tag 'Dynamic
+                      Map Tag respo.schema/CssValue
                     assert-type
                       if demo?
                         {}
@@ -241,10 +228,9 @@
                           :font-size 16
                           :font-family ui/font-code
                         {}
-                      :: 'Map 'Tag 'Dynamic
+                      Map Tag respo.schema/CssValue
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
-            :args $ [] 'app.schema/Task 'Number 'Bool 'String 'String
+          :schema $ quote $ Fn app.schema/Task Number Bool String String (-> respo.schema/Component)
         'css-done $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defstyle css-done
             {} $ |$0 $ {} (:width 20) (:height 20)
@@ -253,7 +239,7 @@
               :transition-duration |300ms
               :border-radius |50%
           :examples $ []
-          :schema $ :: 'String
+          :schema $ quote String
         'css-task $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defstyle css-task
             {}
@@ -268,7 +254,7 @@
                 :box-shadow $ str "|2px 2px 8px " $ hsl 0 0 40 (Option :some 0.2)
                 :z-index 999
           :examples $ []
-          :schema $ :: 'String
+          :schema $ quote String
         'css-text $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defstyle css-text
             {}
@@ -284,7 +270,7 @@
                 :border :none
               |$0:focus $ {} (:box-shadow :none) (:border :none)
           :examples $ []
-          :schema $ :: 'String
+          :schema $ quote String
         'effect-in $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defeffect effect-in (done?) (action el at-place?)
             match action
@@ -320,87 +306,68 @@
                 , &unit
               _ &unit
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'respo.schema/Effect)
-            :args $ [] 'Bool
-            :features $ #{} :js-ffi
+          :schema $ quote $ Fn Bool (-> respo.schema/Effect) (:features :js-ffi)
         'event-host $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn event-host (e)
-            js-cast
-              .unwrap $ get e :original-event
-              , 'app.comp.task/InteractionEventHost
+            js-cast (:original-event e) 'app.comp.task/InteractionEventHost
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'app.comp.task/InteractionEventHost)
-            :args $ [] $ :: 'Map 'Tag 'Dynamic
-            :features $ #{} :js-ffi
+          :schema $ quote $ Fn respo.schema/RespoEvent (-> app.comp.task/InteractionEventHost) (:features :js-ffi)
         'event-key-info $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn event-key-info (e)
             let
-                event $ js-cast
-                  .unwrap $ get e :original-event
-                  , 'app.comp.task/KeyboardModifiersHost
+                event $ js-cast (:original-event e) 'app.comp.task/KeyboardModifiersHost
               KeyInfo :shift? (.-shift-key? event) :ctrl? (.-ctrl-key? event) :meta? $ .-meta-key? event
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'app.comp.task/KeyInfo)
-            :args $ [] $ :: 'Map 'Tag 'Dynamic
-            :features $ #{} :js-ffi
+          :schema $ quote $ Fn respo.schema/RespoEvent (-> app.comp.task/KeyInfo) (:features :js-ffi)
         'on-keydown $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn on-keydown (task-id text idx)
             fn (e dispatch!)
-              hint-fn $ {} (:return 'Unit)
-                :args $ [] (:: 'Map 'Tag 'Dynamic)
-                  :: 'Fn $ {}
-                    :args $ [] 'Dynamic
-                    :rest 'Dynamic
-                    :return 'Unit
+              hint-fn $ Fn respo.schema/RespoEvent
+                Fn app.schema/Op $ -> Unit
+                -> Unit
               let
-                  e $ decode-map-as e $ :: 'Map 'Tag 'Dynamic
-                let
-                    key-info $ event-key-info e
-                    shift? $ :shift? key-info
-                    ctrl? $ :ctrl? key-info
-                    meta? $ :meta? key-info
-                    code $ decode-map-as
-                      .unwrap $ get e :key-code
-                      , 'Number
-                  cond
-                      and shift? $ = 13 code
-                      if
-                        not $ blank? text
-                        dispatch! $ schema/Op :task/add-before task-id
-                    (and (blank? text) (and (or shift? meta?) (= 8 code)))
-                      dispatch! $ schema/Op :task/delete task-id idx
-                    (and (not shift?) (= 13 code))
-                      if
-                        not $ blank? text
-                        dispatch! $ schema/Op :task/add-after task-id
-                    (and meta? ctrl? (= 38 code))
-                      do
-                        dispatch! $ schema/Op :task/move-up task-id
-                        prevent-default! e
-                    (and (= 38 code))
-                      do
-                        dispatch! $ schema/Op :pointer/before
-                        prevent-default! e
-                    (and meta? ctrl? (= 40 code))
-                      do
-                        dispatch! $ schema/Op :task/move-down task-id
-                        prevent-default! e
-                    (and (= 40 code))
-                      do
-                        dispatch! $ schema/Op :pointer/after
-                        prevent-default! e
-                    (and shift? (= 9 code))
-                      do (prevent-default! e)
-                        dispatch! $ schema/Op :pointer/before
-                    (and (not shift?) (= 9 code))
-                      do (prevent-default! e)
-                        dispatch! $ schema/Op :pointer/after
-                    true &unit
+                  key-info $ event-key-info e
+                  shift? $ :shift? key-info
+                  ctrl? $ :ctrl? key-info
+                  meta? $ :meta? key-info
+                  code $ decode-map-as (:key-code e) 'Number
+                cond
+                    and shift? $ = 13 code
+                    if
+                      not $ blank? text
+                      dispatch! $ schema/Op :task/add-before task-id
+                  (and (blank? text) (and (or shift? meta?) (= 8 code)))
+                    dispatch! $ schema/Op :task/delete task-id idx
+                  (and (not shift?) (= 13 code))
+                    if
+                      not $ blank? text
+                      dispatch! $ schema/Op :task/add-after task-id
+                  (and meta? ctrl? (= 38 code))
+                    do
+                      dispatch! $ schema/Op :task/move-up task-id
+                      prevent-default! e
+                  (and (= 38 code))
+                    do
+                      dispatch! $ schema/Op :pointer/before
+                      prevent-default! e
+                  (and meta? ctrl? (= 40 code))
+                    do
+                      dispatch! $ schema/Op :task/move-down task-id
+                      prevent-default! e
+                  (and (= 40 code))
+                    do
+                      dispatch! $ schema/Op :pointer/after
+                      prevent-default! e
+                  (and shift? (= 9 code))
+                    do (prevent-default! e)
+                      dispatch! $ schema/Op :pointer/before
+                  (and (not shift?) (= 9 code))
+                    do (prevent-default! e)
+                      dispatch! $ schema/Op :pointer/after
+                  true &unit
               , &unit
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'respo.schema/EventHandler)
-            :args $ [] 'String 'String 'Number
-            :features $ #{} :js-ffi
+          :schema $ quote $ Fn String String Number (-> respo.schema/EventHandler) (:features :js-ffi)
         'prevent-default! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn prevent-default! (e)
             let
@@ -408,18 +375,14 @@
               event .prevent-default!
               , &unit
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Unit)
-            :args $ [] $ :: 'Map 'Tag 'Dynamic
-            :features $ #{} :js-ffi
+          :schema $ quote $ Fn respo.schema/RespoEvent (-> Unit) (:features :js-ffi)
         'set-transparent-drag-image! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn set-transparent-drag-image! (data-transfer)
             match (browser/query-selector |.transparent)
               (:none) &unit
               (:some transparent) (data-transfer .set-drag-image! transparent 0 0)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Unit)
-            :args $ [] 'app.comp.task/DataTransferHost
-            :features $ #{} :js-ffi
+          :schema $ quote $ Fn app.comp.task/DataTransferHost (-> Unit) (:features :js-ffi)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.comp.task
           :require
@@ -428,7 +391,7 @@
             respo-ui.css :as css
             respo.core :refer $ defcomp div span input <> defeffect
             respo.css :refer $ defstyle
-            respo.comp.space :refer $ =<
+            respo.comp.space :refer $ space-x
             js-ffi.browser :as browser
             app.util.dom :refer $ get-width
             app.config :refer $ demo?
@@ -465,8 +428,7 @@
                       + 2 $ * 49 pointer
                       , |px
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
-            :args $ [] (:: 'Map 'String 'app.schema/Task) 'Number 'String 'String
+          :schema $ quote $ Fn (Map String app.schema/Task) Number String String (-> respo.schema/Component)
         'css-cursor $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defstyle css-cursor
             {} $ |$0 $ {} (:left -20) (:width 8) (:height 40)
@@ -475,7 +437,7 @@
               :transition |600ms
               :border-radius |4px
           :examples $ []
-          :schema $ :: 'String
+          :schema $ quote String
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.comp.todolist
           :require
@@ -492,17 +454,17 @@
           :code $ quote $ def demo?
             = |true $ .unwrap-or (get-env |demo) |false
           :examples $ []
-          :schema $ :: 'Bool
+          :schema $ quote Bool
         'dev? $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def dev?
             = |dev $ .unwrap-or (get-env |mode) |release
           :examples $ []
-          :schema $ :: 'Bool
+          :schema $ quote Bool
         'site $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def site
             {} (:title |Pudica) (:icon |https://cdn.tiye.me/logo/pudica.png) (:storage-key |pudica-schedule)
           :examples $ []
-          :schema $ :: 'Map 'Tag 'String
+          :schema $ quote $ Map Tag String
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.config
     'app.main $ %{} 'FileEntry
@@ -510,17 +472,15 @@
         '*reel $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defref *reel (reel/new-reel schema/store)
           :examples $ []
-          :schema $ :: 'Ref $ :: 'reel.typed/State 'app.schema/Op 'app.schema/Store
+          :schema $ quote $ Ref (reel.typed/State app.schema/Op app.schema/Store)
         '*storage-failed? $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defref *storage-failed? false
           :examples $ []
-          :schema $ :: 'Ref 'Bool
+          :schema $ quote $ Ref Bool
         'adjust-focus! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn adjust-focus! () (browser/set-timeout! adjust-focus-now! 0) &unit
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Unit)
-            :args $ []
-            :features $ #{} :js-ffi
+          :schema $ quote $ Fn (-> Unit) (:features :js-ffi)
         'adjust-focus-now! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn adjust-focus-now! ()
             let
@@ -531,25 +491,20 @@
                 (:none) &unit
                 (:some input) (browser/element-focus! input)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Unit)
-            :args $ []
-            :features $ #{} :js-ffi
+          :schema $ quote $ Fn (-> Unit) (:features :js-ffi)
         'dispatch! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn dispatch! (op)
-            if (enum? op)
-              do
-                when config/dev? $ println |Dispatch: op
-                reset! *reel $ match (reel/decode-control op)
-                  (:some control) (reel/apply-control updater @*reel control)
-                  (:none)
-                    reel/record-op updater @*reel (decode-map-as op 'app.schema/Op) (generate-id!) (host/now-ms)
-                , &unit
-              raise |Expected-Enum-operation
+            when config/dev? $ println |Dispatch: op
+            reset! *reel $ reel/record-op updater @*reel op (generate-id!) (host/now-ms)
             , &unit
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Unit)
-            :args $ [] 'Dynamic
-            :features $ #{} :js-ffi
+          :schema $ quote $ Fn app.schema/Op (-> Unit) (:features :js-ffi)
+        'dispatch-control! $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn dispatch-control! (control)
+            reset! *reel $ reel/apply-control updater @*reel control
+            , &unit
+          :examples $ []
+          :schema $ quote $ Fn reel.typed/Control (-> Unit)
         'main! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn main! ()
             if config/dev? $ load-console-formatter!
@@ -557,7 +512,7 @@
             render-app!
             add-watch! *reel :changes $ fn (r p) (render-app!)
             add-watch! *reel :focus $ fn (r p) (adjust-focus!)
-            listen-devtools! |k dispatch!
+            listen-devtools! |k dispatch-control!
             browser/set-before-unload! persist-on-unload!
             browser/set-interval! persist-storage! 60000
             browser/add-event-listener! |visibilitychange persist-when-hidden!
@@ -567,24 +522,19 @@
               (:some raw) (restore-storage! raw)
             println "|App started."
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Unit)
-            :args $ []
-            :features $ #{} :js-ffi
+          :schema $ quote $ Fn (-> Unit) (:features :js-ffi)
         'mount-target $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def mount-target (query-mount-target)
           :examples $ []
-          :schema $ :: 'JsNullish 'respo.dom/DomElement
+          :schema $ quote $ JsNullish respo.dom/DomElement
         'parse-store $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn parse-store (raw) (storage/parse-store raw)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'app.schema/Store)
-            :args $ [] 'String
-            :features $ #{} :js-ffi
+          :schema $ quote $ Fn String (-> app.schema/Store) (:features :js-ffi)
         'persist-on-unload! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn persist-on-unload! (_event) (persist-storage!)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Unit)
-            :args $ [] 'js-ffi.browser/EventHost
+          :schema $ quote $ Fn js-ffi.browser/EventHost (-> Unit)
         'persist-storage! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn persist-storage! (& e)
             when-not @*storage-failed? $ browser/storage-set!
@@ -592,19 +542,17 @@
               format-cirru-edn $ :store @*reel
             , &unit
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Unit)
-            :args $ []
-            :features $ #{} :js-ffi
-            :rest $ :: 'JsNullish 'JsObject
+          :schema $ quote $ Fn
+            & $ JsNullish JsObject
+            -> Unit
+            :features :js-ffi
         'persist-when-hidden! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn persist-when-hidden! (_event)
             match (browser/visibility-state)
               (:visible) &unit
               _ $ persist-storage!
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Unit)
-            :args $ [] 'js-ffi.browser/EventHost
-            :features $ #{} :js-ffi
+          :schema $ quote $ Fn js-ffi.browser/EventHost (-> Unit) (:features :js-ffi)
         'reload! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn reload! ()
             if (nil? build-errors)
@@ -615,14 +563,14 @@
               hud! |error build-errors
             , &unit
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Unit)
-            :args $ []
+          :schema $ quote $ Fn (-> Unit)
         'render-app! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn render-app! ()
-            render! mount-target (comp-container @*reel) dispatch!
+            render-with! mount-target
+              fn () $ comp-container @*reel dispatch-control!
+              , dispatch!
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Unit)
-            :args $ []
+          :schema $ quote $ Fn (-> Unit)
         'restore-storage! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn restore-storage! (raw)
             try
@@ -635,13 +583,11 @@
                 hud! |error $ str "|存档加载失败，已暂停自动保存以保留原数据：" message
                 , &unit
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Unit)
-            :args $ [] 'String
-            :features $ #{} :js-ffi
+          :schema $ quote $ Fn String (-> Unit) (:features :js-ffi)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.main
           :require
-            respo.core :refer $ render! clear-cache! realize-ssr!
+            respo.core :refer $ render-with! clear-cache! realize-ssr!
             respo.main :refer $ query-mount-target
             js-ffi.browser :as browser
             app.comp.container :refer $ comp-container
@@ -658,53 +604,53 @@
       :defs $ {}
         'Op $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defenum Op
-            :states (:: 'List 'Dynamic) 'Dynamic
-            :task/add-before 'String
-            :task/add-after 'String
-            :task/edit 'String 'String
-            :task/toggle 'String
+            :states (List respo.schema/CoordKey) Dynamic
+            :task/add-before String
+            :task/add-after String
+            :task/edit String String
+            :task/toggle String
             :task/relax
-            :task/delete 'String 'Number
-            :task/move 'String 'String
-            :task/move-up 'String
-            :task/move-down 'String
-            :task/swap 'String 'String 'Number
-            :pointer/touch 'Number
+            :task/delete String Number
+            :task/move String String
+            :task/move-up String
+            :task/move-down String
+            :task/swap String String Number
+            :pointer/touch Number
             :pointer/before
             :pointer/after
-            :mark/dragging 'String
-            :mark/dropping 'String
-            :hydrate-storage 'app.schema/Store
+            :mark/dragging String
+            :mark/dropping String
+            :hydrate-storage app.schema/Store
           :examples $ []
-          :schema $ :: 'EnumDef
+          :schema $ quote EnumDef
         'Store $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defstruct Store
-            :tasks $ :: 'Map 'String 'app.schema/Task
-            :pointer 'Number
-            :dragging-id 'String
-            :dropping-id 'String
-            :states $ :: 'Map 'Tag 'Dynamic
-            :archives $ :: 'Map 'String 'app.schema/Task
+            :tasks $ Map String app.schema/Task
+            :pointer Number
+            :dragging-id String
+            :dropping-id String
+            :states $ Map Tag Dynamic
+            :archives $ Map String app.schema/Task
           :examples $ []
-          :schema $ :: 'StructDef
+          :schema $ quote StructDef
         'Task $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defstruct Task (:id 'String) (:text 'String) (:done? 'Bool) (:sort-id 'String) (:created-time 'Number)
-            :done-time $ :: 'Option 'Number
-            :archived-time $ :: 'Option 'Number
+          :code $ quote $ defstruct Task (:id String) (:text String) (:done? Bool) (:sort-id String) (:created-time Number)
+            :done-time $ Option Number
+            :archived-time $ Option Number
           :examples $ []
-          :schema $ :: 'StructDef
+          :schema $ quote StructDef
         'store $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def store
             Store :tasks
               {} $ |root $ -> task (assoc :id |root) (assoc :sort-id mid-id)
               , :pointer 0 :dragging-id | :dropping-id | :states ({}) :archives $ {}
           :examples $ []
-          :schema $ :: 'app.schema/Store
+          :schema $ quote app.schema/Store
         'task $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def task
             Task :id | :text | :done? false :sort-id mid-id :created-time 0 :done-time (Option :none) :archived-time $ Option :none
           :examples $ []
-          :schema $ :: 'app.schema/Task
+          :schema $ quote app.schema/Task
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.schema
           :require $ bisection-key.core :refer $ mid-id
@@ -721,15 +667,21 @@
                     if (map? data)
                       let
                           normalized $ if
-                            nil? $ .unwrap-or (get data :created-time) nil
+                            match (get data :created-time)
+                              (:none) true
+                              (:some value) (nil? value)
                             assoc data :created-time 0
                             , data
                           normalized $ if
-                            nil? $ .unwrap-or (get normalized :done-time) nil
+                            match (get normalized :done-time)
+                              (:none) true
+                              (:some value) (nil? value)
                             dissoc normalized :done-time
                             , normalized
                         if
-                          nil? $ .unwrap-or (get normalized :archived-time) nil
+                          match (get normalized :archived-time)
+                            (:none) true
+                            (:some value) (nil? value)
                           dissoc normalized :archived-time
                           , normalized
                       , data
@@ -737,17 +689,17 @@
                   {} $ :Option Option
                 normalized $ if (map? data)
                   .fold ([] :tasks :archives) data $ fn (acc field)
-                    let
-                        tasks $ .unwrap-or (get acc field) nil
-                      if (map? tasks)
-                        assoc acc field $ filter-map-kv tasks $ fn (id task)
-                          MapEntryDecision :keep id $ normalize-task task
-                        , acc
+                    match (get acc field)
+                      (:none) acc
+                      (:some tasks)
+                        if (map? tasks)
+                          assoc acc field $ filter-map-kv tasks $ fn (id task)
+                            MapEntryDecision :keep id $ normalize-task task
+                          , acc
                   , data
               decode-map-as normalized schema/Store
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'app.schema/Store)
-            :args $ [] 'String
+          :schema $ quote $ Fn String (-> app.schema/Store)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.storage
           :require $ app.schema :as schema
@@ -773,8 +725,7 @@
               -> store (assoc :tasks next-tasks)
                 assoc :pointer $ inc $ :pointer store
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'app.schema/Store)
-            :args $ [] 'app.schema/Store 'String 'String 'Number
+          :schema $ quote $ Fn app.schema/Store String String Number (-> app.schema/Store)
         'add-before $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn add-before (store task-id op-id op-time)
             let
@@ -794,8 +745,7 @@
                 next-tasks $ assoc tasks op-id new-task
               assoc store :tasks next-tasks
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'app.schema/Store)
-            :args $ [] 'app.schema/Store 'String 'String 'Number
+          :schema $ quote $ Fn app.schema/Store String String Number (-> app.schema/Store)
         'delete-task $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn delete-task (store task-id idx)
             if
@@ -805,8 +755,7 @@
                   next-tasks $ dissoc (:tasks store) task-id
                 -> store (assoc :tasks next-tasks) (assoc :pointer next-pointer)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'app.schema/Store)
-            :args $ [] 'app.schema/Store 'String 'Number
+          :schema $ quote $ Fn app.schema/Store String Number (-> app.schema/Store)
         'move-task $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn move-task (store from-id to-id)
             let
@@ -842,8 +791,7 @@
                 next-tasks $ assoc tasks from-id next-task
               -> store (assoc :tasks next-tasks) (assoc :pointer new-pointer)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'app.schema/Store)
-            :args $ [] 'app.schema/Store 'String 'String
+          :schema $ quote $ Fn app.schema/Store String String (-> app.schema/Store)
         'move-task-down $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn move-task-down (store from-id)
             let
@@ -872,8 +820,7 @@
                   -> store (assoc :tasks next-tasks)
                     assoc :pointer $ inc current-index
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'app.schema/Store)
-            :args $ [] 'app.schema/Store 'String
+          :schema $ quote $ Fn app.schema/Store String (-> app.schema/Store)
         'move-task-up $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn move-task-up (store from-id)
             let
@@ -900,8 +847,7 @@
                 -> store (assoc :tasks next-tasks)
                   assoc :pointer $ dec current-index
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'app.schema/Store)
-            :args $ [] 'app.schema/Store 'String
+          :schema $ quote $ Fn app.schema/Store String (-> app.schema/Store)
         'relax-tasks $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn relax-tasks (store op-id op-time)
             let
@@ -921,8 +867,7 @@
                 assoc :archives $ .merge (:archives store) done-tasks
                 assoc :pointer 0
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'app.schema/Store)
-            :args $ [] 'app.schema/Store 'String 'Number
+          :schema $ quote $ Fn app.schema/Store String Number (-> app.schema/Store)
         'swap-tasks $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn swap-tasks (store from-id to-id new-pointer)
             let
@@ -934,15 +879,14 @@
                   assoc to-id $ assoc to-task :sort-id $ :sort-id from-task
               -> store (assoc :tasks next-tasks) (assoc :pointer new-pointer)
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'app.schema/Store)
-            :args $ [] 'app.schema/Store 'String 'String 'Number
+          :schema $ quote $ Fn app.schema/Store String String Number (-> app.schema/Store)
         'updater $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn updater (store op op-id op-time)
             match op
               (:states cursor s)
                 assoc store :states $ decode-map-as
                   assoc-in (:states store) (conj cursor :data) s
-                  :: 'Map 'Tag 'Dynamic
+                  Map Tag Dynamic
               (:task/add-before data) (add-before store data op-id op-time)
               (:task/add-after data) (add-after store data op-id op-time)
               (:task/edit task-id text)
@@ -978,8 +922,7 @@
               (:hydrate-storage data) data
               _ $ do (eprintln "|Unknown op:" op) store
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'app.schema/Store)
-            :args $ [] 'app.schema/Store 'app.schema/Op 'String 'Number
+          :schema $ quote $ Fn app.schema/Store app.schema/Op String Number (-> app.schema/Store)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.updater
           :require (app.schema :as schema)
@@ -989,41 +932,36 @@
         '*canvas-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defref *canvas-element (create-canvas)
           :examples $ []
-          :schema $ :: 'Ref $ :: 'Option 'app.util.dom/CanvasHost
+          :schema $ quote $ Ref (Option app.util.dom/CanvasHost)
         'CanvasContextHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait CanvasContextHost (:font 'String)
-            .measure-text $ :: 'Fn $ {}
-              :args $ [] 'app.util.dom/CanvasContextHost 'String
-              :return 'app.util.dom/TextMetricsHost
+            .measure-text $ Fn app.util.dom/CanvasContextHost String $ -> app.util.dom/TextMetricsHost
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
             :names $ {} $ :measure-text |measureText
             :writable $ #{} :font
-          :schema $ :: 'Trait
+          :schema $ quote Trait
         'CanvasHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait CanvasHost
-            .get-context $ :: 'Fn $ {}
-              :args $ [] 'app.util.dom/CanvasHost 'String
-              :return $ :: 'JsNullish 'JsObject
+            .get-context $ Fn app.util.dom/CanvasHost String $ -> (JsNullish JsObject)
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
             :names $ {} $ :get-context |getContext
-          :schema $ :: 'Trait
+          :schema $ quote Trait
         'TextMetricsHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait TextMetricsHost (:width 'Number)
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
-          :schema $ :: 'Trait
+          :schema $ quote Trait
         'create-canvas $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-canvas ()
             if (browser/document-available?)
               Option :some $ js-cast (browser/create-element |canvas) 'app.util.dom/CanvasHost
               Option :none
           :examples $ []
-          :schema $ :: 'Fn $ {}
-            :args $ []
-            :features $ #{} :js-ffi
-            :return $ :: 'Option 'app.util.dom/CanvasHost
+          :schema $ quote $ Fn
+            -> $ Option app.util.dom/CanvasHost
+            :features :js-ffi
         'get-width $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn get-width (text font-family font-size)
             match @*canvas-element
@@ -1036,9 +974,7 @@
                     set! (.-font ctx) (str font-size "|px " font-family)
                     .-width $ ctx .measure-text text
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Number)
-            :args $ [] 'String 'String 'Number
-            :features $ #{} :js-ffi
+          :schema $ quote $ Fn String String Number (-> Number) (:features :js-ffi)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.util.dom
           :require $ js-ffi.browser :as browser

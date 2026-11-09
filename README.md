@@ -2,7 +2,7 @@
 Pudica Schedule
 ------
 
-> Built with paired stable Calcit/procs 0.30.1 and formal Respo modules.
+> Built with paired stable Calcit/procs 0.38.0 and formal Respo modules.
 
 Demo: http://r.tiye.me/Memkits/pudica-schedule/
 
@@ -26,7 +26,11 @@ Public upload verification uses cos-upload-action's built-in verify settings,
 with no extra CDN checker. Original server
 deployment paths and external shared resources are unchanged.
 
-Calcit/procs 必须精确配对正式 0.30.1。模块固定正式 Reel 0.6.42、Respo 0.16.126、UI 0.8.1、Bisection Key 0.0.37 和 JS-FFI 0.2.6，不固定未发布的候选或 hash。业务类型、存档格式、排序键及原有 `hud!` 页面提示不变，不因升级而重写已有任务。
+Calcit/procs 精确配对正式 0.38.0。模块固定 Reel 0.11.0、Respo 0.19.5、UI 0.15.2、Bisection Key 0.0.46 和 JS FFI 0.2.13。升级后重新安装并构建。已有任务、排序键、存档格式与页面 `hud!` 提示沿用。
+
+键盘、拖拽和输入使用 RespoEvent，应用派发使用具名 Op，Reel 使用独立 Control。样式值和游标分别采用 Respo 的 CssValue 与 CoordKey union。存档解析保留缺失和旧 null 时间戳的原行为。全定义、完整 strict、原 11 项测试与前端构建通过，隔离浏览器验证任务输入、Enter、合成存档恢复及坏存档保护。
+
+### 0.30.1 历史迁移
 
 任务 Map 的五处长度调用使用公开 `.len`：列表高度、删除保护、下移边界和指针边界均保留原计数和求值次数，不需要转换或重写存档。官方 0.30.1 逐处确认接收者为 `Map<String, Task>`，方法对应 `&map:count`；迁移前后全部 129 个生成模块逐文件 SHA256 一致，原 11 项业务测试各自 11/11 通过。原规范格式门禁改用 Git blob 不变校验，仍要求格式化不修改源码，但失败时不再输出 Snapshot 文本。临时迁移脚本不进入项目；本轮没有新增浏览器存档操作或测试框架。
 

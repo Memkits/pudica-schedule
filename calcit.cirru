@@ -408,20 +408,18 @@
                   :height $ str
                     + 8 $ * 40 $ .len tasks
                     , |px
-                list-> ({})
+                keyed-> ({})
                   -> tasks (keys) (.to-list)
                     sort $ fn (a b)
                       &compare
                         :sort-id $ .unwrap $ get tasks a
                         :sort-id $ .unwrap $ get tasks b
                     map-indexed $ fn (idx task-id)
-                      [] task-id $ comp-task
+                      hint-fn $ Fn Number String $ -> respo.schema/ChildPair
+                      keyed-component task-id $ comp-task
                         .unwrap $ get tasks task-id
                         , idx (= pointer idx) dragging-id dropping-id
-                    sort $ fn (a b)
-                      &compare
-                        .unwrap $ first a
-                        .unwrap $ first b
+                    sort $ fn (a b) (&compare a.:key b.:key)
                 div $ {} (:class-name css-cursor)
                   :style $ {} $ :top
                     str
@@ -443,7 +441,7 @@
           :require
             respo-ui.core :refer $ hsl
             respo-ui.core :as ui
-            respo.core :refer $ defcomp div button list->
+            respo.core :refer $ defcomp div button keyed-> keyed-component
             respo.css :refer $ defstyle
             respo.comp.space :refer $ =<
             app.comp.task :refer $ comp-task

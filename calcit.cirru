@@ -627,7 +627,7 @@
             :pointer Number
             :dragging-id String
             :dropping-id String
-            :states $ Map Tag Dynamic
+            :states $ Map respo.schema/CoordKey Dynamic
             :archives $ Map String app.schema/Task
           :examples $ []
           :schema $ quote StructDef
@@ -884,7 +884,7 @@
               (:states cursor s)
                 assoc store :states $ decode-map-as
                   assoc-in (:states store) (conj cursor :data) s
-                  Map Tag Dynamic
+                  Map respo.schema/CoordKey Dynamic
               (:task/add-before data) (add-before store data op-id op-time)
               (:task/add-after data) (add-after store data op-id op-time)
               (:task/edit task-id text)

@@ -174,7 +174,7 @@
                   :on $ {}
                     :dragstart $ fn (e d!)
                       hint-fn $ Fn respo.schema/RespoEvent
-                        Fn app.schema/Op $ -> Unit
+                        Fn schema/Op $ -> Unit
                         -> Unit
                       begin-drag! e $ :id task
                       d! $ schema/Op :mark/dragging $ :id task
@@ -186,7 +186,7 @@
                       d! $ schema/Op :mark/dropping $ :id task
                     :dragover $ fn (e d!)
                       hint-fn $ Fn respo.schema/RespoEvent
-                        Fn app.schema/Op $ -> Unit
+                        Fn schema/Op $ -> Unit
                         -> Unit
                       prevent-default! e
                       , &unit
@@ -323,7 +323,7 @@
           :code $ quote $ defn on-keydown (task-id text idx)
             fn (e dispatch!)
               hint-fn $ Fn respo.schema/RespoEvent
-                Fn app.schema/Op $ -> Unit
+                Fn schema/Op $ -> Unit
                 -> Unit
               let
                   key-info $ event-key-info e
@@ -711,7 +711,7 @@
                 base-sort-id $ :sort-id base-task
                 all-sort-ids $ -> tasks (distinct-values) (.to-list)
                   map $ fn (task)
-                    :sort-id $ assert-type task 'app.schema/Task
+                    :sort-id $ assert-type task schema/Task
                   sort &compare
                 sort-id-after $ .unwrap-or
                   first $ filter all-sort-ids $ fn (x)
@@ -732,7 +732,7 @@
                 base-sort-id $ :sort-id base-task
                 all-sort-ids $ -> tasks (distinct-values) (.to-list)
                   map $ fn (task)
-                    :sort-id $ assert-type task 'app.schema/Task
+                    :sort-id $ assert-type task schema/Task
                   sort &compare
                 sort-id-before $ .unwrap-or
                   last $ filter all-sort-ids $ fn (x)
@@ -765,7 +765,7 @@
                 before? $ > (&compare from-sort-id base-sort-id) 0
                 all-sort-ids $ -> tasks (distinct-values) (.to-list)
                   map $ fn (task)
-                    :sort-id $ assert-type task 'app.schema/Task
+                    :sort-id $ assert-type task schema/Task
                 smaller-sort-ids $ -> all-sort-ids
                   filter $ fn (x)
                     < (&compare x base-sort-id) 0
@@ -798,7 +798,7 @@
                 sorted-pairs $ -> tasks (distinct-values) (.to-list)
                   map $ fn (task)
                     let
-                        typed-task $ assert-type task 'app.schema/Task
+                        typed-task $ assert-type task schema/Task
                       [] (:sort-id typed-task) (:id typed-task)
                   sort $ fn (a b)
                     &compare
@@ -827,7 +827,7 @@
                 sorted-pairs $ -> tasks (distinct-values) (.to-list)
                   map $ fn (task)
                     let
-                        typed-task $ assert-type task 'app.schema/Task
+                        typed-task $ assert-type task schema/Task
                       [] (:sort-id typed-task) (:id typed-task)
                   sort $ fn (a b)
                     &compare

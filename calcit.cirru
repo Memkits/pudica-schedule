@@ -31,13 +31,13 @@
                     :on-click $ fn (e d!) (open-reviewer! store)
                 comp-transparent
                 if config/dev?
-                  Option :some $ comp-inspect |Store store $ {}
-                  Option :none
+                  Some $ comp-inspect |Store store $ {}
+                  , None
                 if config/dev?
-                  Option :some $ comp-typed-reel (:states store) reel ({}) on-control
-                  Option :none
+                  Some $ comp-typed-reel (:states store) reel ({}) on-control
+                  , None
           :examples $ []
-          :schema $ quote $ Fn (reel.typed/State app.schema/Op app.schema/Store)
+          :schema $ quote $ Fn (reel.typed/State schema/Op schema/Store)
             Fn reel.typed/Control $ -> Unit
             -> respo.schema/Component
             :features :js-ffi
@@ -57,7 +57,7 @@
               browser/window-open url
               , &unit
           :examples $ []
-          :schema $ quote $ Fn app.schema/Store (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn schema/Store (-> Unit) (:features :js-ffi)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.comp.container
           :require
@@ -219,22 +219,22 @@
                 <> (:sort-id task)
                   .merge
                     assert-type
-                      {} $ :color $ hsl 0 0 40 (Option :some 0.1)
+                      {} $ :color $ hsl 0 0 40 (Some 0.1)
                       Map Tag respo.schema/CssValue
                     assert-type
                       if demo?
                         {}
-                          :color $ hsl 0 0 0 $ Option :some 0.4
+                          :color $ hsl 0 0 0 $ Some 0.4
                           :font-size 16
                           :font-family ui/font-code
                         {}
                       Map Tag respo.schema/CssValue
           :examples $ []
-          :schema $ quote $ Fn app.schema/Task Number Bool String String (-> respo.schema/Component)
+          :schema $ quote $ Fn schema/Task Number Bool String String (-> respo.schema/Component)
         'css-done $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defstyle css-done
             {} $ |$0 $ {} (:width 20) (:height 20)
-              :background-color $ hsl 240 90 88 $ Option :some 0.3
+              :background-color $ hsl 240 90 88 $ Some 0.3
               :cursor :pointer
               :transition-duration |300ms
               :border-radius |50%
@@ -248,10 +248,10 @@
                 :min-width 720
                 :cursor :move
                 :border-radius |2px
-                :box-shadow $ str "|0 0 2px " $ hsl 0 0 80 (Option :some 0.1)
+                :box-shadow $ str "|0 0 2px " $ hsl 0 0 80 (Some 0.1)
                 :cursor :move
               |$0:hover $ {}
-                :box-shadow $ str "|2px 2px 8px " $ hsl 0 0 40 (Option :some 0.2)
+                :box-shadow $ str "|2px 2px 8px " $ hsl 0 0 40 (Some 0.2)
                 :z-index 999
           :examples $ []
           :schema $ quote String
@@ -311,14 +311,14 @@
           :code $ quote $ defn event-host (e)
             js-cast (:original-event e) 'app.comp.task/InteractionEventHost
           :examples $ []
-          :schema $ quote $ Fn respo.schema/RespoEvent (-> app.comp.task/InteractionEventHost) (:features :js-ffi)
+          :schema $ quote $ Fn respo.schema/RespoEvent (-> InteractionEventHost) (:features :js-ffi)
         'event-key-info $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn event-key-info (e)
             let
                 event $ js-cast (:original-event e) 'app.comp.task/KeyboardModifiersHost
               KeyInfo :shift? (.-shift-key? event) :ctrl? (.-ctrl-key? event) :meta? $ .-meta-key? event
           :examples $ []
-          :schema $ quote $ Fn respo.schema/RespoEvent (-> app.comp.task/KeyInfo) (:features :js-ffi)
+          :schema $ quote $ Fn respo.schema/RespoEvent (-> KeyInfo) (:features :js-ffi)
         'on-keydown $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn on-keydown (task-id text idx)
             fn (e dispatch!)
@@ -382,7 +382,7 @@
               (:none) &unit
               (:some transparent) (data-transfer .set-drag-image! transparent 0 0)
           :examples $ []
-          :schema $ quote $ Fn app.comp.task/DataTransferHost (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn DataTransferHost (-> Unit) (:features :js-ffi)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.comp.task
           :require
@@ -470,7 +470,7 @@
         '*reel $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defref *reel (reel/new-reel schema/store)
           :examples $ []
-          :schema $ quote $ Ref (reel.typed/State app.schema/Op app.schema/Store)
+          :schema $ quote $ Ref (reel/State schema/Op schema/Store)
         '*storage-failed? $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defref *storage-failed? false
           :examples $ []
@@ -496,13 +496,13 @@
             reset! *reel $ reel/record-op updater @*reel op (generate-id!) (host/now-ms)
             , &unit
           :examples $ []
-          :schema $ quote $ Fn app.schema/Op (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn schema/Op (-> Unit) (:features :js-ffi)
         'dispatch-control! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn dispatch-control! (control)
             reset! *reel $ reel/apply-control updater @*reel control
             , &unit
           :examples $ []
-          :schema $ quote $ Fn reel.typed/Control (-> Unit)
+          :schema $ quote $ Fn reel/Control (-> Unit)
         'main! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn main! ()
             if config/dev? $ load-console-formatter!
@@ -528,11 +528,11 @@
         'parse-store $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn parse-store (raw) (storage/parse-store raw)
           :examples $ []
-          :schema $ quote $ Fn String (-> app.schema/Store) (:features :js-ffi)
+          :schema $ quote $ Fn String (-> schema/Store) (:features :js-ffi)
         'persist-on-unload! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn persist-on-unload! (_event) (persist-storage!)
           :examples $ []
-          :schema $ quote $ Fn js-ffi.browser/EventHost (-> Unit)
+          :schema $ quote $ Fn browser/EventHost (-> Unit)
         'persist-storage! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn persist-storage! (& e)
             when-not @*storage-failed? $ browser/storage-set!
@@ -550,7 +550,7 @@
               (:visible) &unit
               _ $ persist-storage!
           :examples $ []
-          :schema $ quote $ Fn js-ffi.browser/EventHost (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn browser/EventHost (-> Unit) (:features :js-ffi)
         'reload! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn reload! ()
             if (nil? build-errors)
@@ -602,7 +602,7 @@
       :defs $ {}
         'Op $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defenum Op
-            :states (List respo.schema/CoordKey) Dynamic
+            :states (List respo.schema/CoordKey) String
             :task/add-before String
             :task/add-after String
             :task/edit String String
@@ -643,12 +643,12 @@
               {} $ |root $ -> task (assoc :id |root) (assoc :sort-id mid-id)
               , :pointer 0 :dragging-id | :dropping-id | :states ({}) :archives $ {}
           :examples $ []
-          :schema $ quote app.schema/Store
+          :schema $ quote Store
         'task $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def task
-            Task :id | :text | :done? false :sort-id mid-id :created-time 0 :done-time (Option :none) :archived-time $ Option :none
+            Task :id | :text | :done? false :sort-id mid-id :created-time 0 :done-time None :archived-time None
           :examples $ []
-          :schema $ quote app.schema/Task
+          :schema $ quote Task
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.schema
           :require $ bisection-key.core :refer $ mid-id
@@ -697,7 +697,7 @@
                   , data
               decode-map-as normalized schema/Store
           :examples $ []
-          :schema $ quote $ Fn String (-> app.schema/Store)
+          :schema $ quote $ Fn String (-> schema/Store)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.storage
           :require $ app.schema :as schema
@@ -723,7 +723,7 @@
               -> store (assoc :tasks next-tasks)
                 assoc :pointer $ inc $ :pointer store
           :examples $ []
-          :schema $ quote $ Fn app.schema/Store String String Number (-> app.schema/Store)
+          :schema $ quote $ Fn schema/Store String String Number (-> schema/Store)
         'add-before $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn add-before (store task-id op-id op-time)
             let
@@ -743,7 +743,7 @@
                 next-tasks $ assoc tasks op-id new-task
               assoc store :tasks next-tasks
           :examples $ []
-          :schema $ quote $ Fn app.schema/Store String String Number (-> app.schema/Store)
+          :schema $ quote $ Fn schema/Store String String Number (-> schema/Store)
         'delete-task $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn delete-task (store task-id idx)
             if
@@ -753,7 +753,7 @@
                   next-tasks $ dissoc (:tasks store) task-id
                 -> store (assoc :tasks next-tasks) (assoc :pointer next-pointer)
           :examples $ []
-          :schema $ quote $ Fn app.schema/Store String Number (-> app.schema/Store)
+          :schema $ quote $ Fn schema/Store String Number (-> schema/Store)
         'move-task $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn move-task (store from-id to-id)
             let
@@ -789,7 +789,7 @@
                 next-tasks $ assoc tasks from-id next-task
               -> store (assoc :tasks next-tasks) (assoc :pointer new-pointer)
           :examples $ []
-          :schema $ quote $ Fn app.schema/Store String String (-> app.schema/Store)
+          :schema $ quote $ Fn schema/Store String String (-> schema/Store)
         'move-task-down $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn move-task-down (store from-id)
             let
@@ -802,15 +802,15 @@
                       [] (:sort-id typed-task) (:id typed-task)
                   sort $ fn (a b)
                     &compare
-                      assert-type (&list:nth a 0) 'String
-                      assert-type (&list:nth b 0) 'String
+                      assert-type (&list:nth a 0) String
+                      assert-type (&list:nth b 0) String
                 current-index $ :pointer store
               if
                 = (inc current-index) (.len tasks)
                 , store $ let
                     target-pair $ .unwrap $ nth sorted-pairs (inc current-index)
-                    new-sort-id $ assert-type (&list:nth target-pair 0) 'String
-                    target-id $ assert-type (&list:nth target-pair 1) 'String
+                    new-sort-id $ assert-type (&list:nth target-pair 0) String
+                    target-id $ assert-type (&list:nth target-pair 1) String
                     target-task $ .unwrap $ get tasks target-id
                     next-tasks $ -> tasks
                       assoc from-id $ assoc from-task :sort-id new-sort-id
@@ -818,7 +818,7 @@
                   -> store (assoc :tasks next-tasks)
                     assoc :pointer $ inc current-index
           :examples $ []
-          :schema $ quote $ Fn app.schema/Store String (-> app.schema/Store)
+          :schema $ quote $ Fn schema/Store String (-> schema/Store)
         'move-task-up $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn move-task-up (store from-id)
             let
@@ -831,13 +831,13 @@
                       [] (:sort-id typed-task) (:id typed-task)
                   sort $ fn (a b)
                     &compare
-                      assert-type (&list:nth a 0) 'String
-                      assert-type (&list:nth b 0) 'String
+                      assert-type (&list:nth a 0) String
+                      assert-type (&list:nth b 0) String
                 current-index $ :pointer store
               if (= 0 current-index) store $ let
                   target-pair $ .unwrap $ nth sorted-pairs (dec current-index)
-                  new-sort-id $ assert-type (&list:nth target-pair 0) 'String
-                  target-id $ assert-type (&list:nth target-pair 1) 'String
+                  new-sort-id $ assert-type (&list:nth target-pair 0) String
+                  target-id $ assert-type (&list:nth target-pair 1) String
                   target-task $ .unwrap $ get tasks target-id
                   next-tasks $ -> tasks
                     assoc from-id $ assoc from-task :sort-id new-sort-id
@@ -845,7 +845,7 @@
                 -> store (assoc :tasks next-tasks)
                   assoc :pointer $ dec current-index
           :examples $ []
-          :schema $ quote $ Fn app.schema/Store String (-> app.schema/Store)
+          :schema $ quote $ Fn schema/Store String (-> schema/Store)
         'relax-tasks $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn relax-tasks (store op-id op-time)
             let
@@ -854,7 +854,7 @@
                   if
                     and (:done? task)
                       not $ blank? $ :text task
-                    MapEntryDecision :keep id $ assoc task :archived-time $ Option :some op-time
+                    MapEntryDecision :keep id $ assoc task :archived-time $ Some op-time
                     MapEntryDecision :drop
                 next-tasks $ filter-map-kv tasks $ fn (id task)
                   if (:done? task) (MapEntryDecision :drop) (MapEntryDecision :keep id task)
@@ -865,7 +865,7 @@
                 assoc :archives $ .merge (:archives store) done-tasks
                 assoc :pointer 0
           :examples $ []
-          :schema $ quote $ Fn app.schema/Store String Number (-> app.schema/Store)
+          :schema $ quote $ Fn schema/Store String Number (-> schema/Store)
         'swap-tasks $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn swap-tasks (store from-id to-id new-pointer)
             let
@@ -877,7 +877,7 @@
                   assoc to-id $ assoc to-task :sort-id $ :sort-id from-task
               -> store (assoc :tasks next-tasks) (assoc :pointer new-pointer)
           :examples $ []
-          :schema $ quote $ Fn app.schema/Store String String Number (-> app.schema/Store)
+          :schema $ quote $ Fn schema/Store String String Number (-> schema/Store)
         'updater $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn updater (store op op-id op-time)
             match op
@@ -897,7 +897,7 @@
                     tasks $ :tasks store
                     task $ .unwrap $ get tasks task-id
                     next-task $ if (:done? task) (assoc task :done? false)
-                      schema/Task :id (:id task) :text (:text task) :done? true :sort-id (:sort-id task) :created-time (:created-time task) :done-time (Option :some op-time) :archived-time $ :archived-time task
+                      schema/Task :id (:id task) :text (:text task) :done? true :sort-id (:sort-id task) :created-time (:created-time task) :done-time (Some op-time) :archived-time $ :archived-time task
                   assoc store :tasks $ assoc tasks task-id next-task
               (:task/relax) (relax-tasks store op-id op-time)
               (:task/delete task-id idx) (delete-task store task-id idx)
@@ -920,7 +920,7 @@
               (:hydrate-storage data) data
               _ $ do (eprintln "|Unknown op:" op) store
           :examples $ []
-          :schema $ quote $ Fn app.schema/Store app.schema/Op String Number (-> app.schema/Store)
+          :schema $ quote $ Fn schema/Store schema/Op String Number (-> schema/Store)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.updater
           :require (app.schema :as schema)
@@ -930,7 +930,7 @@
         '*canvas-element $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defref *canvas-element (create-canvas)
           :examples $ []
-          :schema $ quote $ Ref (Option app.util.dom/CanvasHost)
+          :schema $ quote $ Ref (Option CanvasHost)
         'CanvasContextHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait CanvasContextHost (:font 'String)
             .measure-text $ Fn app.util.dom/CanvasContextHost String $ -> app.util.dom/TextMetricsHost
@@ -954,11 +954,11 @@
         'create-canvas $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn create-canvas ()
             if (browser/document-available?)
-              Option :some $ js-cast (browser/create-element |canvas) 'app.util.dom/CanvasHost
-              Option :none
+              Some $ js-cast (browser/create-element |canvas) 'app.util.dom/CanvasHost
+              , None
           :examples $ []
           :schema $ quote $ Fn
-            -> $ Option app.util.dom/CanvasHost
+            -> $ Option CanvasHost
             :features :js-ffi
         'get-width $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn get-width (text font-family font-size)

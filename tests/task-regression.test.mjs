@@ -120,9 +120,11 @@ test("nested UI state updates preserve tasks and archive fields", () => {
   const s = session();
   const before = s.db;
   s.dispatch(op("states", c._$L_(t.editor), "draft"));
+  s.dispatch(op("states", c._$L_(1, "editor"), "mixed draft"));
   assert.ok(c._$e_(get(s.db, t.tasks), get(before, t.tasks)));
   assert.ok(c._$e_(get(s.db, t.archives), get(before, t.archives)));
   assert.equal(get(get(get(s.db, t.states), t.editor), t.data), "draft");
+  assert.equal(get(get(get(get(s.db, t.states), 1), "editor"), t.data), "mixed draft");
 });
 
 test("real Respo input events update task text without Struct casts", () => {

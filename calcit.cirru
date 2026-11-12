@@ -40,7 +40,7 @@
           :schema $ quote $ Fn (reel.typed/State schema/Op schema/Store)
             Fn reel.typed/Control $ -> Unit
             -> respo.schema/Component
-            :features :js-ffi
+            :features :js-ffi :state
         'comp-transparent $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-transparent ()
             span $ {} (:class-name |transparent)
@@ -230,7 +230,7 @@
                         {}
                       Map Tag respo.schema/CssValue
           :examples $ []
-          :schema $ quote $ Fn schema/Task Number Bool String String (-> respo.schema/Component)
+          :schema $ quote $ Fn schema/Task Number Bool String String (-> respo.schema/Component) (:features :state)
         'css-done $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defstyle css-done
             {} $ |$0 $ {} (:width 20) (:height 20)
@@ -426,7 +426,7 @@
                       + 2 $ * 49 pointer
                       , |px
           :examples $ []
-          :schema $ quote $ Fn (Map String app.schema/Task) Number String String (-> respo.schema/Component)
+          :schema $ quote $ Fn (Map String app.schema/Task) Number String String (-> respo.schema/Component) (:features :state)
         'css-cursor $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defstyle css-cursor
             {} $ |$0 $ {} (:left -20) (:width 8) (:height 40)
@@ -478,7 +478,7 @@
         'adjust-focus! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn adjust-focus! () (browser/set-timeout! adjust-focus-now! 0) &unit
           :examples $ []
-          :schema $ quote $ Fn (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn (-> Unit) (:features :js-ffi :state)
         'adjust-focus-now! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn adjust-focus-now! ()
             let
@@ -489,20 +489,20 @@
                 (:none) &unit
                 (:some input) (browser/element-focus! input)
           :examples $ []
-          :schema $ quote $ Fn (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn (-> Unit) (:features :js-ffi :state)
         'dispatch! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn dispatch! (op)
             when config/dev? $ println |Dispatch: op
             reset! *reel $ reel/record-op updater @*reel op (generate-id!) (host/now-ms)
             , &unit
           :examples $ []
-          :schema $ quote $ Fn schema/Op (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn schema/Op (-> Unit) (:features :io :js-ffi :state)
         'dispatch-control! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn dispatch-control! (control)
             reset! *reel $ reel/apply-control updater @*reel control
             , &unit
           :examples $ []
-          :schema $ quote $ Fn reel/Control (-> Unit)
+          :schema $ quote $ Fn reel/Control (-> Unit) (:features :io :state)
         'main! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn main! ()
             if config/dev? $ load-console-formatter!
@@ -520,7 +520,7 @@
               (:some raw) (restore-storage! raw)
             println "|App started."
           :examples $ []
-          :schema $ quote $ Fn (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn (-> Unit) (:features :io :js-ffi :state)
         'mount-target $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def mount-target (query-mount-target)
           :examples $ []
@@ -532,7 +532,7 @@
         'persist-on-unload! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn persist-on-unload! (_event) (persist-storage!)
           :examples $ []
-          :schema $ quote $ Fn browser/EventHost (-> Unit)
+          :schema $ quote $ Fn browser/EventHost (-> Unit) (:features :state)
         'persist-storage! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn persist-storage! (& e)
             when-not @*storage-failed? $ browser/storage-set!
@@ -543,14 +543,14 @@
           :schema $ quote $ Fn
             & $ JsNullish JsObject
             -> Unit
-            :features :js-ffi
+            :features :js-ffi :state
         'persist-when-hidden! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn persist-when-hidden! (_event)
             match (browser/visibility-state)
               (:visible) &unit
               _ $ persist-storage!
           :examples $ []
-          :schema $ quote $ Fn browser/EventHost (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn browser/EventHost (-> Unit) (:features :js-ffi :state)
         'reload! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn reload! ()
             if (nil? build-errors)
@@ -561,14 +561,14 @@
               hud! |error build-errors
             , &unit
           :examples $ []
-          :schema $ quote $ Fn (-> Unit)
+          :schema $ quote $ Fn (-> Unit) (:features :io :state)
         'render-app! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn render-app! ()
             render-with! mount-target
               fn () $ comp-container @*reel dispatch-control!
               , dispatch!
           :examples $ []
-          :schema $ quote $ Fn (-> Unit)
+          :schema $ quote $ Fn (-> Unit) (:features :io :state)
         'restore-storage! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn restore-storage! (raw)
             try
@@ -581,7 +581,7 @@
                 hud! |error $ str "|存档加载失败，已暂停自动保存以保留原数据：" message
                 , &unit
           :examples $ []
-          :schema $ quote $ Fn String (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn String (-> Unit) (:features :io :js-ffi :state)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.main
           :require
@@ -795,22 +795,14 @@
             let
                 tasks $ :tasks store
                 from-task $ .unwrap $ get tasks from-id
-                sorted-pairs $ -> tasks (distinct-values) (.to-list)
-                  map $ fn (task)
-                    let
-                        typed-task $ assert-type task schema/Task
-                      [] (:sort-id typed-task) (:id typed-task)
-                  sort $ fn (a b)
-                    &compare
-                      assert-type (&list:nth a 0) String
-                      assert-type (&list:nth b 0) String
+                sorted $ sorted-tasks tasks
                 current-index $ :pointer store
               if
                 = (inc current-index) (.len tasks)
                 , store $ let
-                    target-pair $ .unwrap $ nth sorted-pairs (inc current-index)
-                    new-sort-id $ assert-type (&list:nth target-pair 0) String
-                    target-id $ assert-type (&list:nth target-pair 1) String
+                    target $ .unwrap $ nth sorted (inc current-index)
+                    new-sort-id $ :sort-id target
+                    target-id $ :id target
                     target-task $ .unwrap $ get tasks target-id
                     next-tasks $ -> tasks
                       assoc from-id $ assoc from-task :sort-id new-sort-id
@@ -824,20 +816,12 @@
             let
                 tasks $ :tasks store
                 from-task $ .unwrap $ get tasks from-id
-                sorted-pairs $ -> tasks (distinct-values) (.to-list)
-                  map $ fn (task)
-                    let
-                        typed-task $ assert-type task schema/Task
-                      [] (:sort-id typed-task) (:id typed-task)
-                  sort $ fn (a b)
-                    &compare
-                      assert-type (&list:nth a 0) String
-                      assert-type (&list:nth b 0) String
+                sorted $ sorted-tasks tasks
                 current-index $ :pointer store
               if (= 0 current-index) store $ let
-                  target-pair $ .unwrap $ nth sorted-pairs (dec current-index)
-                  new-sort-id $ assert-type (&list:nth target-pair 0) String
-                  target-id $ assert-type (&list:nth target-pair 1) String
+                  target $ .unwrap $ nth sorted (dec current-index)
+                  new-sort-id $ :sort-id target
+                  target-id $ :id target
                   target-task $ .unwrap $ get tasks target-id
                   next-tasks $ -> tasks
                     assoc from-id $ assoc from-task :sort-id new-sort-id
@@ -866,6 +850,16 @@
                 assoc :pointer 0
           :examples $ []
           :schema $ quote $ Fn schema/Store String Number (-> schema/Store)
+        'sorted-tasks $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn sorted-tasks (tasks)
+            sort
+              .to-list $ distinct-values tasks
+              fn (a b)
+                hint-fn $ Fn schema/Task schema/Task $ -> Number
+                &compare (:sort-id a) (:sort-id b)
+          :examples $ []
+          :schema $ quote $ Fn (Map String schema/Task)
+            -> $ List schema/Task
         'swap-tasks $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn swap-tasks (store from-id to-id new-pointer)
             let
@@ -920,7 +914,7 @@
               (:hydrate-storage data) data
               _ $ do (eprintln "|Unknown op:" op) store
           :examples $ []
-          :schema $ quote $ Fn schema/Store schema/Op String Number (-> schema/Store)
+          :schema $ quote $ Fn schema/Store schema/Op String Number (-> schema/Store) (:features :io)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.updater
           :require (app.schema :as schema)
@@ -972,7 +966,7 @@
                     set! (.-font ctx) (str font-size "|px " font-family)
                     .-width $ ctx .measure-text text
           :examples $ []
-          :schema $ quote $ Fn String String Number (-> Number) (:features :js-ffi)
+          :schema $ quote $ Fn String String Number (-> Number) (:features :js-ffi :state)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.util.dom
           :require $ js-ffi.browser :as browser

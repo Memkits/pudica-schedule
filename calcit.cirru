@@ -404,7 +404,7 @@
               browser/element-set-style! element (&list:nth entry 0) (&list:nth entry 1)
             , &unit
           :examples $ []
-          :schema $ quote $ Fn js-ffi.browser/DomElementHost (Map String String) (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn browser/DomElementHost (Map String String) (-> Unit) (:features :js-ffi)
         'set-transparent-drag-image! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn set-transparent-drag-image! (data-transfer)
             match (browser/query-selector |.transparent)
@@ -423,7 +423,7 @@
                   (:some child) (strip-ghost-identifiers! child)
             , &unit
           :examples $ []
-          :schema $ quote $ Fn js-ffi.browser/DomElementHost (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn browser/DomElementHost (-> Unit) (:features :js-ffi)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.comp.task
           :require

@@ -75,6 +75,20 @@
             app.schema :as schema
     'app.comp.task $ %{} 'FileEntry
       :defs $ {}
+        'AnimatedElementHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait AnimatedElementHost
+            .animate $ Fn app.comp.task/AnimatedElementHost JsObject JsObject $ -> app.comp.task/AnimationHost
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+          :schema $ quote Trait
+        'AnimationHost $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ deftrait AnimationHost
+            :onfinish $ Fn JsObject $ -> Unit
+            :oncancel $ Fn JsObject $ -> Unit
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
+            :writable $ #{} :oncancel :onfinish
+          :schema $ quote Trait
         'DataTransferHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait DataTransferHost
             .set-data! $ Fn app.comp.task/DataTransferHost String String $ -> Unit
@@ -88,15 +102,6 @@
             :data-transfer $ JsNullish JsObject
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
-          :schema $ quote Trait
-        'ElementHost $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ deftrait ElementHost (:style 'app.comp.task/StyleHost)
-            :parent-node $ JsNullish app.comp.task/ParentHost
-            .clone-node $ Fn app.comp.task/ElementHost Bool $ -> app.comp.task/ElementHost
-            .remove! $ Fn app.comp.task/ElementHost $ -> Unit
-          :examples $ []
-          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
-            :names $ {} (:clone-node |cloneNode) (:parent-node |parentNode) (:remove! |remove)
           :schema $ quote Trait
         'InteractionEventHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait InteractionEventHost
@@ -115,19 +120,63 @@
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
             :names $ {} (:ctrl-key? |ctrlKey) (:meta-key? |metaKey) (:shift-key? |shiftKey)
           :schema $ quote Trait
-        'ParentHost $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ deftrait ParentHost
-            .append-child! $ Fn app.comp.task/ParentHost app.comp.task/ElementHost $ -> app.comp.task/ElementHost
-          :examples $ []
-          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
-          :schema $ quote Trait
         'StyleHost $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ deftrait StyleHost (:opacity 'String) (:transform 'String) (:z-index 'String)
+          :code $ quote $ deftrait StyleHost (:opacity 'String)
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
-            :names $ {} $ :z-index |zIndex
-            :writable $ #{} :opacity :transform :z-index
           :schema $ quote Trait
+        'animate-enter! $ %{} 'CodeEntry
+          :doc "|Fade from transparent to the current underlying task opacity. Omit the final opacity and fill so completion or drag styles remain authoritative after animation."
+          :code $ quote $ defn animate-enter! (element)
+            let
+                host $ js-cast element 'app.comp.task/AnimatedElementHost
+              .animate host
+                js-array
+                  js-object (:opacity 0) (:transform "|translateX(8px)")
+                  js-object $ :transform "|translateX(0px)"
+                js-object (:duration 300) (:easing |ease)
+            , &unit
+          :examples $ []
+          :schema $ quote $ Fn respo.dom/DomElement (-> Unit) (:features :js-ffi)
+        'animate-exit! $ %{} 'CodeEntry
+          :doc "|Animate an inert clone in a body-level overlay, outside Respo keyed children. Preserve the visible position and opacity; remove the overlay on finish or cancellation."
+          :code $ quote $ defn animate-exit! (element)
+            let
+                source $ browser/element-host element
+                rect $ browser/element-bounding-rect source
+                computed $ js-cast (js/getComputedStyle source) 'app.comp.task/StyleHost
+                layer $ browser/create-element |div
+                ghost $ browser/element-clone source true
+              browser/element-set-attribute! layer |data-task-exit |
+              browser/element-set-attribute! layer |aria-hidden |true
+              browser/element-set-attribute! layer |inert |
+              set-animation-styles! layer $ {} (|position |fixed) (|pointerEvents |none) (|zIndex |1000)
+                |left $ str (:x rect) |px
+                |top $ str (:y rect) |px
+                |width $ str (:width rect) |px
+                |height $ str (:height rect) |px
+              strip-ghost-identifiers! ghost
+              set-animation-styles! ghost $ {} (|position |absolute) (|left |0px) (|top |0px) (|right |auto) (|bottom |auto) (|boxSizing |border-box) (|margin |0px) (|transform |none) (|transition |none) (|pointerEvents |none)
+                |width $ str (:width rect) |px
+                |height $ str (:height rect) |px
+                |opacity $ .-opacity computed
+              browser/append-child! layer ghost
+              browser/document-append-body! layer
+              let
+                  host $ js-cast layer 'app.comp.task/AnimatedElementHost
+                  animation $ .animate host
+                    js-array
+                      js-object (:opacity 1) (:transform "|translateX(0px)")
+                      js-object (:opacity 0) (:transform "|translateX(8px)")
+                    js-object (:duration 300) (:easing |ease) (:fill |forwards)
+                  cleanup $ fn (_event)
+                    hint-fn $ Fn JsObject $ -> Unit
+                    browser/element-remove! layer
+                set! (.-onfinish animation) cleanup
+                set! (.-oncancel animation) cleanup
+            , &unit
+          :examples $ []
+          :schema $ quote $ Fn respo.dom/DomElement (-> Unit) (:features :js-ffi)
         'begin-drag! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn begin-drag! (e task-id)
             let
@@ -274,36 +323,8 @@
         'effect-in $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defeffect effect-in (done?) (action el at-place?)
             match action
-              :mount $ let
-                  element $ js-cast el 'app.comp.task/ElementHost
-                  style $ .-style element
-                set! (.-opacity style) |0
-                set! (.-transform style) "|translate(8px,0px)"
-                browser/set-timeout!
-                  fn () $ let
-                      next-style $ .-style element
-                    set! (.-opacity next-style) (if done? |0.5 |1)
-                    set! (.-transform next-style) "|translate(0px,0px)"
-                    , &unit
-                  , 10
-                , &unit
-              :unmount $ let
-                  element $ js-cast el 'app.comp.task/ElementHost
-                  e2 $ element .clone-node true
-                  p $ .-parent-node element
-                when (js-present? p) (p .append-child! e2)
-                browser/set-timeout!
-                  fn () $ let
-                      style $ .-style e2
-                    set! (.-opacity style) |0
-                    set! (.-transform style) "|translate(8px,0px)"
-                    set! (.-z-index style) |-1
-                    , &unit
-                  , 10
-                browser/set-timeout!
-                  fn () (e2 .remove!) &unit
-                  , 300
-                , &unit
+              :mount $ animate-enter! el
+              :unmount $ animate-exit! el
               _ &unit
           :examples $ []
           :schema $ quote $ Fn Bool (-> respo.schema/Effect) (:features :js-ffi)
@@ -376,6 +397,14 @@
               , &unit
           :examples $ []
           :schema $ quote $ Fn respo.schema/RespoEvent (-> Unit) (:features :js-ffi)
+        'set-animation-styles! $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn set-animation-styles! (element styles)
+            &doseq
+              entry $ .to-list styles
+              browser/element-set-style! element (&list:nth entry 0) (&list:nth entry 1)
+            , &unit
+          :examples $ []
+          :schema $ quote $ Fn browser/DomElementHost (Map String String) (-> Unit) (:features :js-ffi)
         'set-transparent-drag-image! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn set-transparent-drag-image! (data-transfer)
             match (browser/query-selector |.transparent)
@@ -383,6 +412,18 @@
               (:some transparent) (data-transfer .set-drag-image! transparent 0 0)
           :examples $ []
           :schema $ quote $ Fn DataTransferHost (-> Unit) (:features :js-ffi)
+        'strip-ghost-identifiers! $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn strip-ghost-identifiers! (element) (browser/element-remove-attribute! element |id) (browser/element-remove-attribute! element |data-comp)
+            let
+                children $ .-children element
+              &doseq
+                idx $ range $ .-length children
+                match (browser/child-element-at children idx)
+                  (:none) &unit
+                  (:some child) (strip-ghost-identifiers! child)
+            , &unit
+          :examples $ []
+          :schema $ quote $ Fn browser/DomElementHost (-> Unit) (:features :js-ffi)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.comp.task
           :require

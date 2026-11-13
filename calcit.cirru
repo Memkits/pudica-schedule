@@ -91,12 +91,8 @@
           :schema $ quote Trait
         'ElementHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait ElementHost (:style 'app.comp.task/StyleHost)
-            :parent-node $ JsNullish app.comp.task/ParentHost
-            .clone-node $ Fn app.comp.task/ElementHost Bool $ -> app.comp.task/ElementHost
-            .remove! $ Fn app.comp.task/ElementHost $ -> Unit
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
-            :names $ {} (:clone-node |cloneNode) (:parent-node |parentNode) (:remove! |remove)
           :schema $ quote Trait
         'InteractionEventHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait InteractionEventHost
@@ -114,12 +110,6 @@
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
             :names $ {} (:ctrl-key? |ctrlKey) (:meta-key? |metaKey) (:shift-key? |shiftKey)
-          :schema $ quote Trait
-        'ParentHost $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ deftrait ParentHost
-            .append-child! $ Fn app.comp.task/ParentHost app.comp.task/ElementHost $ -> app.comp.task/ElementHost
-          :examples $ []
-          :ffi $ {} (:backend :js) (:kind :external-object) (:target :browser)
           :schema $ quote Trait
         'StyleHost $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait StyleHost (:opacity 'String) (:transform 'String) (:z-index 'String)
@@ -287,23 +277,7 @@
                     , &unit
                   , 10
                 , &unit
-              :unmount $ let
-                  element $ js-cast el 'app.comp.task/ElementHost
-                  e2 $ element .clone-node true
-                  p $ .-parent-node element
-                when (js-present? p) (p .append-child! e2)
-                browser/set-timeout!
-                  fn () $ let
-                      style $ .-style e2
-                    set! (.-opacity style) |0
-                    set! (.-transform style) "|translate(8px,0px)"
-                    set! (.-z-index style) |-1
-                    , &unit
-                  , 10
-                browser/set-timeout!
-                  fn () (e2 .remove!) &unit
-                  , 300
-                , &unit
+              :unmount $ do (animateTaskExit el) &unit
               _ &unit
           :examples $ []
           :schema $ quote $ Fn Bool (-> respo.schema/Effect) (:features :js-ffi)
@@ -396,6 +370,7 @@
             app.util.dom :refer $ get-width
             app.config :refer $ demo?
             app.schema :as schema
+            |../task-animation.mjs :refer $ animateTaskExit
     'app.comp.todolist $ %{} 'FileEntry
       :defs $ {}
         'comp-todolist $ %{} 'CodeEntry (:doc |)

@@ -38,9 +38,9 @@
                   , None
           :examples $ []
           :schema $ quote $ Fn (reel.typed/State schema/Op schema/Store)
-            Fn reel.typed/Control $ -> Unit
+            Fn reel.typed/Control (-> Unit) (:features :io :state)
             -> respo.schema/Component
-            :features :js-ffi :state
+            :features :io :js-ffi :state
         'comp-transparent $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-transparent ()
             span $ {} (:class-name |transparent)
@@ -388,7 +388,12 @@
                   true &unit
               , &unit
           :examples $ []
-          :schema $ quote $ Fn String String Number (-> respo.schema/EventHandler) (:features :js-ffi)
+          :schema $ quote $ Fn String String Number
+            -> $ Fn respo.schema/RespoEvent
+              Fn schema/Op $ -> Unit
+              -> Unit
+              :features :js-ffi
+            :features :js-ffi
         'prevent-default! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn prevent-default! (e)
             let
@@ -517,7 +522,11 @@
           :examples $ []
           :schema $ quote $ Ref Bool
         'adjust-focus! $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn adjust-focus! () (browser/set-timeout! adjust-focus-now! 0) &unit
+          :code $ quote $ defn adjust-focus! ()
+            browser/set-timeout!
+              fn () $ adjust-focus-now!
+              , 0
+            , &unit
           :examples $ []
           :schema $ quote $ Fn (-> Unit) (:features :js-ffi :state)
         'adjust-focus-now! $ %{} 'CodeEntry (:doc |)
@@ -552,9 +561,9 @@
             add-watch! *reel :changes $ fn (r p) (render-app!)
             add-watch! *reel :focus $ fn (r p) (adjust-focus!)
             listen-devtools! |k dispatch-control!
-            browser/set-before-unload! persist-on-unload!
+            browser/set-before-unload! $ fn (e) (persist-on-unload! e)
             browser/set-interval! persist-storage! 60000
-            browser/add-event-listener! |visibilitychange persist-when-hidden!
+            browser/add-event-listener! |visibilitychange $ fn (e) (persist-when-hidden! e)
             match
               browser/storage-get $ .unwrap $ get config/site :storage-key
               (:none) &unit
@@ -953,9 +962,9 @@
               (:mark/dragging data) (assoc store :dragging-id data)
               (:mark/dropping data) (assoc store :dropping-id data)
               (:hydrate-storage data) data
-              _ $ do (eprintln "|Unknown op:" op) store
+              _ store
           :examples $ []
-          :schema $ quote $ Fn schema/Store schema/Op String Number (-> schema/Store) (:features :io)
+          :schema $ quote $ Fn schema/Store schema/Op String Number (-> schema/Store)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.updater
           :require (app.schema :as schema)

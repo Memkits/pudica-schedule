@@ -2,7 +2,7 @@
 Pudica Schedule
 ------
 
-> Built with paired stable Calcit/procs 0.44.0 and formal Respo modules.
+> Built with paired stable Calcit/procs 0.44.0 and formal Respo modules (Reel 0.11.5, UI 0.15.7, Respo 0.19.13, JS-FFI 0.2.19; transitive Router 0.12.11).
 
 Demo: http://r.tiye.me/Memkits/pudica-schedule/
 

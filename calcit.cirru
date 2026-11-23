@@ -926,9 +926,7 @@
           :code $ quote $ defn updater (store op op-id op-time)
             match op
               (:states cursor s)
-                assoc store :states $ decode-map-as
-                  assoc-in (:states store) (conj cursor :data) s
-                  Map respo.schema/CoordKey Dynamic
+                assoc store :states $ cursor/update-state-map (:states store) cursor s
               (:task/add-before data) (add-before store data op-id op-time)
               (:task/add-after data) (add-after store data op-id op-time)
               (:task/edit task-id text)
@@ -965,9 +963,21 @@
               _ store
           :examples $ []
           :schema $ quote $ Fn schema/Store schema/Op String Number (-> schema/Store)
+          :tests $ [] $ %{} 'TestEntry (:name |state-update-preserves-paths)
+            :code $ quote $ let
+                states $ {} (:keep |value) (:panel nil)
+                store $ assoc schema/store :states states
+                paths $ decode-map-as
+                  [] ([]) ([] :panel) ([] :panel 7)
+                  List $ List respo.schema/CoordKey
+              map paths $ fn (path)
+                hint-fn $ Fn (List respo.schema/CoordKey) (-> Unit)
+                assert=
+                  assoc-in states (conj path :data) |draft
+                  :states $ updater store (schema/Op :states path |draft) |test 0
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.updater
-          :require (app.schema :as schema)
+          :require (app.schema :as schema) (respo.cursor :as cursor)
             bisection-key.core :refer $ bisect max-id min-id mid-id
     'app.util.dom $ %{} 'FileEntry
       :defs $ {}

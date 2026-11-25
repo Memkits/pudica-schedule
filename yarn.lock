@@ -12,15 +12,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@calcit/procs@npm:0.44.0":
-  version: 0.44.0
-  resolution: "@calcit/procs@npm:0.44.0"
+"@calcit/procs@npm:0.45.1":
+  version: 0.45.1
+  resolution: "@calcit/procs@npm:0.45.1"
   dependencies:
     "@calcit/finger-vec": "npm:0.1.1"
     "@calcit/ternary-tree": "npm:0.0.26"
     "@cirru/parser.ts": "npm:0.0.10"
     "@cirru/writer.ts": "npm:^0.1.9"
-  checksum: 10c0/28f2dc888de84f14974a1499973503d5f98144502f99e4ec0cf53f4e0e6c4426d7d9a9a0013fd7fd4b5b0ab0b29af4e218377a388e5949520ab3ae4823b0c885
+  checksum: 10c0/881d2c9e3b60fee271b0c74b2cf8f8c9378e865f0886392e0ba532df0ca5999a78b72a7b3e0648e12b7dad6b56b3406307daf65c8dadc96c30a7455c810bdfad
   languageName: node
   linkType: hard
 
@@ -579,7 +579,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "pudica-schedule@workspace:."
   dependencies:
-    "@calcit/procs": "npm:0.44.0"
+    "@calcit/procs": "npm:0.45.1"
     bottom-tip: "npm:^0.1.5"
     shortid: "npm:^2.2.17"
     vite: "npm:8.3.3"

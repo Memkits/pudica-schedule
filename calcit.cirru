@@ -243,6 +243,7 @@
                       if
                         not= dragging-id $ :id task
                         d! $ schema/Op :task/move dragging-id $ :id task
+                      , &unit
                 div $ {} (:class-name css-done)
                   :style $ if (:done? task)
                     {} $ :transform "|scale(0.7)"

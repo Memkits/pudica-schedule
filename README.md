@@ -2,7 +2,7 @@
 Pudica Schedule
 ------
 
-> Built with paired stable Calcit/procs 0.46.0 and formal Respo modules (Reel 0.11.10, UI 0.16.6, Respo 0.20.0, JS-FFI 0.2.26; transitive Router 0.12.18).
+> Built with paired stable Calcit/procs 0.47.1 and formal Respo modules (Reel 0.11.11, UI 0.16.7, Respo 0.20.1, JS-FFI 0.2.26; transitive Router 0.12.19).
 
 Demo: http://r.tiye.me/Memkits/pudica-schedule/
 
@@ -26,7 +26,7 @@ Public upload verification uses cos-upload-action's built-in verify settings,
 with no extra CDN checker. Original server
 deployment paths and external shared resources are unchanged.
 
-Calcit/procs 精确配对正式 0.46.0。模块固定 Reel 0.11.10、Respo 0.20.0、UI 0.16.6、Bisection Key 0.0.53 和 JS FFI 0.2.26。升级后重新安装并构建。已有任务、排序键、存档格式与页面 `hud!` 提示沿用。
+Calcit/procs 精确配对正式 0.47.1。模块固定 Reel 0.11.11、Respo 0.20.1、UI 0.16.7、Bisection Key 0.0.53 和 JS FFI 0.2.26。升级后重新安装并构建。已有任务、排序键、存档格式与页面 `hud!` 提示沿用。
 
 键盘、拖拽和输入使用 RespoEvent，应用派发使用具名 Op，Reel 使用独立 Control。样式值和游标分别采用 Respo 的 CssValue 与 CoordKey union。存档解析保留缺失和旧 null 时间戳的原行为。全定义、完整 strict、原 11 项测试与前端构建通过，隔离浏览器验证任务输入、Enter、合成存档恢复及坏存档保护。
 
